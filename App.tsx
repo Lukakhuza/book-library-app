@@ -19,6 +19,7 @@ import Reader2 from "./screens/Reader2";
 export default function App() {
   const [base64StringState, setBase64StringState] = useState("");
   const loadFunction = async () => {
+    console.log("Hello");
     // const result = await fetchBook();
     // const booksDir = new Directory(Paths.document.uri, "books");
 

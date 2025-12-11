@@ -5,12 +5,11 @@ import JSZip from "jszip";
 import { parseHTML } from "linkedom";
 
 const Reader2 = ({ filePath }: { filePath: string }) => {
-  const [chapterHtml, setChapterHtml] = useState("");
-  const [chapterText, setChapterText] = useState("");
+  const [chapter, setChapter] = useState<any>(null);
   const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
 
-  console.log("Height: ", screenHeight);
-  console.log("Width: ", screenWidth);
+  //   console.log("Height: ", screenHeight);
+  //   console.log("Width: ", screenWidth);
 
   useEffect(() => {
     const loadBook = async () => {
@@ -20,17 +19,22 @@ const Reader2 = ({ filePath }: { filePath: string }) => {
         const zip = await JSZip.loadAsync(encoded, { base64: true });
         const zipObjects = Object.keys(zip.files);
         const content: any = await zip.file(zipObjects[6])?.async("text");
-        setChapterHtml(content);
         const { document } = parseHTML(content);
         const title: any = document?.querySelector("h1.title")?.textContent;
-        const paragraphs: any = document?.querySelectorAll("p");
-        const paragraphsTextContent = paragraphs.map((paragraph: any) => {
+        const body1: any = document?.querySelectorAll("p");
+
+        const body2: any = body1.map((paragraph: any) => {
           return paragraph.textContent;
         });
-        console.log(paragraphsTextContent);
-        const fullText = paragraphsTextContent.join("\n\n");
-        setChapterText(fullText);
-        setChapterHtml(title);
+        const body3 = body2.join("\n\n");
+        console.log("Full Text: ", body3);
+
+        const chapter = {
+          title: title,
+          body: body3,
+        };
+
+        setChapter(chapter);
       } catch (error) {
         console.log(error);
       }
@@ -40,10 +44,16 @@ const Reader2 = ({ filePath }: { filePath: string }) => {
 
   return (
     <View style={{ flex: 1, marginHorizontal: 15, marginVertical: 25 }}>
-      <Text style={{ textAlign: "center" }}>{chapterHtml}</Text>
-      <ScrollView>
-        <Text>{chapterText}</Text>
-      </ScrollView>
+      {chapter ? (
+        <View>
+          <Text style={{ textAlign: "center" }}>{chapter.title}</Text>
+          <ScrollView>
+            <Text>{chapter.body}</Text>
+          </ScrollView>
+        </View>
+      ) : (
+        <Text>No Data</Text>
+      )}
     </View>
   );
 };
