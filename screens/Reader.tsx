@@ -1,203 +1,265 @@
-import React, { useRef } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { WebView, WebViewMessageEvent } from "react-native-webview";
+import {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useRef,
+  useContext,
+} from "react";
+import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
+import LoadingOverlay from "../util/LoadingOverlay";
+import { getDimensions, paginateText, wait } from "../util/helperFunctions";
+import { getBook } from "../util/helperFunctions";
+import { ReaderContext } from "../store/ReaderContext";
 
-type Props = {
-  fileUri: string; // local path to your downloaded .epub
-};
-const BOOK_HTML = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1"
-    />
-    <style>
-      html, body, #viewer {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        width: 100%;
-        overflow: hidden;
-        background: #ffffff;
-      }
-    </style>
-    <!-- Load EPUB.js from CDN -->
-    <script src="https://unpkg.com/epubjs/dist/epub.js"></script>
-  </head>
-  <body>
-    <div id="viewer"></div>
-    <script>
-      (function () {
-        var book = null;
-        var rendition = null;
+const Reader = ({ signedUrl }: { signedUrl: string }) => {
+  // Screen dimensions, to be set via onScreenLayout before the screen is painted:
+  const [screenDimensions, setScreenDimensions] = useState({
+    height: 0,
+    width: 0,
+  });
 
-        function log(msg) {
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(
-              JSON.stringify({ type: "LOG", message: msg })
+  const [pages, setPages]: any = useState([]);
+
+  // Store screen dimensions in screenDimensions state.
+  useLayoutEffect(() => {
+    const { width, height } = Dimensions.get("screen");
+    setScreenDimensions({
+      height: height,
+      width: width,
+    });
+  }, []);
+
+  const textLayoutsRef = useRef<any>([]);
+
+  // Text Layouts:
+  const [textLayouts, setTextLayouts]: any = useState(null);
+
+  // Reader Dimensions:
+  const [readerDimensions, setReaderDimensions] = useState({
+    height: 0,
+    width: 0,
+  });
+
+  // Current Chapter:
+  const [chapter, setChapter]: any = useState({
+    title: "",
+    body: [],
+  });
+
+  // Checklist to make sure everything is ready before pagination logic is run:
+  const layoutReadyRef = useRef({
+    container: false,
+    textLayout: false,
+    contentSize: false,
+    fonts: true,
+  });
+
+  // Text Properties:
+  const [properties, setProperties] = useState({
+    paddingTop: 17.23809814,
+    paddingBottom: 0,
+    horizontalPadding: 20,
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: 600,
+  });
+
+  const availableHeight =
+    readerDimensions.height -
+    (properties.paddingTop + properties.paddingBottom);
+  const MAX_LINES_PER_PAGE = Math.floor(
+    availableHeight / properties.lineHeight
+  );
+  const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
+
+  const contentSizeRef = useRef({
+    width: 0,
+    height: 0,
+  });
+
+  const containerWidthRef = useRef(0);
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const didPaginateRef = useRef(false);
+
+  // Load the chapter based on the file signedUrl provided in props.
+  useEffect(() => {
+    const load = async () => {
+      const book = await getBook(signedUrl);
+      const newBook = book?.body;
+      setChapter({
+        title: book?.title,
+        body: newBook,
+      });
+    };
+    load();
+  }, [signedUrl]);
+
+  const checkLayoutReady = () => {
+    if (!didPaginateRef) return;
+
+    const ready = Object.values(layoutReadyRef.current).every(Boolean);
+
+    if (!ready) return;
+    didPaginateRef.current = true;
+
+    const pages = paginateText(textLayouts, readerDimensions, properties);
+    setPages(pages);
+  };
+
+  useEffect(() => {
+    if (!textLayouts) return;
+    layoutReadyRef.current.contentSize = true;
+    checkLayoutReady();
+  }, [textLayouts]);
+
+  if (pages.length > 0) {
+    return (
+      <View>
+        <Text style={styles.title}>{chapter.title}</Text>
+        <FlatList
+          data={pages}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, i) => i.toString()}
+          renderItem={(itemData) => {
+            return (
+              <View
+                style={{
+                  paddingTop: properties.paddingTop,
+                  paddingBottom: properties.paddingBottom,
+                  paddingHorizontal: properties.horizontalPadding,
+                  width: readerDimensions.width,
+                  height: readerDimensions.height,
+                  overflow: "hidden",
+                  backgroundColor: "turqouise",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: properties.fontSize,
+                    lineHeight: properties.lineHeight,
+                    color: "black",
+                    includeFontPadding: true,
+                    backgroundColor: "yellow",
+                  }}
+                >
+                  {itemData.item}
+                </Text>
+              </View>
             );
-          }
-        }
-
-        // Called from React Native via injectedJavaScript
-        window.initBook = function (bookPath) {
-          try {
-            log("Opening book: " + bookPath);
-            book = ePub(bookPath); // EPUB.js handles the zip internally
-
-            rendition = book.renderTo("viewer", {
-              width: "100%",
-              height: "100%",
-              flow: "paginated",
-              spread: "always"
-            });
-
-            rendition.display();
-
-            book.ready.then(function () {
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(
-                  JSON.stringify({ type: "READY" })
-                );
-              }
-            });
-          } catch (e) {
-            log("Error in initBook: " + e.message);
-          }
-        };
-
-        function handleCommand(raw) {
-          try {
-            var data = JSON.parse(raw);
-            if (!rendition) return;
-
-            if (data.type === "NEXT") {
-              rendition.next();
-            } else if (data.type === "PREV") {
-              rendition.prev();
-            }
-          } catch (e) {
-            log("handleCommand error: " + e.message);
-          }
-        }
-
-        // Messages from React Native
-        document.addEventListener("message", function (event) {
-          handleCommand(event.data);
-        });
-
-        // iOS sometimes uses window for message events
-        window.addEventListener("message", function (event) {
-          handleCommand(event.data);
-        });
-      })();
-    </script>
-  </body>
-</html>
-`;
-
-export const Reader: React.FC<Props> = ({ fileUri }) => {
-  const webViewRef = useRef<WebView>(null);
-
-  const onMessage = (event: WebViewMessageEvent) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === "LOG") {
-        console.log("[EPUB LOG]", data.message);
-      }
-      if (data.type === "READY") {
-        console.log("Book is ready");
-      }
-    } catch {
-      // ignore non-JSON messages
-    }
-  };
-
-  const sendCommand = (type: "NEXT" | "PREV") => {
-    webViewRef.current?.postMessage(JSON.stringify({ type }));
-  };
+          }}
+          scrollEnabled={true}
+          removeClippedSubviews={false}
+          initialNumToRender={chapter.body.length}
+          maxToRenderPerBatch={chapter.body.length}
+          windowSize={100}
+        />
+      </View>
+    );
+  }
+  let text = "";
+  for (let i = 0; i < chapter.body.length; i++) {
+    text += chapter.body[i];
+  }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
-      <WebView
-        ref={webViewRef}
-        originWhitelist={["*"]}
-        source={{ html: BOOK_HTML, baseUrl: "https://localhost" }}
-        javaScriptEnabled
-        allowFileAccess
-        allowingReadAccessToURL={fileUri} // iOS safety
-        onMessage={onMessage}
-        injectedJavaScript={`
-          window.initBook(${JSON.stringify(fileUri)});
-          true; // required for injectedJavaScript
-        `}
-        style={{ flex: 1 }}
-      />
+    <View style={{ flex: 1, backgroundColor: "#40E0D0" }}>
+      <View>
+        <Text style={styles.title}>{chapter.title}</Text>
+        <FlatList
+          data={chapter.body}
+          style={{
+            opacity: 1,
+          }}
+          onContentSizeChange={(w, h) => {
+            if (w < screenDimensions.width * 0.9) {
+              return;
+            }
+            contentSizeRef.current.width = w;
+            contentSizeRef.current.height = h;
+            if (debounceRef.current) {
+              clearTimeout(debounceRef.current);
+            }
+            debounceRef.current = setTimeout(() => {
+              if (textLayoutsRef.current.length === 0) return;
 
-      {/* Simple pagination controls */}
-      <View style={styles.controls}>
-        <TouchableOpacity
-          onPress={() => sendCommand("PREV")}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Prev</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => sendCommand("NEXT")}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
+              setTextLayouts(textLayoutsRef);
+            }, 200);
+          }}
+          onLayout={(e) => {
+            const { height, width } = e.nativeEvent.layout;
+            if (height < 100 || width < 100) {
+              return;
+            }
+            containerWidthRef.current = e.nativeEvent.layout.width;
+            setReaderDimensions({
+              width: width,
+              height: height,
+            });
+            layoutReadyRef.current.container = true;
+            checkLayoutReady();
+          }}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, i) => i.toString()}
+          renderItem={(itemData) => {
+            return (
+              <View
+                style={{
+                  paddingTop: properties.paddingTop,
+                  paddingBottom: properties.paddingBottom,
+                  paddingHorizontal: properties.horizontalPadding,
+                  width: readerDimensions.width,
+                  height: readerDimensions.height,
+                  overflow: "hidden",
+                  backgroundColor: "turqouise",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: properties.fontSize,
+                    lineHeight: properties.lineHeight,
+                    color: "black",
+                    includeFontPadding: true,
+                    backgroundColor: "yellow",
+                    textAlign: "right",
+                  }}
+                  onTextLayout={(e) => {
+                    if (containerWidthRef.current < 200) return;
+                    textLayoutsRef.current[itemData.index] =
+                      e.nativeEvent.lines;
+                    if (textLayoutsRef.current.length !== chapter.body.length)
+                      return;
+                    layoutReadyRef.current.textLayout = true;
+                    checkLayoutReady();
+                  }}
+                >
+                  {itemData.item}
+                </Text>
+              </View>
+            );
+          }}
+          scrollEnabled={true}
+          removeClippedSubviews={false}
+          initialNumToRender={chapter.body.length}
+          maxToRenderPerBatch={chapter.body.length}
+          windowSize={100}
+        />
       </View>
     </View>
   );
 };
 
+export default Reader;
+
 const styles = StyleSheet.create({
-  controls: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: "#111",
-  },
-  button: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 4,
-    backgroundColor: "#333",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
+  title: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: 600,
   },
 });
-// import * as Epub from "@ndvi3t/epubjs-rn";
-// import { View, Text, StyleSheet } from "react-native";
-
-// export default function Reader() {
-//   return (
-//     <View>
-//       <Text>Hello</Text>
-//     </View>
-//     // <Epub
-//     //   src={{
-//     //     uri: "https://books-library-app.s3.eu-north-1.amazonaws.com/the-bell-jar-by-sylvia-plath.epub?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAV5HOVVHUQDSVM3WF%2F20251205%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20251205T180333Z&X-Amz-Expires=300&X-Amz-Signature=de7e669481f853776cb3490b2c8afd2f3f24012827db4f500e98d03ad5e0e070&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
-//     //   }}
-//     //   flow="paginated"
-//     //   style={{ flex: 1 }}
-//     // />
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });

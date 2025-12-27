@@ -1,4 +1,4 @@
-export const fetchBook = async () => {
+export const fetchBookSignedUrl = async () => {
   const response = await fetch("http://10.0.2.2:3000/book/fetch-books", {
     method: "GET",
     headers: {
