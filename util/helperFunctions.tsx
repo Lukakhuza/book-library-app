@@ -65,34 +65,53 @@ export const paginateText = (
     availableHeight / properties.lineHeight
   );
 
-  const pages: string[] = [];
+  const pages: string[][] = [];
   let lineIndex = 0;
-  let currentPage = "";
+  let currentPage: any = [];
+
+  // for (let i = 0; i < textLayouts.current.length; i++) {
+  //   for (let j = 0; j < textLayouts.current[i].length; j++) {
+  //     currentPage.push(textLayouts.current[i][j].text.trim());
+  //     if (lineIndex % 34 === 0) {
+  //       pages.push(currentPage);
+  //       currentPage = [];
+  //     }
+  //     lineIndex++;
+  //   }
+  //   if (currentPage.length !== 0) {
+  //     currentPage.push("");
+  //     if (lineIndex % 34 === 0) {
+  //       pages.push(currentPage);
+  //       currentPage = [];
+  //     }
+  //     lineIndex++;
+  //   }
+  // }
+  // pages.push(currentPage);
 
   for (let i = 0; i < textLayouts.current.length; i++) {
     for (let j = 0; j < textLayouts.current[i].length; j++) {
-      if (currentPage.length === 0) {
-        currentPage += textLayouts.current[i][j].text;
-      } else {
-        currentPage += "" + textLayouts.current[i][j].text;
-      }
+      currentPage.push(textLayouts.current[i][j].text.trim());
       lineIndex++;
-      if (lineIndex % 33 === 0) {
-        currentPage += "\n";
+      if (lineIndex % 34 === 0) {
         pages.push(currentPage);
-        currentPage = "";
+        currentPage = [];
       }
     }
-    if (lineIndex % 33 !== 0) {
-      currentPage += "\n\n";
-      lineIndex++;
+    if (currentPage.length === 0) {
+      continue;
+    }
+    currentPage.push("");
+    lineIndex++;
+    if (lineIndex % 34 === 0) {
+      pages.push(currentPage);
+      currentPage = [];
     }
   }
-  if (currentPage.length > 0) {
-    pages.push(currentPage);
-  }
+  pages.push(currentPage);
 
-  console.log(pages[0]);
+  console.log(pages[7]);
+
   return pages;
 };
 

@@ -115,6 +115,7 @@ const Reader = ({ signedUrl }: { signedUrl: string }) => {
   }, [textLayouts]);
 
   if (pages.length > 0) {
+    console.log(pages[15].length);
     return (
       <View>
         <Text style={styles.title}>{chapter.title}</Text>
@@ -137,17 +138,18 @@ const Reader = ({ signedUrl }: { signedUrl: string }) => {
                   backgroundColor: "turqouise",
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: properties.fontSize,
-                    lineHeight: properties.lineHeight,
-                    color: "black",
-                    includeFontPadding: true,
-                    backgroundColor: "yellow",
-                  }}
-                >
-                  {itemData.item}
-                </Text>
+                {itemData.item.map((line: string, index: number) => (
+                  <Text
+                    key={index}
+                    style={{
+                      fontSize: properties.fontSize - 1,
+                      lineHeight: properties.lineHeight,
+                      textAlign: "auto",
+                    }}
+                  >
+                    {line}
+                  </Text>
+                ))}
               </View>
             );
           }}
