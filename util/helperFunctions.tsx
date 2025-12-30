@@ -110,8 +110,6 @@ export const paginateText = (
   }
   pages.push(currentPage);
 
-  console.log(pages[7]);
-
   return pages;
 };
 

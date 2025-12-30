@@ -1,30 +1,187 @@
-import { createContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useState,
+  type ReactNode,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+} from "react";
+import { Dimensions } from "react-native";
+import { getBook } from "../util/helperFunctions";
+import { fetchBookSignedUrl } from "../api/book.api";
+import { paginateText } from "../util/helperFunctions";
 
 export const ReaderContext: any = createContext({
-  textProperties: {
+  screenDimensions: {
+    height: 0,
+    width: 0,
+  },
+  signedUrl: "",
+  chapter: {
+    title: "",
+    body: [],
+  },
+  pages: [],
+  readerDimensions: {
+    height: 0,
+    width: 0,
+  },
+  textLayouts: null,
+  readerIsReady: false,
+  properties: {
     verticalPadding: 18.6190490722656,
+    paddingTop: 10,
+    paddingBottom: 10,
     horizontalPadding: 20,
     fontSize: 20,
     lineHeight: 25,
     fontWeight: 600,
   },
+  contentSizeRef: { current: null },
+  containerWidthRef: { current: null },
+  layoutReadyRef: { current: null },
+  debounceRef: { current: null },
+  textLayoutsRef: { current: null },
+  updateReaderDimensions: (width: number, height: number) => {},
+  updateTextLayouts: (textLayoutsRef: any) => {},
+  updatePages: (pages: any) => {},
+  checkLayoutReady: () => {},
 });
 
 type Props = {
   children: ReactNode;
 };
 
-const ReaderContextProvider = ({ children }: any) => {
-  const [textProperties, setTextProperties] = useState({
-    verticalPadding: 18.6190490722656,
+const ReaderContextProvider = ({ children }: Props) => {
+  const [screenDimensions, setScreenDimensions] = useState({
+    height: 0,
+    width: 0,
+  });
+  const [signedUrl, setSignedUrl] = useState<any>(null);
+  const [pages, setPages]: any = useState([]);
+  const [textLayouts, setTextLayouts]: any = useState(null);
+  const [readerDimensions, setReaderDimensions] = useState({
+    height: 0,
+    width: 0,
+  });
+  const [chapter, setChapter]: any = useState({
+    title: "",
+    body: [],
+  });
+  const [properties, setProperties] = useState({
+    paddingTop: 17.23809814,
+    paddingBottom: 0,
     horizontalPadding: 20,
     fontSize: 20,
     lineHeight: 25,
     fontWeight: 600,
   });
+  const [readerIsReady, setReaderIsReady] = useState(false);
+
+  // Store screen dimensions in screenDimensions state.
+  useLayoutEffect(() => {
+    const { width, height } = Dimensions.get("screen");
+    setScreenDimensions({
+      height: height,
+      width: width,
+    });
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      const url = await fetchBookSignedUrl();
+      setSignedUrl(url);
+    };
+    load();
+  }, []);
+
+  // Load the chapter based on the file signedUrl provided in props.
+  useEffect(() => {
+    const load = async () => {
+      const chapter = await getBook(signedUrl);
+      setChapter({
+        title: chapter?.title,
+        body: chapter?.body,
+      });
+    };
+    load();
+  }, [signedUrl]);
+
+  const textLayoutsRef = useRef<any>([]);
+
+  // Checklist to make sure everything is ready before pagination logic is run:
+  const layoutReadyRef = useRef({
+    container: false,
+    textLayout: false,
+    contentSize: false,
+    fonts: true,
+  });
+
+  const availableHeight =
+    readerDimensions.height -
+    (properties.paddingTop + properties.paddingBottom);
+  const MAX_LINES_PER_PAGE = Math.floor(
+    availableHeight / properties.lineHeight
+  );
+  const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
+
+  const contentSizeRef = useRef({
+    width: 0,
+    height: 0,
+  });
+
+  const containerWidthRef = useRef(0);
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const didPaginateRef = useRef(false);
+
+  const checkLayoutReady = () => {
+    if (!didPaginateRef) return;
+    const ready = Object.values(layoutReadyRef.current).every(Boolean);
+    if (!ready) return;
+    didPaginateRef.current = true;
+    const pages = paginateText(textLayouts, readerDimensions, properties);
+    setPages(pages);
+    setReaderIsReady(true);
+  };
+
+  useEffect(() => {
+    if (!textLayouts) return;
+    layoutReadyRef.current.contentSize = true;
+    checkLayoutReady();
+  }, [textLayouts]);
+
+  const updateReaderDimensions = (width: number, height: number) => {
+    setReaderDimensions({ width: width, height: height });
+  };
+
+  const updateTextLayouts = (textLayoutsRef: any) => {
+    setTextLayouts(textLayoutsRef);
+  };
+
+  const updatePages = (pages: any) => {
+    setPages(pages);
+  };
 
   const value = {
-    textProperties: textProperties,
+    properties: properties,
+    signedUrl: signedUrl,
+    chapter: chapter,
+    pages: pages,
+    readerDimensions: readerDimensions,
+    screenDimensions: screenDimensions,
+    textLayouts: textLayouts,
+    readerIsReady: readerIsReady,
+    contentSizeRef: contentSizeRef,
+    layoutReadyRef: layoutReadyRef,
+    containerWidthRef: containerWidthRef,
+    debounceRef: debounceRef,
+    textLayoutsRef: textLayoutsRef,
+    updateReaderDimensions: updateReaderDimensions,
+    updateTextLayouts: updateTextLayouts,
+    updatePages: updatePages,
+    checkLayoutReady: checkLayoutReady,
   };
 
   return (
