@@ -1,15 +1,17 @@
 import { Image, Pressable, Text, View } from "react-native";
-// import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  createStaticNavigation,
-  useNavigation,
-} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Button } from "react-native";
+import { useContext, useEffect } from "react";
+import { ReaderContext } from "../store/ReaderContext";
 
 const HomeScreen = () => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
+  const { bookImageUri }: any = useContext(ReaderContext);
+  useEffect(() => {
+    console.log(bookImageUri);
+  }, [bookImageUri]);
 
   return (
     <View
@@ -30,10 +32,18 @@ const HomeScreen = () => {
           navigation.navigate("Details");
         }}
       />
+      {bookImageUri && (
+        <Image
+          source={{ uri: bookImageUri }}
+          style={{ width: 200, height: 300 }}
+          resizeMode="contain"
+        />
+      )}
+
       <Button
         title="Go to Reader"
         onPress={() => {
-          navigation.navigate("Loading");
+          navigation.navigate("Reader");
         }}
       />
     </View>

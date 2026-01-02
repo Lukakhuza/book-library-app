@@ -7,7 +7,7 @@ import {
   useLayoutEffect,
 } from "react";
 import { Dimensions } from "react-native";
-import { getBook } from "../util/helperFunctions";
+import { getBook, getBookMetadata } from "../util/helperFunctions";
 import { fetchBookSignedUrl } from "../api/book.api";
 import { paginateText } from "../util/helperFunctions";
 
@@ -16,6 +16,7 @@ export const ReaderContext: any = createContext({
     height: 0,
     width: 0,
   },
+  bookImageUri: "",
   signedUrl: "",
   chapter: {
     title: "",
@@ -46,6 +47,7 @@ export const ReaderContext: any = createContext({
   updateTextLayouts: (textLayoutsRef: any) => {},
   updatePages: (pages: any) => {},
   checkLayoutReady: () => {},
+  updateBookImageUri: () => {},
 });
 
 type Props = {
@@ -77,6 +79,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     fontWeight: 600,
   });
   const [readerIsReady, setReaderIsReady] = useState(false);
+  const [bookImageUri, setBookImageUri] = useState();
 
   // Store screen dimensions in screenDimensions state.
   useLayoutEffect(() => {
@@ -99,6 +102,9 @@ const ReaderContextProvider = ({ children }: Props) => {
   useEffect(() => {
     const load = async () => {
       const chapter = await getBook(signedUrl);
+      const metadata = await getBookMetadata(signedUrl);
+      updateBookImageUri(metadata);
+
       setChapter({
         title: chapter?.title,
         body: chapter?.body,
@@ -164,9 +170,15 @@ const ReaderContextProvider = ({ children }: Props) => {
     setPages(pages);
   };
 
+  const updateBookImageUri = (bookImageUri: any) => {
+    console.log("Test 1", bookImageUri);
+    setBookImageUri(bookImageUri);
+  };
+
   const value = {
     properties: properties,
     signedUrl: signedUrl,
+    bookImageUri: bookImageUri,
     chapter: chapter,
     pages: pages,
     readerDimensions: readerDimensions,
@@ -182,6 +194,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     updateTextLayouts: updateTextLayouts,
     updatePages: updatePages,
     checkLayoutReady: checkLayoutReady,
+    updateBookImageUri: updateBookImageUri,
   };
 
   return (

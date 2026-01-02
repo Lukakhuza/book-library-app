@@ -1,4 +1,3 @@
-import * as React from "react";
 import { View, Text, useColorScheme } from "react-native";
 import {
   createStaticNavigation,
@@ -10,7 +9,6 @@ import HomeScreen from "./screens/Home";
 import DetailsScreen from "./screens/Details";
 import ReaderContextProvider from "./store/ReaderContext";
 import ReaderScreen from "./screens/Reader";
-import LoadingScreen from "./screens/Loading";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -47,12 +45,6 @@ const RootStack = createNativeStackNavigator({
     },
     Reader: {
       screen: ReaderScreen,
-      options: {
-        headerShown: false,
-      },
-    },
-    Loading: {
-      screen: LoadingScreen,
       options: {
         headerShown: false,
       },
