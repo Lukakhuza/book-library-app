@@ -12,21 +12,33 @@ import { getBook } from "../util/helperFunctions";
 import { ReaderContext } from "../store/ReaderContext";
 import ReaderMeasurementPhase from "../components/organisms/ReaderMeasurementPhase";
 import ReaderReadingPhase from "../components/organisms/ReaderReadingPhase";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  useNavigation,
+  createStaticNavigation,
+  DefaultTheme,
+  DarkTheme,
+  useTheme,
+} from "@react-navigation/native";
 
-const Reader = () => {
+const ReaderScreen = () => {
   const { readerIsReady }: any = useContext(ReaderContext);
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        // paddingTop: insets.top,
+        // paddingBottom: insets.bottom,
+        // paddingLeft: insets.left,
+        // paddingRight: insets.right,
+      }}
+    >
       {readerIsReady ? <ReaderReadingPhase /> : <ReaderMeasurementPhase />}
     </View>
   );
 };
 
-export default Reader;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+export default ReaderScreen;

@@ -7,7 +7,7 @@ import {
 } from "@react-navigation/native";
 import { Button } from "react-native";
 
-const HomeScreen = () => {
+const LoadingScreen = () => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
 
@@ -39,4 +39,4 @@ const HomeScreen = () => {
     </View>
   );
 };
-export default HomeScreen;
+export default LoadingScreen;
