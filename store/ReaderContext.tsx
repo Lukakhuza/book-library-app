@@ -171,7 +171,6 @@ const ReaderContextProvider = ({ children }: Props) => {
   };
 
   const updateBookImageUri = (bookImageUri: any) => {
-    console.log("Test 1", bookImageUri);
     setBookImageUri(bookImageUri);
   };
 

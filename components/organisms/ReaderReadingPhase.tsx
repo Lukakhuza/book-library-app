@@ -10,8 +10,6 @@ const ReaderReadingPhase = () => {
     readerDimensions,
   }: any = useContext(ReaderContext);
 
-  console.log("Pages: ", pages.length);
-
   return (
     <View style={{ backgroundColor: "#40e0d0" }}>
       <Text style={styles.title}>{chapter.title}</Text>

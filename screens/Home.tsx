@@ -9,9 +9,6 @@ const HomeScreen = () => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
   const { bookImageUri }: any = useContext(ReaderContext);
-  useEffect(() => {
-    console.log(bookImageUri);
-  }, [bookImageUri]);
 
   return (
     <View

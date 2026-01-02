@@ -88,7 +88,6 @@ export const getBookMetadata = async (signedUrl: string) => {
     const coverFile: any = zip.file(zipObjects[5]);
     const base64 = await coverFile.async("base64");
     const bookImageUri = `data:image/jpeg;base64,${base64}`;
-    console.log(bookImageUri);
     return bookImageUri;
 
     // const title: any = document?.querySelector("h1.title")?.textContent;
