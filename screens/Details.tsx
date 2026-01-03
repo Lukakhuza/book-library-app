@@ -1,40 +1,63 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
 // import { useNavigation } from "@react-navigation/native";
 import {
   createStaticNavigation,
   useNavigation,
 } from "@react-navigation/native";
 import { Button } from "react-native";
+import { ReaderContext } from "../store/ReaderContext";
+import { useContext } from "react";
 
 const DetailsScreen = () => {
   const navigation: any = useNavigation();
+  const { books }: any = useContext(ReaderContext);
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Details Screen</Text>
-      <Button
-        title="Go to Details again"
-        onPress={() => {
-          navigation.navigate("Details");
+    <View style={{ flex: 1, paddingHorizontal: 15, paddingVertical: 20 }}>
+      <FlatList
+        data={books}
+        columnWrapperStyle={{ gap: 12, justifyContent: "flex-end" }}
+        contentContainerStyle={{
+          // flexGrow: 1,
+          // justifyContent: "center",
+          // alignItems: "center",
+          // paddingHorizontal: 30,
+          paddingTop: 40,
+          paddingBottom: 15,
         }}
-      />
-      <Button
-        title="Update Title"
-        onPress={() => {
-          navigation.setOptions({ title: "Updated!" });
+        renderItem={(book) => {
+          return (
+            <View
+              style={{
+                backgroundColor: "gray",
+                borderRadius: 20,
+                flex: 1,
+                width: "45%",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                marginBottom: 10,
+                // marginVertical: 10,
+                paddingHorizontal: 8,
+              }}
+            >
+              <Text
+                ellipsizeMode="tail"
+                numberOfLines={2}
+                style={{ textAlign: "center", color: "white", fontWeight: 500 }}
+              >
+                {book.item.title}
+              </Text>
+              <Image
+                source={{
+                  uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${book.item.coverKey}`,
+                }}
+                style={{ width: 90, height: 135, marginTop: 10 }}
+                resizeMode="cover"
+              />
+            </View>
+          );
         }}
-      />
-      <Button
-        title="Go to the first screen"
-        onPress={() => {
-          navigation.popToTop();
-        }}
-      />
-      <Button
-        title="Go Home"
-        onPress={() => {
-          navigation.popTo("Home");
-        }}
+        numColumns={2}
       />
     </View>
   );

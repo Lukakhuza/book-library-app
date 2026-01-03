@@ -10,8 +10,10 @@ import { Dimensions } from "react-native";
 import { getBook, getBookMetadata } from "../util/helperFunctions";
 import { fetchBookSignedUrl } from "../api/book.api";
 import { paginateText } from "../util/helperFunctions";
+import { getAllBooks } from "../api/book.api";
 
 export const ReaderContext: any = createContext({
+  books: [],
   screenDimensions: {
     height: 0,
     width: 0,
@@ -80,6 +82,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   });
   const [readerIsReady, setReaderIsReady] = useState(false);
   const [bookImageUri, setBookImageUri] = useState();
+  const [books, setBooks] = useState([]);
 
   // Store screen dimensions in screenDimensions state.
   useLayoutEffect(() => {
@@ -92,16 +95,25 @@ const ReaderContextProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const load = async () => {
-      const url = await fetchBookSignedUrl();
-      setSignedUrl(url);
+      const books = await getAllBooks();
+      setBooks(books);
     };
     load();
   }, []);
 
-  // Load the chapter based on the file signedUrl provided in props.
   useEffect(() => {
     const load = async () => {
-      const chapter = await getBook(signedUrl);
+      const url = await fetchBookSignedUrl();
+      console.log(url);
+      setSignedUrl(url);
+    };
+    // load();
+  }, []);
+
+  // Load the book based on the file signedUrl provided in props.
+  useEffect(() => {
+    const load = async () => {
+      // const chapter = await getBook(signedUrl);
       const metadata = await getBookMetadata(signedUrl);
       updateBookImageUri(metadata);
 
@@ -110,7 +122,7 @@ const ReaderContextProvider = ({ children }: Props) => {
         body: chapter?.body,
       });
     };
-    load();
+    // load();
   }, [signedUrl]);
 
   const textLayoutsRef = useRef<any>([]);
@@ -175,6 +187,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   };
 
   const value = {
+    books: books,
     properties: properties,
     signedUrl: signedUrl,
     bookImageUri: bookImageUri,

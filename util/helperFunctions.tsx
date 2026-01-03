@@ -35,9 +35,12 @@ export const getBook = async (signedUrl: string) => {
     const encoded = await file.base64();
     const zip = await JSZip.loadAsync(encoded, { base64: true });
     const zipObjects = Object.keys(zip.files);
-    const content: any = await zip.file(zipObjects[6])?.async("text");
+    const content: any = await zip.file(zipObjects[30])?.async("text");
+    // await zip.file("OEBPS/package.opf")?.async("text");
+
     const { document } = parseHTML(content);
     const title: any = document?.querySelector("h1.title")?.textContent;
+
     const body1: any = document?.querySelectorAll("p");
     const body2: any = body1.map((paragraph: any) => {
       return JSON.stringify(paragraph.textContent)
