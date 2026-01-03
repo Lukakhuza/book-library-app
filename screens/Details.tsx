@@ -13,7 +13,7 @@ const DetailsScreen = () => {
   const { books }: any = useContext(ReaderContext);
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 15, paddingVertical: 20 }}>
+    <View style={{ flex: 1, paddingHorizontal: 15 }}>
       <FlatList
         data={books}
         columnWrapperStyle={{ gap: 12, justifyContent: "flex-end" }}
