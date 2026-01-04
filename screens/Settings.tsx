@@ -17,7 +17,7 @@ const SettingsScreen = () => {
       <Button
         title="Go Home"
         onPress={() => {
-          navigation.popTo("Home");
+          navigation.navigate("App", { screen: "Home" });
         }}
       />
     </View>
