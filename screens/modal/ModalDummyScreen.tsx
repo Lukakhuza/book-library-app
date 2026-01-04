@@ -15,7 +15,7 @@ const ModalDummyScreen = () => {
       <Button
         title="Go to Details again"
         onPress={() => {
-          navigation.navigate("Details");
+          navigation.navigate("Discover");
         }}
       />
       <Button
@@ -33,7 +33,7 @@ const ModalDummyScreen = () => {
       <Button
         title="Go Home"
         onPress={() => {
-          navigation.popTo("Home");
+          navigation.navigate("Home");
         }}
       />
     </View>

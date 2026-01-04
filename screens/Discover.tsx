@@ -8,7 +8,7 @@ import { Button } from "react-native";
 import { ReaderContext } from "../store/ReaderContext";
 import { useContext } from "react";
 
-const DetailsScreen = () => {
+const DiscoverScreen = () => {
   const navigation: any = useNavigation();
   const { books }: any = useContext(ReaderContext);
 
@@ -63,4 +63,4 @@ const DetailsScreen = () => {
   );
 };
 
-export default DetailsScreen;
+export default DiscoverScreen;

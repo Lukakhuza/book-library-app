@@ -7,11 +7,12 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screens/Home";
-import DetailsScreen from "./screens/Details";
+import DiscoverScreen from "./screens/Discover";
 import ReaderContextProvider from "./store/ReaderContext";
 import ReaderScreen from "./screens/Reader";
 import SettingsScreen from "./screens/Settings";
 import ModalDummyScreen from "./screens/modal/ModalDummyScreen";
+import HomeStack from "./navigation/HomeStack";
 import { Ionicons } from "@expo/vector-icons";
 
 const MyTheme = {
@@ -23,50 +24,6 @@ const MyTheme = {
     card: "rgb(120,120,120)",
   },
 };
-
-const HomeStack = createBottomTabNavigator({
-  initialRouteName: "Home",
-  screenOptions: {
-    headerStyle: { backgroundColor: "tomato" },
-    headerTitleAlign: "center",
-    headerShown: false,
-  },
-  screens: {
-    Home: {
-      screen: HomeScreen,
-      options: {
-        title: "Home",
-        tabBarIcon: ({ color, size }) => {
-          return <Ionicons name="home-outline" size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "white",
-      },
-    },
-    Discover: {
-      screen: DetailsScreen,
-      options: {
-        title: "Discover",
-        tabBarIcon: ({ color, size }) => {
-          return <Ionicons name="book-outline" size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "white",
-      },
-      // tabBarIcon: <Ionicons name="home-outline" size={10} color="blue" />,
-    },
-    Settings: {
-      screen: SettingsScreen,
-      options: {
-        tabBarIcon: ({ color, size }) => {
-          return <Ionicons name="settings-outline" size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "white",
-      },
-    },
-  },
-});
 
 const RootStack = createNativeStackNavigator({
   groups: {

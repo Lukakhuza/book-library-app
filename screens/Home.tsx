@@ -24,9 +24,9 @@ const HomeScreen = () => {
     >
       <Text>Home Screen</Text>
       <Button
-        title="Go to Details"
+        title="Discover"
         onPress={() => {
-          navigation.navigate("Details");
+          navigation.navigate("Discover");
         }}
       />
       {bookImageUri && (
