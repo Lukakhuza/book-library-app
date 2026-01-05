@@ -1,4 +1,4 @@
-import { View, Text, useColorScheme } from "react-native";
+import { View, Text, useColorScheme, StyleSheet } from "react-native";
 import {
   createStaticNavigation,
   DefaultTheme,
@@ -19,7 +19,7 @@ const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "rgb(140, 201, 125)",
+    background: "#ddb52f",
     primary: "rgba(10, 13, 222, 1)",
     card: "rgb(120,120,120)",
   },

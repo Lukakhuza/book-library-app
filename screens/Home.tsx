@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Button } from "react-native";
 import { useContext, useEffect } from "react";
 import { ReaderContext } from "../store/ReaderContext";
+import { LinearGradient } from "expo-linear-gradient";
 
 const HomeScreen = () => {
   const navigation: any = useNavigation();
@@ -11,7 +12,8 @@ const HomeScreen = () => {
   const { bookImageUri }: any = useContext(ReaderContext);
 
   return (
-    <View
+    <LinearGradient
+      colors={["#d3d86cf5", "#f85454ff"]}
       style={{
         flex: 1,
         alignItems: "center",
@@ -36,14 +38,13 @@ const HomeScreen = () => {
           resizeMode="contain"
         />
       )}
-
       <Button
         title="Go to Reader"
         onPress={() => {
           navigation.navigate("Reader");
         }}
       />
-    </View>
+    </LinearGradient>
   );
 };
 export default HomeScreen;

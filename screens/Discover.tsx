@@ -7,13 +7,17 @@ import {
 import { Button } from "react-native";
 import { ReaderContext } from "../store/ReaderContext";
 import { useContext } from "react";
+import { LinearGradient } from "expo-linear-gradient";
 
 const DiscoverScreen = () => {
   const navigation: any = useNavigation();
   const { books }: any = useContext(ReaderContext);
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 15 }}>
+    <LinearGradient
+      colors={["#d3d86cf5", "#f85454ff"]}
+      style={{ flex: 1, paddingHorizontal: 15 }}
+    >
       <FlatList
         data={books}
         columnWrapperStyle={{ gap: 12, justifyContent: "flex-end" }}
@@ -59,7 +63,7 @@ const DiscoverScreen = () => {
         }}
         numColumns={2}
       />
-    </View>
+    </LinearGradient>
   );
 };
 
