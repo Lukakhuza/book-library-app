@@ -11,8 +11,64 @@ import { getBook, getBookMetadata } from "../util/helperFunctions";
 import { fetchBookSignedUrl } from "../api/book.api";
 import { paginateText } from "../util/helperFunctions";
 import { getAllBooks } from "../api/book.api";
+import { TextLayoutLine } from "react-native";
+import { RefObject } from "react";
 
-export const ReaderContext: any = createContext({
+type Book = {
+  title: string;
+  author: string;
+  coverKey: string;
+  epubKey: string;
+  language: string;
+  publishedYear: string;
+};
+
+type ScreenDimensions = {
+  height: number;
+  width: number;
+};
+
+type Chapter = {
+  title: string;
+  body: string[];
+};
+
+type ReaderDimensions = {
+  height: number;
+  width: number;
+};
+
+type Properties = {
+  verticalPadding: number;
+  paddingTop: number;
+  paddingBottom: number;
+  horizontalPadding: number;
+  fontSize: number;
+  lineHeight: number;
+  fontWeight: number;
+};
+
+type Size = {
+  width: number;
+  height: number;
+};
+
+type ReaderContextType = {
+  books: Book[];
+  screenDimensions: ScreenDimensions;
+  bookImageUri: string;
+  signedUrl: string;
+  chapter: Chapter;
+  pages: [];
+  readerDimensions: ReaderDimensions;
+  textLayouts: TextLayoutLine[];
+  readerIsReady: boolean;
+  properties: Properties;
+  contentSizeRef: RefObject<Size>;
+  containerWidthRef: RefObject<Size>;
+};
+
+export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],
   screenDimensions: {
     height: 0,
@@ -29,7 +85,7 @@ export const ReaderContext: any = createContext({
     height: 0,
     width: 0,
   },
-  textLayouts: null,
+  textLayouts: [],
   readerIsReady: false,
   properties: {
     verticalPadding: 18.6190490722656,
@@ -40,8 +96,8 @@ export const ReaderContext: any = createContext({
     lineHeight: 25,
     fontWeight: 600,
   },
-  contentSizeRef: { current: null },
-  containerWidthRef: { current: null },
+  contentSizeRef: { current: { width: 0, height: 0 } },
+  containerWidthRef: { current: { width: 0 } },
   layoutReadyRef: { current: null },
   debounceRef: { current: null },
   textLayoutsRef: { current: null },
@@ -63,7 +119,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   });
   const [signedUrl, setSignedUrl] = useState<any>(null);
   const [pages, setPages]: any = useState([]);
-  const [textLayouts, setTextLayouts]: any = useState(null);
+  const [textLayouts, setTextLayouts] = useState<TextLayoutLine[]>([]);
   const [readerDimensions, setReaderDimensions] = useState({
     height: 0,
     width: 0,
@@ -143,7 +199,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   );
   const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
 
-  const contentSizeRef = useRef({
+  const contentSizeRef = useRef<Size>({
     width: 0,
     height: 0,
   });

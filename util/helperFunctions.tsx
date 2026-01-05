@@ -25,6 +25,7 @@ export const getBook = async (signedUrl: string) => {
 
     // Check for downloaded file Uri and set it to filePath
     let downLoadedFileUri: any = "";
+
     if (info.exists) {
       downLoadedFileUri = info.uri;
     } else {
@@ -39,7 +40,8 @@ export const getBook = async (signedUrl: string) => {
     // await zip.file("OEBPS/package.opf")?.async("text");
 
     const { document } = parseHTML(content);
-    const title: any = document?.querySelector("h1.title")?.textContent;
+    const title: string | undefined =
+      document?.querySelector("h1.title")?.textContent;
 
     const body1: any = document?.querySelectorAll("p");
     const body2: any = body1.map((paragraph: any) => {

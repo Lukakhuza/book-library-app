@@ -33,7 +33,7 @@ const DiscoverScreen = () => {
           return (
             <View
               style={{
-                backgroundColor: "gray",
+                backgroundColor: "#4b4848ee",
                 borderRadius: 20,
                 flex: 1,
                 width: "45%",
