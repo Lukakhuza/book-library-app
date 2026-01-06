@@ -53,10 +53,21 @@ type Size = {
   height: number;
 };
 
+type ContainerWidth = {
+  width: number;
+};
+
+type LayoutChecklist = {
+  container: boolean;
+  textLayout: boolean;
+  contentSize: boolean;
+  fonts: boolean;
+};
+
 type ReaderContextType = {
   books: Book[];
   screenDimensions: ScreenDimensions;
-  bookImageUri: string;
+  bookImageUri: string | null;
   signedUrl: string;
   chapter: Chapter;
   pages: [];
@@ -65,7 +76,15 @@ type ReaderContextType = {
   readerIsReady: boolean;
   properties: Properties;
   contentSizeRef: RefObject<Size>;
-  containerWidthRef: RefObject<Size>;
+  containerWidthRef: RefObject<ContainerWidth>;
+  layoutReadyRef: RefObject<LayoutChecklist>;
+  debounceRef: RefObject<NodeJS.Timeout | null>;
+  textLayoutsRef: RefObject<TextLayoutLine[]>;
+  updateReaderDimensions: (width: number, height: number) => void;
+  updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => void;
+  updatePages: (pages: string[]) => void;
+  checkLayoutReady: () => void;
+  updateBookImageUri: (bookImageUri: string | null) => void;
 };
 
 export const ReaderContext = createContext<ReaderContextType | any>({
@@ -98,11 +117,18 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   },
   contentSizeRef: { current: { width: 0, height: 0 } },
   containerWidthRef: { current: { width: 0 } },
-  layoutReadyRef: { current: null },
+  layoutReadyRef: {
+    current: {
+      container: false,
+      textLayout: false,
+      contentSize: false,
+      fonts: false,
+    },
+  },
   debounceRef: { current: null },
-  textLayoutsRef: { current: null },
+  textLayoutsRef: { current: [] },
   updateReaderDimensions: (width: number, height: number) => {},
-  updateTextLayouts: (textLayoutsRef: any) => {},
+  updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => {},
   updatePages: (pages: any) => {},
   checkLayoutReady: () => {},
   updateBookImageUri: () => {},
@@ -138,7 +164,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   });
   const [readerIsReady, setReaderIsReady] = useState(false);
   const [bookImageUri, setBookImageUri] = useState();
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState<Book[]>([]);
 
   // Store screen dimensions in screenDimensions state.
   useLayoutEffect(() => {
@@ -170,7 +196,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   useEffect(() => {
     const load = async () => {
       // const chapter = await getBook(signedUrl);
-      const metadata = await getBookMetadata(signedUrl);
+      const metadata: any = await getBookMetadata(signedUrl);
       updateBookImageUri(metadata);
 
       setChapter({
@@ -204,11 +230,11 @@ const ReaderContextProvider = ({ children }: Props) => {
     height: 0,
   });
 
-  const containerWidthRef = useRef(0);
+  const containerWidthRef = useRef<ContainerWidth>({ width: 0 });
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const didPaginateRef = useRef(false);
+  const didPaginateRef = useRef<boolean>(false);
 
   const checkLayoutReady = () => {
     if (!didPaginateRef) return;
@@ -238,7 +264,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     setPages(pages);
   };
 
-  const updateBookImageUri = (bookImageUri: any) => {
+  const updateBookImageUri = (bookImageUri: string | any) => {
     setBookImageUri(bookImageUri);
   };
 
