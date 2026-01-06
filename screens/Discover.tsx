@@ -1,4 +1,11 @@
-import { FlatList, Image, Pressable, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 // import { useNavigation } from "@react-navigation/native";
 import {
   createStaticNavigation,
@@ -18,6 +25,9 @@ const DiscoverScreen = () => {
       colors={["#d3d86cf5", "#f85454ff"]}
       style={{ flex: 1, paddingHorizontal: 15 }}
     >
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Explore Books</Text>
+      </View>
       <FlatList
         data={books}
         columnWrapperStyle={{ gap: 12, justifyContent: "flex-end" }}
@@ -26,7 +36,7 @@ const DiscoverScreen = () => {
           // justifyContent: "center",
           // alignItems: "center",
           // paddingHorizontal: 30,
-          paddingTop: 40,
+          paddingTop: 20,
           paddingBottom: 15,
         }}
         renderItem={(book) => {
@@ -68,3 +78,16 @@ const DiscoverScreen = () => {
 };
 
 export default DiscoverScreen;
+
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 20,
+    fontWeight: 800,
+  },
+  headerContainer: {
+    marginTop: 20,
+    marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
