@@ -41,7 +41,10 @@ const DiscoverScreen = () => {
         }}
         renderItem={(book) => {
           return (
-            <View
+            <Pressable
+              onPress={() => {
+                navigation.navigate("BookDetails");
+              }}
               style={{
                 backgroundColor: "#4b4848ee",
                 borderRadius: 20,
@@ -57,7 +60,11 @@ const DiscoverScreen = () => {
               <Text
                 ellipsizeMode="tail"
                 numberOfLines={2}
-                style={{ textAlign: "center", color: "white", fontWeight: 500 }}
+                style={{
+                  textAlign: "center",
+                  color: "white",
+                  fontWeight: 500,
+                }}
               >
                 {book.item.title}
               </Text>
@@ -68,7 +75,7 @@ const DiscoverScreen = () => {
                 style={{ width: 90, height: 135, marginTop: 10 }}
                 resizeMode="cover"
               />
-            </View>
+            </Pressable>
           );
         }}
         numColumns={2}

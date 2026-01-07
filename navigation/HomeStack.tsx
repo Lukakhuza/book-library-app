@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "../screens/Home";
 import DiscoverScreen from "../screens/Discover";
 import SettingsScreen from "../screens/Settings";
+import BookDetailsScreen from "../screens/BookDetails";
 import { Ionicons } from "@expo/vector-icons";
 
 const HomeStack = createBottomTabNavigator({

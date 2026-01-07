@@ -1,19 +1,11 @@
-import { View, Text, useColorScheme, StyleSheet } from "react-native";
+import { useColorScheme } from "react-native";
 import {
   createStaticNavigation,
   DefaultTheme,
   DarkTheme,
 } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "./screens/Home";
-import DiscoverScreen from "./screens/Discover";
 import ReaderContextProvider from "./store/ReaderContext";
-import ReaderScreen from "./screens/Reader";
-import SettingsScreen from "./screens/Settings";
-import ModalDummyScreen from "./screens/modal/ModalDummyScreen";
-import HomeStack from "./navigation/HomeStack";
-import { Ionicons } from "@expo/vector-icons";
+import RootStack from "./navigation/RootStack";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -24,35 +16,6 @@ const MyTheme = {
     card: "rgb(120,120,120)",
   },
 };
-
-const RootStack = createNativeStackNavigator({
-  groups: {
-    Home: {
-      screens: {
-        App: {
-          screen: HomeStack,
-          options: {
-            headerShown: false,
-          },
-        },
-        Reader: {
-          screen: ReaderScreen,
-          options: {
-            headerShown: false,
-          },
-        },
-      },
-    },
-    Modal: {
-      screenOptions: {
-        presentation: "modal",
-      },
-      screens: {
-        MyModal: ModalDummyScreen,
-      },
-    },
-  },
-});
 
 const Navigation = createStaticNavigation(RootStack);
 
