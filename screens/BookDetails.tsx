@@ -5,11 +5,14 @@ import { Button } from "react-native";
 import { useContext, useEffect } from "react";
 import { ReaderContext } from "../store/ReaderContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { downloadBook } from "../services/bookServices";
 
-const BookDetailsScreen = () => {
+const BookDetailsScreen = ({ route }: any) => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
   const { bookImageUri }: any = useContext(ReaderContext);
+
+  const { bookData } = route.params;
 
   return (
     <LinearGradient
@@ -24,12 +27,41 @@ const BookDetailsScreen = () => {
         paddingRight: insets.right,
       }}
     >
-      {/* <View style={styles.headerContainer}>
-        <Text style={styles.header}>Book Details</Text>
-      </View> */}
       <View style={styles.content}>
         <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
-          <Text>Book Details Here</Text>
+          <Image
+            source={{
+              uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${bookData.coverKey}`,
+            }}
+            style={{ width: 270, height: 405, marginTop: 10 }}
+            resizeMode="cover"
+          />
+          <View style={styles.bookInfo}>
+            <View style={styles.bookInfoLine}>
+              <Text style={styles.label}>Title:</Text>
+              <Text numberOfLines={2}>{bookData.title}</Text>
+            </View>
+            <View style={styles.bookInfoLine}>
+              <Text style={styles.label}>Author:</Text>
+              <Text numberOfLines={2}>{bookData.author}</Text>
+            </View>
+            <View style={styles.bookInfoLine}>
+              <Text style={styles.label}>Language:</Text>
+              <Text>{bookData.language}</Text>
+            </View>
+            <View style={styles.bookInfoLine}>
+              <Text style={styles.label}>Published:</Text>
+              <Text>{bookData.publishedYear}</Text>
+            </View>
+          </View>
+          <Pressable
+            style={styles.downloadButton}
+            onPress={() => {
+              downloadBook(bookData);
+            }}
+          >
+            <Text style={styles.downloadButtonText}>Download</Text>
+          </Pressable>
         </View>
       </View>
     </LinearGradient>
@@ -49,12 +81,38 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
   },
   noBooksText: {
     textAlign: "center",
     fontSize: 18,
     fontWeight: 600,
     marginVertical: 5,
+  },
+  label: {
+    fontWeight: 900,
+    marginRight: 25,
+  },
+  bookInfo: {
+    marginTop: 15,
+    marginHorizontal: 3,
+  },
+  bookInfoLine: {
+    marginVertical: 3,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  downloadButton: {
+    marginTop: 10,
+    borderWidth: 3,
+    borderColor: "brown",
+    borderRadius: 15,
+    backgroundColor: "lightgray",
+  },
+  downloadButtonText: {
+    textAlign: "center",
+    fontSize: 17,
+    fontWeight: 500,
+    marginVertical: 7,
   },
 });

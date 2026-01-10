@@ -43,7 +43,7 @@ const DiscoverScreen = () => {
           return (
             <Pressable
               onPress={() => {
-                navigation.navigate("BookDetails");
+                navigation.navigate("BookDetails", { bookData: book.item });
               }}
               style={{
                 backgroundColor: "#4b4848ee",
