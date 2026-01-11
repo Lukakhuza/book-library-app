@@ -1,11 +1,13 @@
-export const fetchBookSignedUrl = async () => {
+export const fetchBookSignedUrl = async (bookData: object) => {
   const response = await fetch("http://10.0.2.2:3000/book/fetch-books", {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(bookData),
   });
   const resData = await response.json();
+  console.log(resData);
   return resData;
 };
 

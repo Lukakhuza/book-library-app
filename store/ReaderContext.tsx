@@ -184,11 +184,11 @@ const ReaderContextProvider = ({ children }: Props) => {
   }, []);
 
   useEffect(() => {
-    const load = async () => {
-      const url = await fetchBookSignedUrl();
-      console.log(url);
-      setSignedUrl(url);
-    };
+    // const load = async () => {
+    //   const url = await fetchBookSignedUrl();
+    //   console.log(url);
+    //   setSignedUrl(url);
+    // };
     // load();
   }, []);
 
