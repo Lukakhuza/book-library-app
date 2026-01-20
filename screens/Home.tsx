@@ -21,8 +21,6 @@ const HomeScreen = () => {
   const { width } = Dimensions.get("screen");
   const { bookImageUri, myBooks }: any = useContext(ReaderContext);
 
-  console.log(myBooks);
-
   return (
     <LinearGradient
       colors={["#d3d86cf5", "#f85454ff"]}
@@ -68,7 +66,7 @@ const HomeScreen = () => {
             contentContainerStyle={{
               alignItems: "center",
               // flexGrow: 1,
-              flex: 1,
+              // flex: 1,
               // justifyContent: "center",
               // alignItems: "center",
               // borderColor: "red",

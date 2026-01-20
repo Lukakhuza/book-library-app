@@ -5,7 +5,7 @@ import { Button } from "react-native";
 import { useContext, useEffect } from "react";
 import { ReaderContext } from "../store/ReaderContext";
 import { LinearGradient } from "expo-linear-gradient";
-import { downloadBook } from "../services/bookServices";
+import { deleteFromMyBooks, downloadBook } from "../services/bookServices";
 
 const BookDetailsScreen = ({ route }: any) => {
   const navigation: any = useNavigation();
@@ -58,9 +58,19 @@ const BookDetailsScreen = ({ route }: any) => {
             style={styles.downloadButton}
             onPress={() => {
               downloadBook(bookData);
+              navigation.navigate("App");
             }}
           >
             <Text style={styles.downloadButtonText}>Download</Text>
+          </Pressable>
+          <Pressable
+            style={styles.deleteButton}
+            onPress={() => {
+              deleteFromMyBooks(bookData.fileName);
+              // navigation.navigate("App");
+            }}
+          >
+            <Text style={styles.deleteButtonText}>Delete from My Books</Text>
           </Pressable>
         </View>
       </View>
@@ -109,7 +119,20 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: "lightgray",
   },
+  deleteButton: {
+    marginTop: 10,
+    borderWidth: 3,
+    borderColor: "black",
+    borderRadius: 15,
+    backgroundColor: "red",
+  },
   downloadButtonText: {
+    textAlign: "center",
+    fontSize: 17,
+    fontWeight: 500,
+    marginVertical: 7,
+  },
+  deleteButtonText: {
     textAlign: "center",
     fontSize: 17,
     fontWeight: 500,

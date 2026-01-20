@@ -21,7 +21,7 @@ const SettingsScreen = () => {
       <Button
         title="Go Home"
         onPress={() => {
-          navigation.navigate("MyModal");
+          navigation.navigate("Home");
         }}
       />
     </LinearGradient>
