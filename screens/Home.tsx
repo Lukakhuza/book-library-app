@@ -8,7 +8,11 @@ import {
   Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import {
+  useNavigation,
+  useIsFocused,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { Button } from "react-native";
 import { useContext, useEffect } from "react";
 import { ReaderContext } from "../store/ReaderContext";
@@ -19,7 +23,12 @@ const HomeScreen = () => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = Dimensions.get("screen");
-  const { bookImageUri, myBooks }: any = useContext(ReaderContext);
+  const { bookImageUri, myBooks, refreshMyBooks }: any =
+    useContext(ReaderContext);
+
+  useFocusEffect(() => {
+    refreshMyBooks();
+  });
 
   return (
     <LinearGradient

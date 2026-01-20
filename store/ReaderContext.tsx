@@ -88,6 +88,7 @@ type ReaderContextType = {
   checkLayoutReady: () => void;
   updateBookImageUri: (bookImageUri: string | null) => void;
   updateMyBooks: (books: Book[]) => {};
+  refreshMyBooks: () => {};
 };
 
 export const ReaderContext = createContext<ReaderContextType | any>({
@@ -188,6 +189,30 @@ const ReaderContextProvider = ({ children }: Props) => {
     };
     load();
   }, []);
+
+  const refreshMyBooks = async () => {
+    console.log("Hello");
+    const booksMetadataDir = new Directory(
+      Paths.document.uri,
+      "books-metadata"
+    );
+    const booksList = booksMetadataDir.list();
+    const fileNameSet = new Set();
+    for (const book of booksList) {
+      const file = new File(book.uri);
+      const text = await file.text();
+      const data = JSON.parse(text);
+      fileNameSet.add(data.bookData.fileName);
+    }
+    let myBooks = [];
+    for (const book of books) {
+      if (fileNameSet.has(book.fileName)) {
+        myBooks.push(book);
+      }
+    }
+
+    setMyBooks(myBooks);
+  };
 
   useEffect(() => {
     if (books.length === 0) return;
@@ -334,6 +359,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     checkLayoutReady: checkLayoutReady,
     updateBookImageUri: updateBookImageUri,
     updateMyBooks: updateMyBooks,
+    refreshMyBooks: refreshMyBooks,
   };
 
   return (

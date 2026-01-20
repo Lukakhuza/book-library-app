@@ -67,7 +67,7 @@ const BookDetailsScreen = ({ route }: any) => {
             style={styles.deleteButton}
             onPress={() => {
               deleteFromMyBooks(bookData.fileName);
-              // navigation.navigate("App");
+              navigation.navigate("App");
             }}
           >
             <Text style={styles.deleteButtonText}>Delete from My Books</Text>

@@ -10,10 +10,9 @@ export const getDimensions = () => {
 export const getBook = async (signedUrl: string, bookData: object) => {
   try {
     const epubFile = await downloadEpubFile(signedUrl, bookData);
-    console.log(epubFile);
     const jsonFile = await saveDataToJsonFile(epubFile.uri, bookData);
     console.log(jsonFile);
-    return;
+
     const encoded = await epubFile.base64();
     const zip = await JSZip.loadAsync(encoded, { base64: true });
     const zipObjects = Object.keys(zip.files);
@@ -130,7 +129,6 @@ const downloadEpubFile = async (signedUrl: string, data: object) => {
     downLoadedFileUri = downloadedFile.uri;
   }
   const file = new File(downLoadedFileUri);
-
   return file;
 };
 
@@ -151,8 +149,6 @@ const saveDataToJsonFile = async (epubFileUri: string, bookData: object) => {
 
   const jsonFileUri = booksMetadataDir.uri + jsonFileName;
   const file = new File(jsonFileUri);
-  console.log(file);
-  return file;
   const stringifiedBookData = JSON.stringify(enhancedBookData);
   file.write(stringifiedBookData);
   const newFile = await new File(jsonFileUri).text();

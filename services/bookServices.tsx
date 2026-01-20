@@ -7,7 +7,6 @@ export const downloadBook = async (bookData: object) => {
   const signedUrl = await fetchBookSignedUrl(bookData);
   // Download the epub file and the book metadata into the file system:
   const book = await getBook(signedUrl, bookData);
-  console.log(book);
 };
 
 export const getDownloadedBooks = async () => {
