@@ -7,12 +7,14 @@ import {
   useLayoutEffect,
 } from "react";
 import { Dimensions } from "react-native";
-import { getBook, getBookMetadata } from "../util/helperFunctions";
+import { getBook } from "../util/helperFunctions";
 import { fetchBookSignedUrl } from "../api/book.api";
 import { paginateText } from "../util/helperFunctions";
+import { getDownloadedBooks } from "../services/bookServices";
 import { getAllBooks } from "../api/book.api";
 import { TextLayoutLine } from "react-native";
 import { RefObject } from "react";
+import { Directory, File, Paths } from "expo-file-system";
 
 type Book = {
   title: string;
@@ -85,10 +87,13 @@ type ReaderContextType = {
   updatePages: (pages: string[]) => void;
   checkLayoutReady: () => void;
   updateBookImageUri: (bookImageUri: string | null) => void;
+  updateMyBooks: (books: Book[]) => {};
 };
 
 export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],
+  myBooks: [],
+  downloadedBooks: [],
   screenDimensions: {
     height: 0,
     width: 0,
@@ -165,6 +170,7 @@ const ReaderContextProvider = ({ children }: Props) => {
   const [readerIsReady, setReaderIsReady] = useState(false);
   const [bookImageUri, setBookImageUri] = useState();
   const [books, setBooks] = useState<Book[]>([]);
+  const [myBooks, setMyBooks] = useState<Book[]>([]);
 
   // Store screen dimensions in screenDimensions state.
   useLayoutEffect(() => {
@@ -184,6 +190,40 @@ const ReaderContextProvider = ({ children }: Props) => {
   }, []);
 
   useEffect(() => {
+    if (books.length === 0) return;
+    const load = async () => {
+      const booksMetadataDir = new Directory(
+        Paths.document.uri,
+        "books-metadata"
+      );
+      const booksList = booksMetadataDir.list();
+      const fileNameSet = new Set();
+      for (const book of booksList) {
+        const file = new File(book.uri);
+        const text = await file.text();
+        const data = JSON.parse(text);
+        fileNameSet.add(data.bookData.fileName);
+      }
+      let myBooks = [];
+      for (const book of books) {
+        if (fileNameSet.has(book.fileName)) {
+          myBooks.push(book);
+        }
+      }
+
+      setMyBooks(myBooks);
+    };
+    load();
+  }, [books]);
+
+  useEffect(() => {
+    const load = async () => {
+      const downloadedBooks = await getDownloadedBooks();
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
     // const load = async () => {
     //   const url = await fetchBookSignedUrl();
     //   console.log(url);
@@ -194,16 +234,15 @@ const ReaderContextProvider = ({ children }: Props) => {
 
   // Load the book based on the file signedUrl provided in props.
   useEffect(() => {
-    const load = async () => {
-      // const chapter = await getBook(signedUrl);
-      const metadata: any = await getBookMetadata(signedUrl);
-      updateBookImageUri(metadata);
-
-      setChapter({
-        title: chapter?.title,
-        body: chapter?.body,
-      });
-    };
+    // const load = async () => {
+    //   // const chapter = await getBook(signedUrl);
+    //   const metadata: any = await getBookMetadata(signedUrl);
+    //   updateBookImageUri(metadata);
+    //   setChapter({
+    //     title: chapter?.title,
+    //     body: chapter?.body,
+    //   });
+    // };
     // load();
   }, [signedUrl]);
 
@@ -268,8 +307,13 @@ const ReaderContextProvider = ({ children }: Props) => {
     setBookImageUri(bookImageUri);
   };
 
+  const updateMyBooks = (myBooks: Book[]) => {
+    setMyBooks(myBooks);
+  };
+
   const value = {
     books: books,
+    myBooks: myBooks,
     properties: properties,
     signedUrl: signedUrl,
     bookImageUri: bookImageUri,
@@ -289,6 +333,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     updatePages: updatePages,
     checkLayoutReady: checkLayoutReady,
     updateBookImageUri: updateBookImageUri,
+    updateMyBooks: updateMyBooks,
   };
 
   return (

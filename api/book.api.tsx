@@ -7,7 +7,6 @@ export const fetchBookSignedUrl = async (bookData: object) => {
     body: JSON.stringify(bookData),
   });
   const resData = await response.json();
-  console.log(resData);
   return resData;
 };
 
