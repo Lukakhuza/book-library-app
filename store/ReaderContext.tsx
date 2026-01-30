@@ -7,9 +7,8 @@ import {
   useLayoutEffect,
 } from "react";
 import { Dimensions } from "react-native";
-import { getBook } from "../util/helperFunctions";
-import { fetchBookSignedUrl } from "../api/book.api";
-import { paginateText } from "../util/helperFunctions";
+import { getBook } from "../services/bookServices";
+import { paginateText } from "../services/bookServices";
 import { getDownloadedBooks } from "../services/bookServices";
 import { getAllBooks } from "../api/book.api";
 import { TextLayoutLine } from "react-native";
@@ -23,6 +22,7 @@ type Book = {
   epubKey: string;
   language: string;
   publishedYear: string;
+  fileName: string;
 };
 
 type ScreenDimensions = {
@@ -70,7 +70,6 @@ type ReaderContextType = {
   books: Book[];
   screenDimensions: ScreenDimensions;
   bookImageUri: string | null;
-  signedUrl: string;
   chapter: Chapter;
   pages: [];
   readerDimensions: ReaderDimensions;
@@ -87,8 +86,8 @@ type ReaderContextType = {
   updatePages: (pages: string[]) => void;
   checkLayoutReady: () => void;
   updateBookImageUri: (bookImageUri: string | null) => void;
-  updateMyBooks: (books: Book[]) => {};
-  refreshMyBooks: () => {};
+  addToMyBooks: (book: object) => {};
+  removeFromMyBooks: (fileName: string) => {};
 };
 
 export const ReaderContext = createContext<ReaderContextType | any>({
@@ -100,7 +99,6 @@ export const ReaderContext = createContext<ReaderContextType | any>({
     width: 0,
   },
   bookImageUri: "",
-  signedUrl: "",
   chapter: {
     title: "",
     body: [],
@@ -149,7 +147,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     height: 0,
     width: 0,
   });
-  const [signedUrl, setSignedUrl] = useState<any>(null);
   const [pages, setPages]: any = useState([]);
   const [textLayouts, setTextLayouts] = useState<TextLayoutLine[]>([]);
   const [readerDimensions, setReaderDimensions] = useState({
@@ -190,30 +187,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     load();
   }, []);
 
-  const refreshMyBooks = async () => {
-    console.log("Hello");
-    const booksMetadataDir = new Directory(
-      Paths.document.uri,
-      "books-metadata"
-    );
-    const booksList = booksMetadataDir.list();
-    const fileNameSet = new Set();
-    for (const book of booksList) {
-      const file = new File(book.uri);
-      const text = await file.text();
-      const data = JSON.parse(text);
-      fileNameSet.add(data.bookData.fileName);
-    }
-    let myBooks = [];
-    for (const book of books) {
-      if (fileNameSet.has(book.fileName)) {
-        myBooks.push(book);
-      }
-    }
-
-    setMyBooks(myBooks);
-  };
-
   useEffect(() => {
     if (books.length === 0) return;
     const load = async () => {
@@ -247,29 +220,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     };
     load();
   }, []);
-
-  useEffect(() => {
-    // const load = async () => {
-    //   const url = await fetchBookSignedUrl();
-    //   console.log(url);
-    //   setSignedUrl(url);
-    // };
-    // load();
-  }, []);
-
-  // Load the book based on the file signedUrl provided in props.
-  useEffect(() => {
-    // const load = async () => {
-    //   // const chapter = await getBook(signedUrl);
-    //   const metadata: any = await getBookMetadata(signedUrl);
-    //   updateBookImageUri(metadata);
-    //   setChapter({
-    //     title: chapter?.title,
-    //     body: chapter?.body,
-    //   });
-    // };
-    // load();
-  }, [signedUrl]);
 
   const textLayoutsRef = useRef<any>([]);
 
@@ -332,34 +282,35 @@ const ReaderContextProvider = ({ children }: Props) => {
     setBookImageUri(bookImageUri);
   };
 
-  const updateMyBooks = (myBooks: Book[]) => {
-    setMyBooks(myBooks);
+  const addToMyBooks = (book: object) => {};
+
+  const removeFromMyBooks = (fileName: string) => {
+    setMyBooks((prev) => prev.filter((book) => book.fileName !== fileName));
   };
 
   const value = {
-    books: books,
-    myBooks: myBooks,
-    properties: properties,
-    signedUrl: signedUrl,
-    bookImageUri: bookImageUri,
-    chapter: chapter,
-    pages: pages,
-    readerDimensions: readerDimensions,
-    screenDimensions: screenDimensions,
-    textLayouts: textLayouts,
-    readerIsReady: readerIsReady,
-    contentSizeRef: contentSizeRef,
-    layoutReadyRef: layoutReadyRef,
-    containerWidthRef: containerWidthRef,
-    debounceRef: debounceRef,
-    textLayoutsRef: textLayoutsRef,
-    updateReaderDimensions: updateReaderDimensions,
-    updateTextLayouts: updateTextLayouts,
-    updatePages: updatePages,
-    checkLayoutReady: checkLayoutReady,
-    updateBookImageUri: updateBookImageUri,
-    updateMyBooks: updateMyBooks,
-    refreshMyBooks: refreshMyBooks,
+    books,
+    myBooks,
+    properties,
+    bookImageUri,
+    chapter,
+    pages,
+    readerDimensions,
+    screenDimensions,
+    textLayouts,
+    readerIsReady,
+    contentSizeRef,
+    layoutReadyRef,
+    containerWidthRef,
+    debounceRef,
+    textLayoutsRef,
+    updateReaderDimensions,
+    updateTextLayouts,
+    updatePages,
+    checkLayoutReady,
+    updateBookImageUri,
+    addToMyBooks,
+    removeFromMyBooks,
   };
 
   return (

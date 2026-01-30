@@ -10,9 +10,14 @@ import { deleteFromMyBooks, downloadBook } from "../services/bookServices";
 const BookDetailsScreen = ({ route }: any) => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
-  const { bookImageUri }: any = useContext(ReaderContext);
+  const { bookImageUri, addToMyBooks, removeFromMyBooks, myBooks }: any =
+    useContext(ReaderContext);
 
   const { bookData } = route.params;
+
+  const downloaded = myBooks.some((book: any) => {
+    return book._id === bookData._id;
+  });
 
   return (
     <LinearGradient
@@ -54,19 +59,32 @@ const BookDetailsScreen = ({ route }: any) => {
               <Text>{bookData.publishedYear}</Text>
             </View>
           </View>
-          <Pressable
-            style={styles.downloadButton}
-            onPress={() => {
-              downloadBook(bookData);
-              navigation.navigate("App");
-            }}
-          >
-            <Text style={styles.downloadButtonText}>Download</Text>
-          </Pressable>
+          {!downloaded ? (
+            <Pressable
+              style={styles.downloadButton}
+              onPress={() => {
+                downloadBook(bookData);
+                addToMyBooks(bookData);
+                navigation.navigate("App");
+              }}
+            >
+              <Text style={styles.downloadButtonText}>Download</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={styles.readButton}
+              onPress={() => {
+                console.log("Opening Book...");
+              }}
+            >
+              <Text style={styles.downloadButtonText}>Read Book</Text>
+            </Pressable>
+          )}
           <Pressable
             style={styles.deleteButton}
             onPress={() => {
               deleteFromMyBooks(bookData.fileName);
+              removeFromMyBooks(bookData.fileName);
               navigation.navigate("App");
             }}
           >
@@ -91,7 +109,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: "center",
-    // justifyContent: "center",
   },
   noBooksText: {
     textAlign: "center",
@@ -118,6 +135,11 @@ const styles = StyleSheet.create({
     borderColor: "brown",
     borderRadius: 15,
     backgroundColor: "lightgray",
+  },
+  readButton: {
+    marginTop: 10,
+    borderRadius: 15,
+    backgroundColor: "green",
   },
   deleteButton: {
     marginTop: 10,

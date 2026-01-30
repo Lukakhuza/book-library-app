@@ -1,48 +1,381 @@
 import { Directory, File, Paths } from "expo-file-system";
 import { fetchBookSignedUrl, getAllBooks } from "../api/book.api";
-import { getBook } from "../util/helperFunctions";
+import { resolveHref } from "../util/helperFunctions";
+import { parseHTML } from "linkedom";
+import { XMLParser } from "fast-xml-parser";
+import JSZip from "jszip";
 
 export const downloadBook = async (bookData: object) => {
-  // Get signed url
-  const signedUrl = await fetchBookSignedUrl(bookData);
-  // Download the epub file and the book metadata into the file system:
-  const book = await getBook(signedUrl, bookData);
+  try {
+    // Get signed url
+    const signedUrl = await fetchBookSignedUrl(bookData);
+    // // Download the epub file and the book metadata into the file system:
+    const bookFile = await getBook(signedUrl, bookData);
+    await openBook(bookFile);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getDownloadedBooks = async () => {
-  const allBooks = await getAllBooks();
-  // console.log(allBooks);
-  const booksDir = new Directory(Paths.document.uri, "books");
-  const booksList = booksDir.list();
-  // console.log(booksList);
-  // const downloadedSet = new Set(booksList.map((book) => book.fileName));
-  // console.log(fileNameSet);
+  try {
+    const allBooks = await getAllBooks();
+    // console.log(allBooks);
+    const booksDir = new Directory(Paths.document.uri, "books");
+    const booksList = booksDir.list();
+    // console.log(booksList);
+    // const downloadedSet = new Set(booksList.map((book) => book.fileName));
+    // console.log(fileNameSet);
 
-  // const downloadedBooks = allBooks.filter((book) => {
-  //   console.log("Test 5", book);
-  //   return true;
-  // });
+    // const downloadedBooks = allBooks.filter((book) => {
+    //   console.log("Test 5", book);
+    //   return true;
+    // });
 
-  // console.log("Test 3", booksList.length);
+    // console.log("Test 3", booksList.length);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const deleteFromMyBooks = async (fileName: string) => {
-  // Generate epub file uri
-  const epubFileName = fileName;
-  const booksDir = new Directory(Paths.document.uri, "books");
-  const bookUri = booksDir.uri + epubFileName;
+  try {
+    // Generate epub file uri
+    const epubFileName = fileName;
+    const booksDir = new Directory(Paths.document.uri, "books");
+    const bookUri = booksDir.uri + epubFileName;
 
-  // Delete Epub File
-  const epubFile = new File(bookUri);
-  epubFile.delete();
+    // Delete Epub File
+    const epubFile = new File(bookUri);
+    epubFile.delete();
 
-  // Generate json file uri
-  const jsonFileName = fileName.replace(/\.epub$/i, ".json");
-  const booksMetadataDir = new Directory(Paths.document.uri, "books-metadata");
-  const bookMetadataUri = booksMetadataDir.uri + jsonFileName;
+    // Generate json file uri
+    const jsonFileName = fileName.replace(/\.epub$/i, ".json");
+    const booksMetadataDir = new Directory(
+      Paths.document.uri,
+      "books-metadata"
+    );
+    const bookMetadataUri = booksMetadataDir.uri + jsonFileName;
 
-  // Delete json file
-  const jsonFile = new File(bookMetadataUri);
-  jsonFile.delete();
-  return;
+    // Delete json file
+    const jsonFile = new File(bookMetadataUri);
+    jsonFile.delete();
+
+    return;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const downloadEpubFile = async (signedUrl: string, data: object) => {
+  try {
+    const bookData: any = data;
+    const booksDir = new Directory(Paths.document.uri, "books");
+
+    if (!booksDir.exists) {
+      booksDir.create();
+    }
+
+    // Create an epub file uri
+    const fileUri = booksDir.uri + bookData.fileName;
+
+    // Check if there is any info on this fileUri
+    const info = new File(fileUri).info();
+
+    // // Check for downloaded file Uri and set it to filePath
+    let downLoadedFileUri: any = "";
+    if (info.exists) {
+      downLoadedFileUri = info.uri;
+    } else {
+      const downloadedFile = await File.downloadFileAsync(signedUrl, booksDir, {
+        idempotent: true,
+      });
+      downLoadedFileUri = downloadedFile.uri;
+    }
+    const file = new File(downLoadedFileUri);
+    return file;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const saveDataToJsonFile = async (
+  epubFileUri: string,
+  bookData: any
+) => {
+  try {
+    const enhancedBookData = {
+      bookData: bookData,
+      epubFileUri: epubFileUri,
+    };
+    const booksMetadataDir = new Directory(
+      Paths.document.uri,
+      "books-metadata"
+    );
+
+    // If books metadata directory doesn't exist, create it:
+    if (!booksMetadataDir.exists) {
+      booksMetadataDir.create();
+    }
+
+    // Create a json file uri
+    const jsonFileName = bookData.fileName.replace(/\.epub$/i, ".json");
+    const jsonFileUri = booksMetadataDir.uri + jsonFileName;
+    const file = new File(jsonFileUri);
+    const stringifiedBookData = JSON.stringify(enhancedBookData);
+    file.write(stringifiedBookData);
+    const newFile = await new File(jsonFileUri).text();
+    return newFile;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getBook = async (signedUrl: string, bookData: object) => {
+  try {
+    const epubFile = await downloadEpubFile(signedUrl, bookData);
+    const jsonFile = await saveDataToJsonFile(epubFile.uri, bookData);
+
+    const bookFile = {
+      epub: epubFile,
+      json: jsonFile,
+    };
+
+    return bookFile;
+
+    // It is working upto here. Continue from here on.
+    const encoded = await epubFile.base64();
+    const zip = await JSZip.loadAsync(encoded, { base64: true });
+    const zipObjects = Object.keys(zip.files);
+    // console.log(zipObjects);
+    const content: any = await zip.file(zipObjects[5])?.async("text");
+    // console.log(content);
+    // await zip.file("OEBPS/package.opf")?.async("text");
+
+    const { document } = parseHTML(content);
+    const title: string | undefined =
+      document?.querySelector("h1.title")?.textContent;
+
+    const body1: any = document?.querySelectorAll("p");
+    const body2: any = body1.map((paragraph: any) => {
+      return JSON.stringify(paragraph.textContent)
+        .replaceAll(/\\n/g, " ")
+        .replace(/^["']|["']$/g, "");
+    });
+    const chapter = {
+      title: title,
+      body: body2,
+    };
+
+    return chapter;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const openBook = async (bookFile: any) => {
+  try {
+    const { epub: epubFile } = bookFile;
+    const encoded = await epubFile.base64();
+    const zip = await JSZip.loadAsync(encoded, { base64: true });
+    const zipObjects = Object.keys(zip.files);
+    const containerXmlFile: any = await zip
+      .file("META-INF/container.xml")
+      ?.async("text");
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+    });
+
+    const parsed = parser.parse(containerXmlFile);
+
+    const rootfiles = parsed.container.rootfiles.rootfile;
+
+    // rootfile can be an object or an array
+    const rootfile = Array.isArray(rootfiles) ? rootfiles[0] : rootfiles;
+
+    const opfPath = rootfile["@_full-path"];
+
+    const opfXml: any = await zip.file(opfPath)?.async("string");
+    const parsedPackage = parser.parse(opfXml);
+    // console.log("Metadata", parsedPackage.package.metadata);
+    // console.log("Manifest", parsedPackage.package.manifest.item);
+    // console.log("Spine", parsedPackage.package.spine.itemref);
+
+    type ManifestItem = {
+      href: string;
+      mediaType: string;
+      properties?: string;
+    };
+
+    const manifest = parsedPackage.package?.manifest;
+    const items = parsedPackage.package?.manifest?.item;
+
+    // console.log("LK TEST:", items);
+
+    if (!items) {
+      throw new Error("OPF manifest missing");
+    }
+
+    const manifestItems = Array.isArray(items) ? items : [items];
+    const manifestMap = new Map<string, ManifestItem>();
+
+    for (const item of manifestItems) {
+      const id = item["@_id"];
+      const href = item["@_href"];
+      const mediaType = item["@_media-type"];
+      const properties = item["@_properties"];
+
+      if (!id || !href || !mediaType) continue;
+
+      manifestMap.set(id, {
+        href,
+        mediaType,
+        properties,
+      });
+    }
+
+    // console.log("LK TEST 1", manifestMap);
+
+    const itemrefs = parsedPackage?.package?.spine?.itemref;
+
+    if (!itemrefs) {
+      throw new Error("OPF spine missing");
+    }
+
+    const spineItems = Array.isArray(itemrefs) ? itemrefs : [itemrefs];
+    // console.log("SPINE ITEMS:", spineItems);
+    const spineHrefs: string[] = [];
+
+    for (const itemref of spineItems) {
+      const idref = itemref["@_idref"];
+      const linear = itemref["@_linear"];
+
+      if (!idref) continue;
+      if (linear === "no") continue;
+
+      const manifestItem = manifestMap.get(idref);
+      // console.log(manifestItem);
+      if (!manifestItem) continue;
+
+      // Skip nav / TOC
+      // if (manifestItem.properties?.includes("nav")) continue;
+
+      // Only render XHTML
+      if (manifestItem.mediaType !== "application/xhtml+xml") continue;
+
+      spineHrefs.push(manifestItem.href);
+    }
+
+    // console.log(spineHrefs);
+    const xhtmlPath = resolveHref(opfPath, spineHrefs[0]);
+    // console.log("Test 4", xhtmlPath);
+    const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
+    // console.log(xhtmlString);
+    // const data = JSON.stringify(xhtmlString);
+    // console.log(data);
+    // console.log(spineHrefs[0]);
+    function prettyPrintXml(xml: string) {
+      return xml.replace(/></g, ">\n<").replace(/\n\s*\n/g, "\n");
+    }
+
+    // console.log(prettyPrintXml(xhtmlString));
+    // const parsed1 = parser.parseFromString;
+    // console.log(parsed1);
+    // }
+
+    const { document } = parseHTML(xhtmlString);
+    // console.log(xhtmlString);
+    // console.log(document.querySelector("title")?.textContent);
+    const parsed2 = parser.parse(xhtmlString);
+    // console.log(parsed2.html.body.div.nav);
+    // const content: any = await zip.file(zipObjects[4])?.async("text");
+    // const contentPackage: any = await zip
+    //   .file("OEBPS/package.opf")
+    //   ?.async("text");
+
+    // console.log("Test 111", contentPackage);
+
+    // return;
+    const title: string | undefined =
+      document?.querySelector("h1.title")?.textContent;
+
+    const body1: any = document?.querySelectorAll("p");
+    const body2: any = body1.map((paragraph: any) => {
+      return JSON.stringify(paragraph.textContent)
+        .replaceAll(/\\n/g, " ")
+        .replace(/^["']|["']$/g, "");
+    });
+    const chapter = {
+      title: title,
+      body: body2,
+    };
+
+    return chapter;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const paginateText = (
+  textLayouts: any,
+  readerDimensions: any,
+  properties: any
+) => {
+  try {
+    const availableHeight =
+      readerDimensions.height - properties.verticalPadding * 2;
+    const MAX_LINES_PER_PAGE = Math.floor(
+      availableHeight / properties.lineHeight
+    );
+
+    const pages: string[][] = [];
+    let lineIndex = 0;
+    let currentPage: any = [];
+
+    // for (let i = 0; i < textLayouts.current.length; i++) {
+    //   for (let j = 0; j < textLayouts.current[i].length; j++) {
+    //     currentPage.push(textLayouts.current[i][j].text.trim());
+    //     if (lineIndex % 34 === 0) {
+    //       pages.push(currentPage);
+    //       currentPage = [];
+    //     }
+    //     lineIndex++;
+    //   }
+    //   if (currentPage.length !== 0) {
+    //     currentPage.push("");
+    //     if (lineIndex % 34 === 0) {
+    //       pages.push(currentPage);
+    //       currentPage = [];
+    //     }
+    //     lineIndex++;
+    //   }
+    // }
+    // pages.push(currentPage);
+
+    for (let i = 0; i < textLayouts.current.length; i++) {
+      for (let j = 0; j < textLayouts.current[i].length; j++) {
+        currentPage.push(textLayouts.current[i][j].text.trim());
+        lineIndex++;
+        if (lineIndex % 34 === 0) {
+          pages.push(currentPage);
+          currentPage = [];
+        }
+      }
+      if (currentPage.length === 0) {
+        continue;
+      }
+      currentPage.push("");
+      lineIndex++;
+      if (lineIndex % 34 === 0) {
+        pages.push(currentPage);
+        currentPage = [];
+      }
+    }
+    pages.push(currentPage);
+
+    return pages;
+  } catch (error) {
+    console.log(error);
+  }
 };

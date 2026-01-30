@@ -6,39 +6,32 @@ import {
   View,
   FlatList,
   Dimensions,
+  Button,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  useNavigation,
-  useIsFocused,
-  useFocusEffect,
-} from "@react-navigation/native";
-import { Button } from "react-native";
-import { useContext, useEffect } from "react";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useContext, useCallback } from "react";
 import { ReaderContext } from "../store/ReaderContext";
 import { LinearGradient } from "expo-linear-gradient";
-import { Directory, File, Paths } from "expo-file-system";
 
 const HomeScreen = () => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = Dimensions.get("screen");
-  const { bookImageUri, myBooks, refreshMyBooks }: any =
-    useContext(ReaderContext);
+  const { myBooks }: any = useContext(ReaderContext);
 
-  useFocusEffect(() => {
-    refreshMyBooks();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      // Refresh myBooks
+    }, [myBooks])
+  );
 
   return (
     <LinearGradient
       colors={["#d3d86cf5", "#f85454ff"]}
       style={{
         flex: 1,
-        // alignItems: "center",
-        // justifyContent: "center",
         paddingTop: insets.top,
-        // paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
       }}
@@ -64,23 +57,12 @@ const HomeScreen = () => {
         <View
           style={{
             flex: 1,
-            // alignItems: "center",
-            // borderColor: "brown",
-            // borderWidth: 3,
           }}
         >
           <FlatList
             data={myBooks}
-            // columnWrapperStyle={{ gap: 12, justifyContent: "flex-end" }}
             contentContainerStyle={{
               alignItems: "center",
-              // flexGrow: 1,
-              // flex: 1,
-              // justifyContent: "center",
-              // alignItems: "center",
-              // borderColor: "red",
-              // borderWidth: 10,
-              // paddingHorizontal: 30,
               paddingTop: 20,
               paddingBottom: 15,
             }}
@@ -92,15 +74,11 @@ const HomeScreen = () => {
                   }}
                   style={{
                     backgroundColor: "lightblue",
-                    // borderColor: "blue",
-                    // borderWidth: 3,
                     borderRadius: 20,
-                    // flex: 1,
                     width: width * 0.5,
                     alignItems: "center",
                     justifyContent: "flex-end",
                     marginBottom: 10,
-                    // marginVertical: 10,
                     paddingHorizontal: 8,
                   }}
                 >
