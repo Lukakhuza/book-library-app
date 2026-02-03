@@ -21,22 +21,35 @@ import {
   useTheme,
 } from "@react-navigation/native";
 
-const ReaderScreen = () => {
+const ReaderScreen = ({ route }: any) => {
   const { readerIsReady }: any = useContext(ReaderContext);
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+
+  const { chapterData } = route.params;
+
+  const data = {
+    bookTitle: chapterData?.html?.head?.title,
+    tableOfContentsHeader: chapterData?.html?.body?.div?.div?.["#text"],
+    content: chapterData?.html?.body?.div?.nav?.ol,
+    opfPath: chapterData.opfPath,
+    epubFile: chapterData.epubFile,
+    spineHrefs: chapterData.spineHrefs,
+    xhtmlString: chapterData.xhtmlString,
+  };
 
   return (
     <View
       style={{
         flex: 1,
-        // paddingTop: insets.top,
-        // paddingBottom: insets.bottom,
-        // paddingLeft: insets.left,
-        // paddingRight: insets.right,
       }}
     >
-      {readerIsReady ? <ReaderReadingPhase /> : <ReaderMeasurementPhase />}
+      {readerIsReady ? (
+        <ReaderReadingPhase />
+      ) : (
+        <ReaderMeasurementPhase data={data} />
+      )}
+      {/* <ReaderMeasurementPhase /> */}
     </View>
   );
 };

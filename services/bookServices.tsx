@@ -3,7 +3,7 @@ import { fetchBookSignedUrl, getAllBooks } from "../api/book.api";
 import { resolveHref } from "../util/helperFunctions";
 import { parseHTML } from "linkedom";
 import { XMLParser } from "fast-xml-parser";
-import JSZip from "jszip";
+import JSZip, { forEach } from "jszip";
 
 export const downloadBook = async (bookData: object) => {
   try {
@@ -11,7 +11,7 @@ export const downloadBook = async (bookData: object) => {
     const signedUrl = await fetchBookSignedUrl(bookData);
     // // Download the epub file and the book metadata into the file system:
     const bookFile = await getBook(signedUrl, bookData);
-    await openBook(bookFile);
+    return bookFile;
   } catch (error) {
     console.log(error);
   }
@@ -20,19 +20,15 @@ export const downloadBook = async (bookData: object) => {
 export const getDownloadedBooks = async () => {
   try {
     const allBooks = await getAllBooks();
-    // console.log(allBooks);
+
     const booksDir = new Directory(Paths.document.uri, "books");
     const booksList = booksDir.list();
-    // console.log(booksList);
+
     // const downloadedSet = new Set(booksList.map((book) => book.fileName));
-    // console.log(fileNameSet);
 
     // const downloadedBooks = allBooks.filter((book) => {
-    //   console.log("Test 5", book);
     //   return true;
     // });
-
-    // console.log("Test 3", booksList.length);
   } catch (error) {
     console.log(error);
   }
@@ -133,7 +129,7 @@ export const saveDataToJsonFile = async (
 
 export const getBook = async (signedUrl: string, bookData: object) => {
   try {
-    const epubFile = await downloadEpubFile(signedUrl, bookData);
+    const epubFile: any = await downloadEpubFile(signedUrl, bookData);
     const jsonFile = await saveDataToJsonFile(epubFile.uri, bookData);
 
     const bookFile = {
@@ -144,12 +140,10 @@ export const getBook = async (signedUrl: string, bookData: object) => {
     return bookFile;
 
     // It is working upto here. Continue from here on.
-    const encoded = await epubFile.base64();
+    const encoded: any = await epubFile?.base64();
     const zip = await JSZip.loadAsync(encoded, { base64: true });
     const zipObjects = Object.keys(zip.files);
-    // console.log(zipObjects);
     const content: any = await zip.file(zipObjects[5])?.async("text");
-    // console.log(content);
     // await zip.file("OEBPS/package.opf")?.async("text");
 
     const { document } = parseHTML(content);
@@ -173,15 +167,17 @@ export const getBook = async (signedUrl: string, bookData: object) => {
   }
 };
 
-export const openBook = async (bookFile: any) => {
+export const openBook = async (fileName: any) => {
   try {
-    const { epub: epubFile } = bookFile;
+    const booksDir = new Directory(Paths.document.uri, "books");
+    const bookUri = booksDir.uri + fileName;
+    const epubFile = new File(bookUri);
     const encoded = await epubFile.base64();
     const zip = await JSZip.loadAsync(encoded, { base64: true });
-    const zipObjects = Object.keys(zip.files);
     const containerXmlFile: any = await zip
       .file("META-INF/container.xml")
       ?.async("text");
+
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: "@_",
@@ -190,16 +186,18 @@ export const openBook = async (bookFile: any) => {
     const parsed = parser.parse(containerXmlFile);
 
     const rootfiles = parsed.container.rootfiles.rootfile;
-
-    // rootfile can be an object or an array
     const rootfile = Array.isArray(rootfiles) ? rootfiles[0] : rootfiles;
 
     const opfPath = rootfile["@_full-path"];
-
     const opfXml: any = await zip.file(opfPath)?.async("string");
     const parsedPackage = parser.parse(opfXml);
+
+    // console.log("Parsed Package: ", parsedPackage);
     // console.log("Metadata", parsedPackage.package.metadata);
-    // console.log("Manifest", parsedPackage.package.manifest.item);
+    // console.log(
+    //   "Manifest",
+    //   parsedPackage?.package?.manifest?.item[9]?.["@_href"]
+    // );
     // console.log("Spine", parsedPackage.package.spine.itemref);
 
     type ManifestItem = {
@@ -210,8 +208,6 @@ export const openBook = async (bookFile: any) => {
 
     const manifest = parsedPackage.package?.manifest;
     const items = parsedPackage.package?.manifest?.item;
-
-    // console.log("LK TEST:", items);
 
     if (!items) {
       throw new Error("OPF manifest missing");
@@ -235,8 +231,6 @@ export const openBook = async (bookFile: any) => {
       });
     }
 
-    // console.log("LK TEST 1", manifestMap);
-
     const itemrefs = parsedPackage?.package?.spine?.itemref;
 
     if (!itemrefs) {
@@ -244,7 +238,6 @@ export const openBook = async (bookFile: any) => {
     }
 
     const spineItems = Array.isArray(itemrefs) ? itemrefs : [itemrefs];
-    // console.log("SPINE ITEMS:", spineItems);
     const spineHrefs: string[] = [];
 
     for (const itemref of spineItems) {
@@ -267,34 +260,50 @@ export const openBook = async (bookFile: any) => {
       spineHrefs.push(manifestItem.href);
     }
 
-    // console.log(spineHrefs);
     const xhtmlPath = resolveHref(opfPath, spineHrefs[0]);
-    // console.log("Test 4", xhtmlPath);
+
+    // console.log("OBJ 2: ", obj2.html.body.div.div.div.div);
     const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
-    // console.log(xhtmlString);
-    // const data = JSON.stringify(xhtmlString);
-    // console.log(data);
-    // console.log(spineHrefs[0]);
-    function prettyPrintXml(xml: string) {
-      return xml.replace(/></g, ">\n<").replace(/\n\s*\n/g, "\n");
-    }
+    // console.log("XHTML: ", xhtmlString);
 
-    // console.log(prettyPrintXml(xhtmlString));
-    // const parsed1 = parser.parseFromString;
-    // console.log(parsed1);
-    // }
+    const cleaned = xhtmlString
+      .replace(/<\?xml[\s\S]*?\?>\s*/i, "")
+      .replace(/<!DOCTYPE[\s\S]*?>\s*/i, "")
+      .trim();
 
-    const { document } = parseHTML(xhtmlString);
-    // console.log(xhtmlString);
-    // console.log(document.querySelector("title")?.textContent);
+    const parser2 = new XMLParser({
+      ignoreAttributes: false,
+      trimValues: true,
+    });
+
+    const obj = parser2.parse(cleaned);
+
+    const data = {
+      opfPath: opfPath,
+      html: obj.html,
+      epubFile: epubFile,
+      spineHrefs: spineHrefs,
+      xhtmlString: xhtmlString,
+    };
+
+    return data;
+    console.log("Table of Contents: ", obj.html.body.div.div["#text"]);
+    console.log("Title: ", obj.html.head.title);
+    console.log("Title: ", obj.html.body.div.nav.ol);
+
+    console.log(obj.html.body.div.nav.ol.li[1]);
+
+    console.log(obj.html.body.div.nav.ol.li[1].ol.li);
+    // const { document } = parseHTML(xhtmlString);
+    // const content = document.querySelector("head");
+    // console.log(content);
+
+    return;
     const parsed2 = parser.parse(xhtmlString);
-    // console.log(parsed2.html.body.div.nav);
     // const content: any = await zip.file(zipObjects[4])?.async("text");
     // const contentPackage: any = await zip
     //   .file("OEBPS/package.opf")
     //   ?.async("text");
-
-    // console.log("Test 111", contentPackage);
 
     // return;
     const title: string | undefined =

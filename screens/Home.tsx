@@ -13,6 +13,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useContext, useCallback } from "react";
 import { ReaderContext } from "../store/ReaderContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { Colors } from "../constants/Colors";
 
 const HomeScreen = () => {
   const navigation: any = useNavigation();

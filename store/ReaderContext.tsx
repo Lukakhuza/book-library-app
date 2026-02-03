@@ -187,6 +187,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     load();
   }, []);
 
+  // Priority 1
   useEffect(() => {
     if (books.length === 0) return;
     const load = async () => {
@@ -208,18 +209,17 @@ const ReaderContextProvider = ({ children }: Props) => {
           myBooks.push(book);
         }
       }
-
       setMyBooks(myBooks);
     };
     load();
   }, [books]);
 
-  useEffect(() => {
-    const load = async () => {
-      const downloadedBooks = await getDownloadedBooks();
-    };
-    load();
-  }, []);
+  // useEffect(() => {
+  //   const load = async () => {
+  //     const downloadedBooks = await getDownloadedBooks();
+  //   };
+  //   load();
+  // }, []);
 
   const textLayoutsRef = useRef<any>([]);
 
@@ -282,7 +282,9 @@ const ReaderContextProvider = ({ children }: Props) => {
     setBookImageUri(bookImageUri);
   };
 
-  const addToMyBooks = (book: object) => {};
+  const addToMyBooks = (book: any) => {
+    setMyBooks((prev) => [...prev, book]);
+  };
 
   const removeFromMyBooks = (fileName: string) => {
     setMyBooks((prev) => prev.filter((book) => book.fileName !== fileName));
