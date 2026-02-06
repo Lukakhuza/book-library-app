@@ -24,7 +24,7 @@ const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       // Refresh myBooks
-    }, [myBooks])
+    }, [myBooks]),
   );
 
   return (
@@ -40,7 +40,7 @@ const HomeScreen = () => {
       <View style={styles.headerContainer}>
         <Text style={styles.header}>My Books</Text>
       </View>
-      {myBooks.length === 0 && (
+      {myBooks?.length === 0 && (
         <View style={styles.content}>
           <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
             <Text style={styles.noBooksText}>You currently have no books.</Text>
@@ -54,7 +54,7 @@ const HomeScreen = () => {
           />
         </View>
       )}
-      {myBooks.length > 0 && (
+      {myBooks?.length > 0 && (
         <View
           style={{
             flex: 1,

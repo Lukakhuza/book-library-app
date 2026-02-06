@@ -34,7 +34,9 @@ const ReaderScreen = ({ route }: any) => {
         flex: 1,
       }}
     >
+      {/* <ReaderReadingPhase /> */}
       {/* <ReaderMeasurementPhase data={chapterData} /> */}
+
       {readerIsReady ? (
         <ReaderReadingPhase />
       ) : (

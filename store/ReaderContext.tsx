@@ -194,11 +194,11 @@ const ReaderContextProvider = ({ children }: Props) => {
 
   // Priority 1
   useEffect(() => {
-    if (books.length === 0) return;
+    if (books?.length === 0) return;
     const load = async () => {
       const booksMetadataDir = new Directory(
         Paths.document.uri,
-        "books-metadata"
+        "books-metadata",
       );
       const booksList = booksMetadataDir.list();
       const fileNameSet = new Set();
@@ -240,7 +240,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     readerDimensions.height -
     (properties.paddingTop + properties.paddingBottom);
   const MAX_LINES_PER_PAGE = Math.floor(
-    availableHeight / properties.lineHeight
+    availableHeight / properties.lineHeight,
   );
   const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
 

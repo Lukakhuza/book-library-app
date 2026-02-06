@@ -53,7 +53,7 @@ const ReaderMeasurementPhase = (data: any) => {
             el.name === "h2" ||
             el.name === "h3" ||
             el.name === "a"),
-        doc.children
+        doc.children,
       );
 
       const texts = allText.map((el: any) => ({
@@ -113,6 +113,7 @@ const ReaderMeasurementPhase = (data: any) => {
               // console.log(textLayoutsRef?.current.length);
               if (textLayoutsRef?.current?.length === 0) return;
               // console.log(textLayoutsRef);
+              console.log(readerDimensions);
               updateTextLayouts(textLayoutsRef);
             }, 200);
           }}
@@ -121,6 +122,7 @@ const ReaderMeasurementPhase = (data: any) => {
             if (height < 100 || width < 100) {
               return;
             }
+            console.log("Reader Dimensions", height, width);
             updateReaderDimensions(width, height);
             layoutReadyRef.current.container = true;
             checkLayoutReady();
@@ -132,6 +134,7 @@ const ReaderMeasurementPhase = (data: any) => {
           renderItem={(itemData) => {
             return (
               <View
+                key={itemData.index}
                 style={[
                   styles.flatlistItem,
                   {

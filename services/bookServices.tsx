@@ -52,7 +52,7 @@ export const deleteFromMyBooks = async (fileName: string) => {
     const jsonFileName = fileName.replace(/\.epub$/i, ".json");
     const booksMetadataDir = new Directory(
       Paths.document.uri,
-      "books-metadata"
+      "books-metadata",
     );
     const bookMetadataUri = booksMetadataDir.uri + jsonFileName;
 
@@ -100,7 +100,7 @@ export const downloadEpubFile = async (signedUrl: string, data: object) => {
 
 export const saveDataToJsonFile = async (
   epubFileUri: string,
-  bookData: any
+  bookData: any,
 ) => {
   try {
     const enhancedBookData = {
@@ -109,7 +109,7 @@ export const saveDataToJsonFile = async (
     };
     const booksMetadataDir = new Directory(
       Paths.document.uri,
-      "books-metadata"
+      "books-metadata",
     );
 
     // If books metadata directory doesn't exist, create it:
@@ -260,7 +260,7 @@ export const getSpineHrefs = (parsedPackage: any) => {
 export const getXhtmlPath = (
   opfPath: any,
   spineHrefs: any,
-  currentSpineIndex: any
+  currentSpineIndex: any,
 ) => {
   const xhtmlPath = resolveHref(opfPath, spineHrefs[currentSpineIndex]);
   return xhtmlPath;
@@ -350,15 +350,16 @@ export const openBook = async (fileName: any) => {
 export const paginateText = (
   textLayouts: any,
   readerDimensions: any,
-  properties: any
+  properties: any,
 ) => {
   try {
     // console.log(textLayouts?.current[0]);
     // console.log(textLayouts?.current[1][0]);
     // console.log(readerDimensions);
-    const verticalPadding = properties.verticalPadding ?? 2;
+    const verticalPadding = properties.verticalPadding ?? 0;
     const availableHeight = readerDimensions.height - verticalPadding * 2;
     // console.log(availableHeight);
+    console.log("Prop:", properties);
 
     let currentPageHeightUsed = 0;
     const pages: string[][] = [];
@@ -366,22 +367,31 @@ export const paginateText = (
 
     // console.log("Test 004", textLayouts.current[1]);r
 
-    for (let i = 0; i < textLayouts.current.length; i++) {
-      for (let j = 0; j < textLayouts.current[i].lines.length; j++) {
+    for (let i = 0; i < textLayouts?.current?.length - 50; i++) {
+      for (let j = 0; j < textLayouts?.current[i]?.lines?.length; j++) {
         if (
-          currentPageHeightUsed + textLayouts.current[i].lines[j].height <=
+          currentPageHeightUsed + textLayouts?.current[i]?.lines[j]?.height <=
           availableHeight
         ) {
           const data = {
             text: textLayouts.current[i].lines[j].text.trim(),
             tag: textLayouts.current[i].tag,
           };
+          console.log(textLayouts.current[i].lines[j]);
           currentPage.push(data);
           currentPageHeightUsed += textLayouts.current[i].lines[j].height;
         } else {
           pages.push(currentPage);
           currentPage = [];
           currentPageHeightUsed = 0;
+          console.log("Test 2", textLayouts.current[i].lines[j].text.trim());
+          console.log("Test 3", textLayouts.current[i].tag);
+          const data = {
+            text: textLayouts.current[i].lines[j].text.trim(),
+            tag: textLayouts.current[i].tag,
+          };
+          console.log("Test 4", data);
+          currentPage.push(data);
           currentPageHeightUsed += textLayouts.current[i].lines[j].height;
         }
       }
@@ -390,6 +400,7 @@ export const paginateText = (
         tag: "p",
       };
       currentPage.push(data);
+      currentPageHeightUsed += 25.14;
     }
     pages.push(currentPage);
 
