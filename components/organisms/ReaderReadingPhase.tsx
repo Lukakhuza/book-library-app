@@ -11,65 +11,210 @@ const ReaderReadingPhase = () => {
     readerDimensions,
   }: any = useContext(ReaderContext);
 
+  console.log("Pages: ", pages);
+
   return (
     <View style={styles.outerContainer}>
-      <Text style={styles.title}>{chapter.title}</Text>
-      <FlatList
-        data={pages}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, i) => i.toString()}
-        renderItem={(itemData) => {
-          return (
-            <View
-              style={[
-                styles.flatlistItem,
-                {
-                  paddingTop: properties.paddingTop,
-                  paddingBottom: properties.paddingBottom,
-                  paddingHorizontal: properties.horizontalPadding,
-                  width: readerDimensions.width,
-                  height: readerDimensions.height,
-                },
-              ]}
-            >
-              {itemData.item.map((line: string, index: number) => (
-                <Text
-                  key={index}
-                  style={[
-                    styles.flatlistItemText,
-                    {
-                      fontSize: properties.fontSize - 1,
-                      lineHeight: properties.lineHeight,
-                    },
-                  ]}
-                >
-                  {line}
-                </Text>
-              ))}
-            </View>
-          );
+      <View
+        style={{
+          flex: 1,
+          // borderWidth: 3,
+          // borderColor: "orange",
+          marginVertical: 30,
+          // marginHorizontal: 20,
         }}
-        scrollEnabled={true}
-        removeClippedSubviews={false}
-        initialNumToRender={chapter.body.length}
-        maxToRenderPerBatch={chapter.body.length}
-        windowSize={100}
-      />
+      >
+        <FlatList
+          data={pages}
+          style={styles.flatlist}
+          onContentSizeChange={(w, h) => {
+            // if (
+            //   w < screenDimensions.width * 0.9 ||
+            //   readerDimensions.width < 100 ||
+            //   readerDimensions.height < 100
+            // ) {
+            //   return;
+            // }
+            // contentSizeRef.current.width = w;
+            // contentSizeRef.current.height = h;
+            // if (debounceRef.current) {
+            //   clearTimeout(debounceRef.current);
+            // }
+            // debounceRef.current = setTimeout(() => {
+            //   if (textLayoutsRef?.current?.length === 0) return;
+            //   updateTextLayouts(textLayoutsRef);
+            // }, 200);
+          }}
+          onLayout={(e) => {
+            // const { height, width } = e.nativeEvent.layout;
+            // if (height < 100 || width < 100) {
+            //   return;
+            // }
+            // updateReaderDimensions(width, height);
+            // layoutReadyRef.current.container = true;
+            // checkLayoutReady();
+          }}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, i) => i.toString()}
+          renderItem={(itemData) => {
+            // console.log(itemData.item[0]);
+            return (
+              <View
+                style={[
+                  styles.flatlistItem,
+                  {
+                    // paddingTop: properties.paddingTop,
+                    // paddingBottom: properties.paddingBottom,
+                    // paddingHorizontal: properties.horizontalPadding,
+                    width: readerDimensions.width,
+                    height: readerDimensions.height,
+                  },
+                ]}
+              >
+                {itemData.item.map((textItem) => {
+                  console.log(textItem.text);
+                  return (
+                    <Text
+                      style={[
+                        styles.flatlistItemText,
+                        {
+                          fontSize: properties.fontSize,
+                          lineHeight: properties.lineHeight,
+                        },
+                        styles[textItem.tag],
+                      ]}
+                    >
+                      {/* {text} */}
+                      {textItem.text}
+                    </Text>
+                  );
+                })}
+                <Text
+
+                // onTextLayout={
+                // (e) => {
+                //   if (
+                //     readerDimensions.width < 200 ||
+                //     readerDimensions.height < 200
+                //   ) {
+                //     return;
+                //   }
+                //   textLayoutsRef.current[itemData.index] =
+                //     e.nativeEvent.lines;
+                //   if (textLayoutsRef?.current?.length !== textsArray?.length)
+                //     return;
+                //   layoutReadyRef.current.textLayout = true;
+                //   checkLayoutReady();
+                // }}
+                >
+                  {/* {itemData.item.text} */}
+                </Text>
+              </View>
+            );
+          }}
+          scrollEnabled={true}
+          removeClippedSubviews={false}
+          // initialNumToRender={pages?.length ?? 0}
+          // maxToRenderPerBatch={pages?.length ?? 0}
+          initialNumToRender={35}
+          maxToRenderPerBatch={35}
+          windowSize={100}
+        />
+      </View>
     </View>
   );
+  // <View style={styles.outerContainer}>
+  //   {/* <Text style={styles.title}>{chapter.title}</Text> */}
+  //   <FlatList
+  //     data={pages}
+  //     horizontal
+  //     pagingEnabled
+  //     showsHorizontalScrollIndicator={false}
+  //     keyExtractor={(_, i) => i.toString()}
+  //     renderItem={(itemData) => {
+  //       return (
+  //         <View
+  //           style={[
+  //             styles.flatlistItem,
+  //             {
+  //               paddingTop: properties.paddingTop,
+  //               // paddingBottom: properties.paddingBottom,
+  //               paddingHorizontal: properties.horizontalPadding,
+  //               width: readerDimensions.width,
+  //               height: readerDimensions.height,
+  //             },
+  //           ]}
+  //         >
+  //           {itemData.item.map((line: string, index: number) => (
+  //             <Text
+  //               key={index}
+  //               style={[
+  //                 styles.flatlistItemText,
+  //                 {
+  //                   fontSize: properties.fontSize - 1,
+  //                   lineHeight: properties.lineHeight,
+  //                 },
+  //               ]}
+  //             >
+  //               {line}
+  //             </Text>
+  //           ))}
+  //         </View>
+  //       );
+  //     }}
+  //     scrollEnabled={true}
+  //     removeClippedSubviews={false}
+  //     initialNumToRender={pages.length}
+  //     maxToRenderPerBatch={pages.length}
+  //     windowSize={100}
+  //   />
+  // </View>
+  // );
 };
 
 export default ReaderReadingPhase;
 
 const styles = StyleSheet.create({
-  outerContainer: { backgroundColor: "#40e0d0" },
+  outerContainer: {
+    flex: 1,
+    backgroundColor: "#40e0d0",
+  },
   title: {
     textAlign: "center",
     fontSize: 20,
     fontWeight: 600,
   },
-  flatlistItem: { overflow: "hidden" },
-  flatlistItemText: { textAlign: "auto" },
+  flatlist: {
+    // opacity: 0,
+  },
+  flatlistItem: {
+    overflow: "hidden",
+  },
+  flatlistItemText: {
+    color: "black",
+    includeFontPadding: true,
+    textAlign: "auto",
+    paddingHorizontal: 10,
+  },
+  loadingOverlayContainer: {
+    backgroundColor: "#0dcadb",
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  h1: { color: "blue", fontSize: 40 },
+  h2: {
+    color: "red",
+    fontSize: 25,
+    // backgroundColor: "blue",
+    lineHeight: 30, // make line height dynamic, so that it is about 1.2 times or 1.3 times the font size.
+    textAlign: "center",
+  },
+  h3: { color: "orange" },
+  a: { color: "brown" },
+  p: { color: "purple" },
 });

@@ -3,7 +3,10 @@ import { fetchBookSignedUrl, getAllBooks } from "../api/book.api";
 import { resolveHref } from "../util/helperFunctions";
 import { parseHTML } from "linkedom";
 import { XMLParser } from "fast-xml-parser";
+import { parser1, parser2 } from "../util/helperFunctions";
 import JSZip, { forEach } from "jszip";
+import { parseDocument } from "htmlparser2";
+import { DomUtils } from "htmlparser2";
 
 export const downloadBook = async (bookData: object) => {
   try {
@@ -167,145 +170,163 @@ export const getBook = async (signedUrl: string, bookData: object) => {
   }
 };
 
+export const getEpubFile = (directoryName: string, fileName: string) => {
+  const booksDir = new Directory(Paths.document.uri, "books");
+  const bookUri = booksDir.uri + fileName;
+  const epubFile = new File(bookUri);
+  return epubFile;
+};
+
+export const getZip = async (epubFile: any) => {
+  const encoded = await epubFile.base64();
+  const zip = await JSZip.loadAsync(encoded, { base64: true });
+  return zip;
+};
+
+export const getOpfPath = async (zip: any) => {
+  const containerXmlFile: any = await zip
+    .file("META-INF/container.xml")
+    ?.async("text");
+
+  const parsed = parser1.parse(containerXmlFile);
+
+  const rootfiles = parsed.container.rootfiles.rootfile;
+  const rootfile = Array.isArray(rootfiles) ? rootfiles[0] : rootfiles;
+
+  const opfPath = rootfile["@_full-path"];
+  return opfPath;
+};
+
+export const getSpineHrefs = (parsedPackage: any) => {
+  type ManifestItem = {
+    href: string;
+    mediaType: string;
+    properties?: string;
+  };
+
+  const items = parsedPackage.package?.manifest?.item;
+
+  if (!items) {
+    throw new Error("OPF manifest missing");
+  }
+
+  const manifestItems = Array.isArray(items) ? items : [items];
+  const manifestMap = new Map<string, ManifestItem>();
+
+  for (const item of manifestItems) {
+    const id = item["@_id"];
+    const href = item["@_href"];
+    const mediaType = item["@_media-type"];
+    const properties = item["@_properties"];
+
+    if (!id || !href || !mediaType) continue;
+
+    manifestMap.set(id, {
+      href,
+      mediaType,
+      properties,
+    });
+  }
+
+  const itemrefs = parsedPackage?.package?.spine?.itemref;
+
+  if (!itemrefs) {
+    throw new Error("OPF spine missing");
+  }
+
+  const spineItems = Array.isArray(itemrefs) ? itemrefs : [itemrefs];
+  const spineHrefs: string[] = [];
+  for (const itemref of spineItems) {
+    const idref = itemref["@_idref"];
+    const linear = itemref["@_linear"];
+
+    if (!idref) continue;
+    if (linear === "no") continue;
+
+    const manifestItem = manifestMap.get(idref);
+    if (!manifestItem) continue;
+
+    // Skip nav / TOC
+    if (manifestItem.properties?.includes("nav")) continue;
+
+    // Only render XHTML
+    if (manifestItem?.mediaType !== "application/xhtml+xml") continue;
+
+    spineHrefs.push(manifestItem.href);
+  }
+  return spineHrefs;
+};
+
+export const getXhtmlPath = (
+  opfPath: any,
+  spineHrefs: any,
+  currentSpineIndex: any
+) => {
+  const xhtmlPath = resolveHref(opfPath, spineHrefs[currentSpineIndex]);
+  return xhtmlPath;
+};
+
 export const openBook = async (fileName: any) => {
   try {
-    const booksDir = new Directory(Paths.document.uri, "books");
-    const bookUri = booksDir.uri + fileName;
-    const epubFile = new File(bookUri);
-    const encoded = await epubFile.base64();
-    const zip = await JSZip.loadAsync(encoded, { base64: true });
-    const containerXmlFile: any = await zip
-      .file("META-INF/container.xml")
-      ?.async("text");
-
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: "@_",
-    });
-
-    const parsed = parser.parse(containerXmlFile);
-
-    const rootfiles = parsed.container.rootfiles.rootfile;
-    const rootfile = Array.isArray(rootfiles) ? rootfiles[0] : rootfiles;
-
-    const opfPath = rootfile["@_full-path"];
+    const epubFile = getEpubFile("books", fileName);
+    const zip = await getZip(epubFile);
+    const opfPath = await getOpfPath(zip);
     const opfXml: any = await zip.file(opfPath)?.async("string");
-    const parsedPackage = parser.parse(opfXml);
+    const parsedPackage = parser1.parse(opfXml);
+    const spineHrefs = getSpineHrefs(parsedPackage);
 
-    // console.log("Parsed Package: ", parsedPackage);
+    const data = {
+      opfPath: opfPath,
+      spineHrefs: spineHrefs,
+      zip: zip,
+    };
+    return data;
+    const currentSpineIndex = 2;
+    const xhtmlPath = resolveHref(opfPath, spineHrefs[currentSpineIndex]);
+    const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
+    // const cleaned = xhtmlString
+    //   .replace(/<\?xml[\s\S]*?\?>\s*/i, "")
+    //   .replace(/<!DOCTYPE[\s\S]*?>\s*/i, "")
+    //   .trim();
+
+    // const obj = parser2.parse(cleaned);
+
+    // from here
+
+    return;
+    const chapterToRender =
+      parsedPackage.package.spine.itemref[currentSpineIndex];
+    console.log(chapterToRender);
+    // const mItems = parsedPackage.package.manifest.item;
+    // const found = mItems.find((item: any) => {
+    //   return item["@_id"] === chapterToRender["@_idref"];
+    // });
+    // console.log(found);
+    // return;
+
     // console.log("Metadata", parsedPackage.package.metadata);
     // console.log(
     //   "Manifest",
     //   parsedPackage?.package?.manifest?.item[9]?.["@_href"]
     // );
-    // console.log("Spine", parsedPackage.package.spine.itemref);
 
-    type ManifestItem = {
-      href: string;
-      mediaType: string;
-      properties?: string;
-    };
-
-    const manifest = parsedPackage.package?.manifest;
-    const items = parsedPackage.package?.manifest?.item;
-
-    if (!items) {
-      throw new Error("OPF manifest missing");
-    }
-
-    const manifestItems = Array.isArray(items) ? items : [items];
-    const manifestMap = new Map<string, ManifestItem>();
-
-    for (const item of manifestItems) {
-      const id = item["@_id"];
-      const href = item["@_href"];
-      const mediaType = item["@_media-type"];
-      const properties = item["@_properties"];
-
-      if (!id || !href || !mediaType) continue;
-
-      manifestMap.set(id, {
-        href,
-        mediaType,
-        properties,
-      });
-    }
-
-    const itemrefs = parsedPackage?.package?.spine?.itemref;
-
-    if (!itemrefs) {
-      throw new Error("OPF spine missing");
-    }
-
-    const spineItems = Array.isArray(itemrefs) ? itemrefs : [itemrefs];
-    const spineHrefs: string[] = [];
-
-    for (const itemref of spineItems) {
-      const idref = itemref["@_idref"];
-      const linear = itemref["@_linear"];
-
-      if (!idref) continue;
-      if (linear === "no") continue;
-
-      const manifestItem = manifestMap.get(idref);
-      // console.log(manifestItem);
-      if (!manifestItem) continue;
-
-      // Skip nav / TOC
-      // if (manifestItem.properties?.includes("nav")) continue;
-
-      // Only render XHTML
-      if (manifestItem.mediaType !== "application/xhtml+xml") continue;
-
-      spineHrefs.push(manifestItem.href);
-    }
-
-    const xhtmlPath = resolveHref(opfPath, spineHrefs[0]);
-
+    // console.log(xhtmlPath);
     // console.log("OBJ 2: ", obj2.html.body.div.div.div.div);
-    const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
-    // console.log("XHTML: ", xhtmlString);
 
-    const cleaned = xhtmlString
-      .replace(/<\?xml[\s\S]*?\?>\s*/i, "")
-      .replace(/<!DOCTYPE[\s\S]*?>\s*/i, "")
-      .trim();
+    // const data = {
+    //   opfPath: opfPath,
+    //   html: obj.html,
+    //   epubFile: epubFile,
+    //   spineHrefs: spineHrefs,
+    //   xhtmlString: xhtmlString,
+    // };
 
-    const parser2 = new XMLParser({
-      ignoreAttributes: false,
-      trimValues: true,
-    });
+    // console.log("Table of Contents: ", obj.html.body.div.div["#text"]);
+    // console.log("Title: ", obj.html.head.title);
+    // console.log("Title: ", obj.html.body.div.nav.ol);
 
-    const obj = parser2.parse(cleaned);
+    const { document } = parseHTML(xhtmlString);
 
-    const data = {
-      opfPath: opfPath,
-      html: obj.html,
-      epubFile: epubFile,
-      spineHrefs: spineHrefs,
-      xhtmlString: xhtmlString,
-    };
-
-    return data;
-    console.log("Table of Contents: ", obj.html.body.div.div["#text"]);
-    console.log("Title: ", obj.html.head.title);
-    console.log("Title: ", obj.html.body.div.nav.ol);
-
-    console.log(obj.html.body.div.nav.ol.li[1]);
-
-    console.log(obj.html.body.div.nav.ol.li[1].ol.li);
-    // const { document } = parseHTML(xhtmlString);
-    // const content = document.querySelector("head");
-    // console.log(content);
-
-    return;
-    const parsed2 = parser.parse(xhtmlString);
-    // const content: any = await zip.file(zipObjects[4])?.async("text");
-    // const contentPackage: any = await zip
-    //   .file("OEBPS/package.opf")
-    //   ?.async("text");
-
-    // return;
     const title: string | undefined =
       document?.querySelector("h1.title")?.textContent;
 
@@ -332,15 +353,51 @@ export const paginateText = (
   properties: any
 ) => {
   try {
-    const availableHeight =
-      readerDimensions.height - properties.verticalPadding * 2;
-    const MAX_LINES_PER_PAGE = Math.floor(
-      availableHeight / properties.lineHeight
-    );
+    // console.log(textLayouts?.current[0]);
+    // console.log(textLayouts?.current[1][0]);
+    // console.log(readerDimensions);
+    const verticalPadding = properties.verticalPadding ?? 2;
+    const availableHeight = readerDimensions.height - verticalPadding * 2;
+    // console.log(availableHeight);
 
+    let currentPageHeightUsed = 0;
     const pages: string[][] = [];
-    let lineIndex = 0;
     let currentPage: any = [];
+
+    // console.log("Test 004", textLayouts.current[1]);r
+
+    for (let i = 0; i < textLayouts.current.length; i++) {
+      for (let j = 0; j < textLayouts.current[i].lines.length; j++) {
+        if (
+          currentPageHeightUsed + textLayouts.current[i].lines[j].height <=
+          availableHeight
+        ) {
+          const data = {
+            text: textLayouts.current[i].lines[j].text.trim(),
+            tag: textLayouts.current[i].tag,
+          };
+          currentPage.push(data);
+          currentPageHeightUsed += textLayouts.current[i].lines[j].height;
+        } else {
+          pages.push(currentPage);
+          currentPage = [];
+          currentPageHeightUsed = 0;
+          currentPageHeightUsed += textLayouts.current[i].lines[j].height;
+        }
+      }
+      let data = {
+        text: "",
+        tag: "p",
+      };
+      currentPage.push(data);
+    }
+    pages.push(currentPage);
+
+    return pages;
+
+    // const pages: string[][] = [];
+    // let lineIndex = 0;
+    // let currentPage: any = [];
 
     // for (let i = 0; i < textLayouts.current.length; i++) {
     //   for (let j = 0; j < textLayouts.current[i].length; j++) {
@@ -362,28 +419,28 @@ export const paginateText = (
     // }
     // pages.push(currentPage);
 
-    for (let i = 0; i < textLayouts.current.length; i++) {
-      for (let j = 0; j < textLayouts.current[i].length; j++) {
-        currentPage.push(textLayouts.current[i][j].text.trim());
-        lineIndex++;
-        if (lineIndex % 34 === 0) {
-          pages.push(currentPage);
-          currentPage = [];
-        }
-      }
-      if (currentPage.length === 0) {
-        continue;
-      }
-      currentPage.push("");
-      lineIndex++;
-      if (lineIndex % 34 === 0) {
-        pages.push(currentPage);
-        currentPage = [];
-      }
-    }
-    pages.push(currentPage);
+    // for (let i = 0; i < textLayouts.current.length; i++) {
+    //   for (let j = 0; j < textLayouts.current[i].length; j++) {
+    //     currentPage.push(textLayouts.current[i][j].text.trim());
+    //     lineIndex++;
+    //     if (lineIndex % 34 === 0) {
+    //       pages.push(currentPage);
+    //       currentPage = [];
+    //     }
+    //   }
+    //   if (currentPage.length === 0) {
+    //     continue;
+    //   }
+    //   currentPage.push("");
+    //   lineIndex++;
+    //   if (lineIndex % 34 === 0) {
+    //     pages.push(currentPage);
+    //     currentPage = [];
+    //   }
+    // }
+    // pages.push(currentPage);
 
-    return pages;
+    // return pages;
   } catch (error) {
     console.log(error);
   }

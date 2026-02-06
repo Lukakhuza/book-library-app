@@ -28,28 +28,18 @@ const ReaderScreen = ({ route }: any) => {
 
   const { chapterData } = route.params;
 
-  const data = {
-    bookTitle: chapterData?.html?.head?.title,
-    tableOfContentsHeader: chapterData?.html?.body?.div?.div?.["#text"],
-    content: chapterData?.html?.body?.div?.nav?.ol,
-    opfPath: chapterData.opfPath,
-    epubFile: chapterData.epubFile,
-    spineHrefs: chapterData.spineHrefs,
-    xhtmlString: chapterData.xhtmlString,
-  };
-
   return (
     <View
       style={{
         flex: 1,
       }}
     >
+      {/* <ReaderMeasurementPhase data={chapterData} /> */}
       {readerIsReady ? (
         <ReaderReadingPhase />
       ) : (
-        <ReaderMeasurementPhase data={data} />
+        <ReaderMeasurementPhase data={chapterData} />
       )}
-      {/* <ReaderMeasurementPhase /> */}
     </View>
   );
 };

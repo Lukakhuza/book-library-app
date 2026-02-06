@@ -136,6 +136,7 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   updatePages: (pages: any) => {},
   checkLayoutReady: () => {},
   updateBookImageUri: () => {},
+  updateSpine: () => {},
 });
 
 type Props = {
@@ -169,7 +170,11 @@ const ReaderContextProvider = ({ children }: Props) => {
   const [bookImageUri, setBookImageUri] = useState();
   const [books, setBooks] = useState<Book[]>([]);
   const [myBooks, setMyBooks] = useState<Book[]>([]);
-
+  const [spine, setSpine] = useState(null);
+  const [location, setLocation] = useState({
+    spineIndex: 0,
+    pageIndex: 0,
+  });
   // Store screen dimensions in screenDimensions state.
   useLayoutEffect(() => {
     const { width, height } = Dimensions.get("screen");
@@ -278,6 +283,10 @@ const ReaderContextProvider = ({ children }: Props) => {
     setPages(pages);
   };
 
+  const updateSpine = (spine: any) => {
+    setSpine(spine);
+  };
+
   const updateBookImageUri = (bookImageUri: string | any) => {
     setBookImageUri(bookImageUri);
   };
@@ -309,6 +318,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     updateReaderDimensions,
     updateTextLayouts,
     updatePages,
+    updateSpine,
     checkLayoutReady,
     updateBookImageUri,
     addToMyBooks,

@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import {
   deleteFromMyBooks,
   downloadBook,
+  getXhtmlPath,
   openBook,
 } from "../services/bookServices";
 import { wait } from "../util/helperFunctions";
@@ -17,8 +18,14 @@ const BookDetailsScreen = ({ route }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
-  const { bookImageUri, addToMyBooks, removeFromMyBooks, myBooks }: any =
-    useContext(ReaderContext);
+  const {
+    bookImageUri,
+    addToMyBooks,
+    removeFromMyBooks,
+    myBooks,
+    updateSpine,
+    spine: sp,
+  }: any = useContext(ReaderContext);
 
   const { bookData } = route.params;
 
@@ -61,12 +68,13 @@ const BookDetailsScreen = ({ route }: any) => {
 
     try {
       setIsLoading(true);
-      // await wait(3000);
-      // Generate epub file uri
-
-      const data = await openBook(bookData.fileName);
-      // console.log(data);
-      navigation.navigate("Reader", { chapterData: data });
+      const { opfPath, spineHrefs, zip }: any = await openBook(
+        bookData.fileName
+      );
+      const currentSpineIndex = 2;
+      const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
+      const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
+      navigation.navigate("Reader", { chapterData: xhtmlString });
     } finally {
       setIsLoading(false);
     }
