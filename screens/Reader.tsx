@@ -35,13 +35,13 @@ const ReaderScreen = ({ route }: any) => {
       }}
     >
       {/* <ReaderReadingPhase /> */}
-      {/* <ReaderMeasurementPhase data={chapterData} /> */}
+      <ReaderMeasurementPhase data={chapterData} />
 
-      {readerIsReady ? (
+      {/* {readerIsReady ? (
         <ReaderReadingPhase />
       ) : (
         <ReaderMeasurementPhase data={chapterData} />
-      )}
+      )} */}
     </View>
   );
 };

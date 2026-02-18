@@ -353,56 +353,72 @@ export const paginateText = (
   properties: any,
 ) => {
   try {
-    // console.log(textLayouts?.current[0]);
-    // console.log(textLayouts?.current[1][0]);
-    // console.log(readerDimensions);
-    const verticalPadding = properties.verticalPadding ?? 0;
-    const availableHeight = readerDimensions.height - verticalPadding * 2;
-    // console.log(availableHeight);
-    console.log("Prop:", properties);
+    // console.log(textLayouts.current[2].lines[0]);
+    const lineProperties = {
+      ascender: textLayouts.current[1].lines[0].ascender,
+      capHeight: textLayouts.current[1].lines[0].capHeight,
+      descender: textLayouts.current[1].lines[0].descender,
+      height: textLayouts.current[1].lines[0].height,
+      text: textLayouts.current[1].lines[0].text,
+      width: textLayouts.current[1].lines[0].width,
+      x: textLayouts.current[1].lines[0].x,
+      xHeight: textLayouts.current[1].lines[0].xHeight,
+      y: textLayouts.current[1].lines[0].y,
+    };
+
+    // console.log(properties);
+    // const verticalPadding = properties.verticalPadding ?? 0;
+    const availableHeight =
+      readerDimensions.height - properties.verticalPadding;
 
     let currentPageHeightUsed = 0;
     const pages: string[][] = [];
     let currentPage: any = [];
+    let currentText = "";
+    let currentTag = "";
+    let data = {
+      text: "",
+      tag: "",
+    };
 
-    // console.log("Test 004", textLayouts.current[1]);r
-
-    for (let i = 0; i < textLayouts?.current?.length - 50; i++) {
+    for (let i = 0; i < textLayouts?.current?.length; i++) {
+      currentTag = textLayouts.current[i].tag;
       for (let j = 0; j < textLayouts?.current[i]?.lines?.length; j++) {
         if (
           currentPageHeightUsed + textLayouts?.current[i]?.lines[j]?.height <=
           availableHeight
         ) {
-          const data = {
-            text: textLayouts.current[i].lines[j].text.trim(),
-            tag: textLayouts.current[i].tag,
-          };
-          console.log(textLayouts.current[i].lines[j]);
-          currentPage.push(data);
+          currentText += " " + textLayouts.current[i].lines[j].text.trim();
+          // const data = {
+          //   text: currentText.trim(),
+          //   tag: currentTag,
+          // };
+
+          // currentPage.push(data);
           currentPageHeightUsed += textLayouts.current[i].lines[j].height;
         } else {
+          data = {
+            text: currentText.trim(),
+            tag: currentTag,
+          };
+          currentPage.push(data);
           pages.push(currentPage);
+          currentText = "";
           currentPage = [];
           currentPageHeightUsed = 0;
-          console.log("Test 2", textLayouts.current[i].lines[j].text.trim());
-          console.log("Test 3", textLayouts.current[i].tag);
-          const data = {
-            text: textLayouts.current[i].lines[j].text.trim(),
-            tag: textLayouts.current[i].tag,
-          };
-          console.log("Test 4", data);
-          currentPage.push(data);
+          currentText += " " + textLayouts.current[i].lines[j].text.trim();
           currentPageHeightUsed += textLayouts.current[i].lines[j].height;
         }
       }
-      let data = {
-        text: "",
-        tag: "p",
+      data = {
+        text: currentText.trim(),
+        tag: currentTag,
       };
       currentPage.push(data);
-      currentPageHeightUsed += 25.14;
+      currentText = "";
     }
     pages.push(currentPage);
+    // console.log(pages[5]?.[1]?.text);
 
     return pages;
 
@@ -455,4 +471,8 @@ export const paginateText = (
   } catch (error) {
     console.log(error);
   }
+};
+
+export const paginateText2 = async (texts) => {
+  // console.log(texts);
 };

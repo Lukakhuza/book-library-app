@@ -1,3 +1,6 @@
+import { DomUtils, parseDocument } from "htmlparser2";
+import { parseHTML } from "linkedom";
+
 export const fetchBookSignedUrl = async (bookData: object) => {
   const response = await fetch("http://10.0.2.2:3000/book/fetch-books", {
     method: "POST",
@@ -17,6 +20,8 @@ export const getAllBooks = async () => {
       "Content-Type": "application/json",
     },
   });
+
   const resData = await response.json();
+
   return resData;
 };

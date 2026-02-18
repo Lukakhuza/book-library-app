@@ -1,5 +1,5 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ReaderContext } from "../../store/ReaderContext";
 import LoadingOverlay from "../../util/LoadingOverlay";
 import { parseHTML } from "linkedom";
@@ -10,12 +10,13 @@ import { resolveHref } from "../../util/helperFunctions";
 import { ScrollView } from "react-native";
 import { parseDocument } from "htmlparser2";
 import { DomUtils } from "htmlparser2";
-import { paginateText } from "../../services/bookServices";
+import { paginateText, paginateText2 } from "../../services/bookServices";
 
 const ReaderMeasurementPhase = (data: any) => {
   const {
     chapter,
     pages,
+    lineProps,
     properties,
     readerDimensions,
     screenDimensions,
@@ -33,12 +34,108 @@ const ReaderMeasurementPhase = (data: any) => {
   }: any = useContext(ReaderContext);
 
   const [textsArray, setTextsArray] = useState([]);
-  const textColors = {
-    p: "red",
-    h1: "blue",
-    h2: "green",
-    quote: "purple",
+  const [currentPage, setCurrentPage] = useState<any>([]);
+  const [currReaderHeight, setCurrReaderHeight] = useState(0);
+  const [textLayout, setTextLayout] = useState([]);
+  const lastParagraphArray = useRef([]);
+  const iRef = useRef(0);
+  const lastParagraphData = useRef({ meta: "", tag: "", text: "" });
+  const textSeparationTriggered: any = useRef(false);
+  const currentIndex = useRef(0);
+
+  useEffect(() => {
+    if (textsArray?.length === 0) return;
+    if (currReaderHeight === 0) return;
+
+    if (currReaderHeight <= 800) {
+      if (textSeparationTriggered?.current === false) {
+        const idx = iRef.current;
+        setCurrentPage((prev: any) => [...prev, textsArray[idx]]);
+        iRef.current = idx + 1;
+      } else {
+        currentIndex.current += 1;
+        const idx1 = currentIndex.current;
+        textSeparationTriggered.current = true;
+        // Transform last paragraph array:
+        const transformedLastParagraphArray1 = transformParagraph(
+          lastParagraphArray.current,
+          idx1,
+        );
+        lastParagraphArray.current = transformedLastParagraphArray1;
+        // setLastParagraphArray(transformedLastParagraphArray1);
+        const text = transformedLastParagraphArray1
+          .slice(0, idx1 + 1)
+          .join(" ");
+        const item = {
+          meta: lastParagraphData.current.meta,
+          tag: lastParagraphData.current.tag,
+          text: text,
+        };
+
+        setCurrentPage((prev: any) => {
+          return [...prev?.slice(0, prev?.length - 1), item];
+        });
+      }
+    } else {
+      // If there is an overflow of last paragraph, create lastParagraph array
+      // based on current last paragraph and splitIndex.
+      if (lastParagraphArray.current.length === 0) {
+        const lastParagraph: any = currentPage[currentPage?.length - 1];
+        lastParagraphData.current = lastParagraph;
+        const arr = [lastParagraph.text];
+        const transformedLastParagraphArray = transformParagraph(arr, 0);
+        // setLastParagraphArray(transformedLastParagraphArray);
+        lastParagraphArray.current = transformedLastParagraphArray;
+        const item = {
+          meta: lastParagraph?.meta,
+          tag: lastParagraph?.tag,
+          text: transformedLastParagraphArray[0],
+        };
+        console.log("Item: ", item);
+        setCurrentPage((prev: any) => {
+          return [...prev?.slice(0, prev?.length - 1), item];
+        });
+      } else {
+        const idx2 = currentIndex.current;
+        const transformedPar = transformParagraph(
+          lastParagraphArray.current,
+          currentIndex.current,
+        );
+        lastParagraphArray.current = transformedPar;
+        const text1 = transformedPar.slice(0, idx2 + 1).join(" ");
+        const item2 = {
+          meta: lastParagraphData.current.meta,
+          tag: lastParagraphData.current.tag,
+          text: text1,
+        };
+        setCurrentPage((prev: any) => {
+          return [...prev?.slice(0, prev?.length - 1), item2];
+        });
+      }
+      textSeparationTriggered.current = true;
+    }
+  }, [textsArray, currReaderHeight, textLayout]);
+
+  const transformParagraph = (paragraphArray: any, currentIndex: number) => {
+    const text = paragraphArray[currentIndex];
+    const words = text?.trim().split(/\s+/);
+    const middle = Math.floor(words?.length / 2);
+    const firstHalfText = words?.slice(0, middle).join(" ");
+    const secondHalfText = words?.slice(middle).join(" ");
+
+    return [
+      ...paragraphArray.slice(0, currentIndex),
+      firstHalfText,
+      secondHalfText,
+      ...paragraphArray.slice(currentIndex + 1),
+    ];
   };
+  // const textColors = {
+  //   p: "red",
+  //   h1: "blue",
+  //   h2: "green",
+  //   quote: "purple",
+  // };
   // const listItems = asArray(data?.data?.content?.li);
 
   useEffect(() => {
@@ -66,34 +163,70 @@ const ReaderMeasurementPhase = (data: any) => {
 
         meta: el.attribs ?? {},
       }));
+
       const textsArray: any = Array.from(texts);
+      // paginateText2(textsArray);
       setTextsArray(textsArray);
     };
     load();
   }, []);
 
-  useEffect(() => {
-    if (!textLayoutsRef) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!textLayoutsRef) {
+  //     return;
+  //   }
 
-    // console.log(textLayoutsRef?.current[0]);
-    // console.log(textLayoutsRef?.current[1][0]);
-    // console.log("Screen: ", screenDimensions);
-    // paginateText(readerDimensions, textLayoutsRef, properties);
-  }, [textLayoutsRef]);
+  //   // paginateText(readerDimensions, textLayoutsRef, properties);
+  // }, [textLayoutsRef]);
+
+  // console.log("TA", textsArray);
+  // console.log("PRO: ", properties);
 
   return (
     <View style={styles.outerContainer}>
       <View
         style={{
           flex: 1,
-          // borderWidth: 3,
-          // borderColor: "orange",
           marginVertical: 30,
         }}
       >
-        <FlatList
+        {/* <FlatList
+          data={[lineProps, lineProps]}
+          style={styles.flatlist}
+          renderItem={(itemData) => {
+            return (
+              <View key={itemData?.index} style={styles.flatlistItem}>
+                <Text
+                  // style={[
+                  //   { color: "purple", fontSize: 20, textAlign: "justify" },
+                  //   styles.flatlistItemText,
+                  // ]}
+                  style={{
+                    textAlign: "justify",
+                    fontSize: 20,
+                    paddingHorizontal: 5,
+                    borderColor: "red",
+                    borderWidth: 1,
+                    width: screenDimensions.width,
+                  }}
+                  allowFontScaling={false}
+                  maxFontSizeMultiplier={1}
+                >
+                  {itemData?.item?.text}
+                </Text>
+              </View>
+            );
+          }}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={true}
+          removeClippedSubviews={false}
+          initialNumToRender={textsArray?.length ?? 0}
+          maxToRenderPerBatch={textsArray?.length ?? 0}
+          windowSize={100}
+        /> */}
+        {/* <FlatList
           data={textsArray}
           style={styles.flatlist}
           onContentSizeChange={(w, h) => {
@@ -110,10 +243,7 @@ const ReaderMeasurementPhase = (data: any) => {
               clearTimeout(debounceRef.current);
             }
             debounceRef.current = setTimeout(() => {
-              // console.log(textLayoutsRef?.current.length);
               if (textLayoutsRef?.current?.length === 0) return;
-              // console.log(textLayoutsRef);
-              console.log(readerDimensions);
               updateTextLayouts(textLayoutsRef);
             }, 200);
           }}
@@ -122,7 +252,6 @@ const ReaderMeasurementPhase = (data: any) => {
             if (height < 100 || width < 100) {
               return;
             }
-            console.log("Reader Dimensions", height, width);
             updateReaderDimensions(width, height);
             layoutReadyRef.current.container = true;
             checkLayoutReady();
@@ -132,29 +261,22 @@ const ReaderMeasurementPhase = (data: any) => {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(_, i) => i.toString()}
           renderItem={(itemData) => {
+            // console.log(itemData.item.tag);
             return (
-              <View
-                key={itemData.index}
-                style={[
-                  styles.flatlistItem,
-                  {
-                    // paddingTop: properties.paddingTop,
-                    // paddingBottom: properties.paddingBottom,
-                    // paddingHorizontal: properties.horizontalPadding,
-                    width: readerDimensions.width,
-                    height: readerDimensions.height,
-                  },
-                ]}
-              >
+              <View key={itemData?.index} style={styles.flatlistItem}>
                 <Text
                   style={[
                     styles.flatlistItemText,
                     {
-                      fontSize: properties.fontSize,
-                      lineHeight: properties.lineHeight,
+                      textAlign: "justify",
+                      fontSize: 20,
+                      paddingHorizontal: 15,
+                      width: screenDimensions.width,
                     },
-                    styles[itemData.item.tag],
+                    properties[itemData.item.tag],
                   ]}
+                  allowFontScaling={false}
+                  maxFontSizeMultiplier={1}
                   onTextLayout={(e) => {
                     if (
                       readerDimensions.width < 200 ||
@@ -172,7 +294,6 @@ const ReaderMeasurementPhase = (data: any) => {
 
                     if (textLayoutsRef?.current?.length !== textsArray?.length)
                       return;
-                    // console.log(textLayoutsRef.current[0], itemData.item.tag);
                     layoutReadyRef.current.textLayout = true;
                     checkLayoutReady();
                   }}
@@ -187,10 +308,39 @@ const ReaderMeasurementPhase = (data: any) => {
           initialNumToRender={textsArray?.length ?? 0}
           maxToRenderPerBatch={textsArray?.length ?? 0}
           windowSize={100}
-        />
+        /> */}
+        <View
+          style={{
+            paddingHorizontal: 20,
+            borderColor: "blue",
+            borderWidth: 1,
+            marginTop: 30,
+          }}
+          onLayout={(e) => {
+            const { height } = e.nativeEvent.layout;
+            setCurrReaderHeight(height);
+          }}
+        >
+          {currentPage.map((item, index) => {
+            return (
+              <Text
+                key={index}
+                style={styles[item?.tag]}
+                onTextLayout={(e) => {
+                  setTextLayout(e.nativeEvent.lines);
+                }}
+              >
+                {item?.text}
+              </Text>
+            );
+          })}
+          {/* <Text style={styles[textsArray[0]?.tag]}>{textsArray[0]?.text}</Text>
+          <Text style={styles[textsArray[1]?.tag]}>{textsArray[1]?.text}</Text> */}
+        </View>
       </View>
     </View>
   );
+
   // (
   // <View style={styles.outerContainer}>
   //   <Text style={styles.title}>{chapter.title}</Text>
@@ -215,14 +365,21 @@ const styles = StyleSheet.create({
   },
   flatlist: {
     // opacity: 0,
+    // borderColor: "red",
+    // margin: 2,
+    // borderWidth: 2,
   },
   flatlistItem: {
     overflow: "hidden",
+    // paddingVertical: 2,
+    // borderColor: "brown",
+    // borderWidth: 2,
+    // width: 400,
   },
   flatlistItemText: {
-    color: "black",
-    includeFontPadding: true,
-    paddingHorizontal: 10,
+    fontSize: 20,
+    // lineHeight: 22,
+    includeFontPadding: false, // 🔑
   },
   loadingOverlayContainer: {
     backgroundColor: "#0dcadb",
@@ -232,15 +389,19 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  h1: { color: "blue", fontSize: 40 },
   h2: {
-    color: "red",
     fontSize: 25,
-    // backgroundColor: "blue",
-    lineHeight: 30, // make line height dynamic, so that it is about 1.2 times or 1.3 times the font size.
+    fontWeight: 700,
+    color: "red",
     textAlign: "center",
+    marginBottom: 5,
   },
   h3: { color: "orange" },
   a: { color: "brown" },
-  p: { color: "purple" },
+  p: {
+    color: "purple",
+    fontSize: 20,
+    textAlign: "justify",
+    marginBottom: 5,
+  },
 });

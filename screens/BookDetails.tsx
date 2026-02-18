@@ -69,8 +69,9 @@ const BookDetailsScreen = ({ route }: any) => {
     try {
       setIsLoading(true);
       const { opfPath, spineHrefs, zip }: any = await openBook(
-        bookData.fileName
+        bookData.fileName,
       );
+      console.log(spineHrefs);
       const currentSpineIndex = 2;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
       const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");

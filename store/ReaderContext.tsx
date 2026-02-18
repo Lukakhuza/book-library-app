@@ -93,6 +93,7 @@ type ReaderContextType = {
 export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],
   myBooks: [],
+  lineProps: [],
   downloadedBooks: [],
   screenDimensions: {
     height: 0,
@@ -112,6 +113,15 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   readerIsReady: false,
   properties: {
     verticalPadding: 18.6190490722656,
+    h2: {
+      fontSize: 25,
+      fontWeight: 700,
+      color: "red",
+      textAlign: "center",
+    },
+    p: {
+      color: "purple",
+    },
     paddingTop: 10,
     paddingBottom: 10,
     horizontalPadding: 20,
@@ -148,6 +158,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     height: 0,
     width: 0,
   });
+  const [lineProps, setLineProps] = useState([]);
   const [pages, setPages]: any = useState([]);
   const [textLayouts, setTextLayouts] = useState<TextLayoutLine[]>([]);
   const [readerDimensions, setReaderDimensions] = useState({
@@ -159,8 +170,20 @@ const ReaderContextProvider = ({ children }: Props) => {
     body: [],
   });
   const [properties, setProperties] = useState({
-    paddingTop: 17.23809814,
-    paddingBottom: 0,
+    verticalPadding: 18.6190490722656,
+    h2: {
+      fontSize: 25,
+      fontWeight: 700,
+      color: "red",
+      textAlign: "center",
+    },
+    p: {
+      color: "purple",
+      fontSize: 20,
+      textAlign: "justify",
+    },
+    paddingTop: 10,
+    paddingBottom: 10,
     horizontalPadding: 20,
     fontSize: 20,
     lineHeight: 25,
@@ -236,13 +259,13 @@ const ReaderContextProvider = ({ children }: Props) => {
     fonts: true,
   });
 
-  const availableHeight =
-    readerDimensions.height -
-    (properties.paddingTop + properties.paddingBottom);
-  const MAX_LINES_PER_PAGE = Math.floor(
-    availableHeight / properties.lineHeight,
-  );
-  const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
+  // const availableHeight =
+  //   readerDimensions.height -
+  //   (properties.paddingTop + properties.paddingBottom);
+  // const MAX_LINES_PER_PAGE = Math.floor(
+  //   availableHeight / properties.lineHeight,
+  // );
+  // const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
 
   const contentSizeRef = useRef<Size>({
     width: 0,
@@ -260,9 +283,14 @@ const ReaderContextProvider = ({ children }: Props) => {
     const ready = Object.values(layoutReadyRef.current).every(Boolean);
     if (!ready) return;
     didPaginateRef.current = true;
-    const pages = paginateText(textLayouts, readerDimensions, properties);
-    setPages(pages);
-    setReaderIsReady(true);
+    const lineProperties: any = paginateText(
+      textLayouts,
+      readerDimensions,
+      properties,
+    );
+    setLineProps(lineProperties);
+    // setPages(pages);
+    // setReaderIsReady(true);
   };
 
   useEffect(() => {
@@ -303,6 +331,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     books,
     myBooks,
     properties,
+    lineProps,
     bookImageUri,
     chapter,
     pages,
