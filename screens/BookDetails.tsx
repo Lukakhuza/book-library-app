@@ -65,7 +65,6 @@ const BookDetailsScreen = ({ route }: any) => {
 
   const handleReadBook = async () => {
     if (isLoading) return;
-
     try {
       setIsLoading(true);
       const { opfPath, spineHrefs, zip }: any = await openBook(

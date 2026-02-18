@@ -34,52 +34,105 @@ const ReaderMeasurementPhase = (data: any) => {
   }: any = useContext(ReaderContext);
 
   const [textsArray, setTextsArray] = useState([]);
+  const iRef = useRef(0);
   const [currentPage, setCurrentPage] = useState<any>([]);
+  const [pagesArray, setPagesArray] = useState<any>([]);
   const [currReaderHeight, setCurrReaderHeight] = useState(0);
   const [textLayout, setTextLayout] = useState([]);
   const lastParagraphArray = useRef([]);
-  const iRef = useRef(0);
   const lastParagraphData = useRef({ meta: "", tag: "", text: "" });
   const textSeparationTriggered: any = useRef(false);
   const currentIndex = useRef(0);
+  const leftoverText: any = useRef(null);
 
   useEffect(() => {
     if (textsArray?.length === 0) return;
     if (currReaderHeight === 0) return;
 
+    if (iRef.current > textsArray.length) {
+      return;
+    }
+
     if (currReaderHeight <= 800) {
-      if (textSeparationTriggered?.current === false) {
+      if (leftoverText.current) {
+        const currLeftover = leftoverText.current;
+        // setCurrentPage((prev: any) => [...prev, currLeftover]);
+        setCurrentPage((prev: any) =>
+          currLeftover.text.trim() === "" ? prev : [...prev, currLeftover],
+        );
+        leftoverText.current = null;
+      } else if (textSeparationTriggered?.current === false) {
         const idx = iRef.current;
         setCurrentPage((prev: any) => [...prev, textsArray[idx]]);
+
         iRef.current = idx + 1;
       } else {
-        currentIndex.current += 1;
-        const idx1 = currentIndex.current;
-        textSeparationTriggered.current = true;
-        // Transform last paragraph array:
-        const transformedLastParagraphArray1 = transformParagraph(
-          lastParagraphArray.current,
-          idx1,
-        );
-        lastParagraphArray.current = transformedLastParagraphArray1;
-        // setLastParagraphArray(transformedLastParagraphArray1);
-        const text = transformedLastParagraphArray1
-          .slice(0, idx1 + 1)
-          .join(" ");
-        const item = {
-          meta: lastParagraphData.current.meta,
-          tag: lastParagraphData.current.tag,
-          text: text,
-        };
+        if (lastParagraphArray.current.includes("")) {
+          // console.log("EMPTY STRING FOUND 1");
+          // Save current page to pages array and reset everything.
+          setPagesArray((prev: any) => [...prev, currentPage]);
 
-        setCurrentPage((prev: any) => {
-          return [...prev?.slice(0, prev?.length - 1), item];
-        });
+          const separationIndex = lastParagraphArray.current.indexOf("");
+
+          let result = "";
+          if (separationIndex !== -1) {
+            result = lastParagraphArray.current
+              .slice(separationIndex)
+              .join(" ")
+              .trim();
+            console.log(result);
+          }
+
+          leftoverText.current = {
+            meta: lastParagraphData.current.meta,
+            tag: lastParagraphData.current.tag,
+            text: result,
+          };
+          // lastParagraphArray.slice(0, currentIndex.current + 1).join(" ");
+          // const text = transformedLastParagraphArray1
+          //   .slice(0, idx1 + 1)
+          //   .join(" ");
+          lastParagraphArray.current = [];
+          textSeparationTriggered.current = false;
+          currentIndex.current = 0;
+          setCurrentPage([]);
+          // Remaining text of the current paragraph would be added to the beginning of next page.
+        } else {
+          currentIndex.current += 1;
+          const idx1 = currentIndex.current;
+          textSeparationTriggered.current = true;
+          // Transform last paragraph array:
+          const transformedLastParagraphArray1 = transformParagraph(
+            lastParagraphArray.current,
+            idx1,
+          );
+          lastParagraphArray.current = transformedLastParagraphArray1;
+          // setLastParagraphArray(transformedLastParagraphArray1);
+          const text = transformedLastParagraphArray1
+            .slice(0, idx1 + 1)
+            .join(" ");
+          const item = {
+            meta: lastParagraphData.current.meta,
+            tag: lastParagraphData.current.tag,
+            text: text,
+          };
+
+          setCurrentPage((prev: any) => {
+            return [...prev?.slice(0, prev?.length - 1), item];
+          });
+        }
       }
     } else {
       // If there is an overflow of last paragraph, create lastParagraph array
       // based on current last paragraph and splitIndex.
-      if (lastParagraphArray.current.length === 0) {
+      if (leftoverText.current) {
+        lastParagraphArray.current = leftoverText.current;
+        const item3 = {
+          meta: leftoverText.current.meta,
+          tag: leftoverText.current.tag,
+          text: leftoverText.current.text,
+        };
+      } else if (lastParagraphArray.current.length === 0) {
         const lastParagraph: any = currentPage[currentPage?.length - 1];
         lastParagraphData.current = lastParagraph;
         const arr = [lastParagraph.text];
@@ -91,26 +144,71 @@ const ReaderMeasurementPhase = (data: any) => {
           tag: lastParagraph?.tag,
           text: transformedLastParagraphArray[0],
         };
-        console.log("Item: ", item);
+        // console.log("Item: ", item);
         setCurrentPage((prev: any) => {
-          return [...prev?.slice(0, prev?.length - 1), item];
+          const withoutLast = prev?.slice(0, prev?.length - 1);
+
+          if (item.text.trim() === "") {
+            return withoutLast;
+          }
+
+          return [...withoutLast, item];
+          // return [...prev?.slice(0, prev?.length - 1), item];
         });
       } else {
-        const idx2 = currentIndex.current;
-        const transformedPar = transformParagraph(
-          lastParagraphArray.current,
-          currentIndex.current,
-        );
-        lastParagraphArray.current = transformedPar;
-        const text1 = transformedPar.slice(0, idx2 + 1).join(" ");
-        const item2 = {
-          meta: lastParagraphData.current.meta,
-          tag: lastParagraphData.current.tag,
-          text: text1,
-        };
-        setCurrentPage((prev: any) => {
-          return [...prev?.slice(0, prev?.length - 1), item2];
-        });
+        if (lastParagraphArray.current.includes("")) {
+          // console.log("EMPTY STRING FOUND 2");
+          // Save current page to pages array and reset everything.
+          setPagesArray((prev: any) => [...prev, currentPage]);
+
+          const separationIndex = lastParagraphArray.current.indexOf("");
+
+          let result = "";
+          if (separationIndex !== -1) {
+            result = lastParagraphArray.current
+              .slice(separationIndex)
+              .join(" ")
+              .trim();
+            console.log(result);
+          }
+
+          leftoverText.current = {
+            meta: lastParagraphData.current.meta,
+            tag: lastParagraphData.current.tag,
+            text: result,
+          };
+          // lastParagraphArray.slice(0, currentIndex.current + 1).join(" ");
+          // const text = transformedLastParagraphArray1
+          //   .slice(0, idx1 + 1)
+          //   .join(" ");
+          lastParagraphArray.current = [];
+          textSeparationTriggered.current = false;
+          currentIndex.current = 0;
+          setCurrentPage([]);
+          // Remaining text of the current paragraph would be added to the beginning of next page.
+        } else {
+          const idx2 = currentIndex.current;
+          const transformedPar = transformParagraph(
+            lastParagraphArray.current,
+            currentIndex.current,
+          );
+          lastParagraphArray.current = transformedPar;
+          const text1 = transformedPar.slice(0, idx2 + 1).join(" ");
+          const item2 = {
+            meta: lastParagraphData.current.meta,
+            tag: lastParagraphData.current.tag,
+            text: text1,
+          };
+          setCurrentPage((prev: any) => {
+            const withoutLast2 = prev?.slice(0, prev?.length - 1);
+
+            if (item2.text.trim() === "") {
+              return withoutLast2;
+            }
+
+            return [...withoutLast2, item2];
+          });
+        }
       }
       textSeparationTriggered.current = true;
     }
