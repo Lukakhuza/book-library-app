@@ -35,6 +35,7 @@ const ReaderMeasurementPhase = (data: any) => {
 
   const [textsArray, setTextsArray] = useState([]);
   const iRef = useRef(0);
+  const [paginationCompleted, setPaginationCompleted] = useState(false);
   const [currentPage, setCurrentPage] = useState<any>([]);
   const [pagesArray, setPagesArray] = useState<any>([]);
   const [currReaderHeight, setCurrReaderHeight] = useState(0);
@@ -49,9 +50,17 @@ const ReaderMeasurementPhase = (data: any) => {
     if (textsArray?.length === 0) return;
     if (currReaderHeight === 0) return;
 
-    if (iRef.current > textsArray.length) {
+    if (iRef.current === 55) {
+      console.log("Breakpoint");
+    }
+
+    if (iRef.current > textsArray.length - 1) {
+      setPagesArray((prev: any) => [...prev, currentPage]);
+      setPaginationCompleted(true);
       return;
     }
+
+    console.log(pagesArray);
 
     if (currReaderHeight <= 800) {
       if (leftoverText.current) {
@@ -80,7 +89,7 @@ const ReaderMeasurementPhase = (data: any) => {
               .slice(separationIndex)
               .join(" ")
               .trim();
-            console.log(result);
+            // console.log(result);
           }
 
           leftoverText.current = {
@@ -169,7 +178,7 @@ const ReaderMeasurementPhase = (data: any) => {
               .slice(separationIndex)
               .join(" ")
               .trim();
-            console.log(result);
+            // console.log(result);
           }
 
           leftoverText.current = {
@@ -407,34 +416,99 @@ const ReaderMeasurementPhase = (data: any) => {
           maxToRenderPerBatch={textsArray?.length ?? 0}
           windowSize={100}
         /> */}
-        <View
-          style={{
-            paddingHorizontal: 20,
-            borderColor: "blue",
-            borderWidth: 1,
-            marginTop: 30,
-          }}
-          onLayout={(e) => {
-            const { height } = e.nativeEvent.layout;
-            setCurrReaderHeight(height);
-          }}
-        >
-          {currentPage.map((item, index) => {
-            return (
-              <Text
-                key={index}
-                style={styles[item?.tag]}
-                onTextLayout={(e) => {
-                  setTextLayout(e.nativeEvent.lines);
-                }}
-              >
-                {item?.text}
-              </Text>
-            );
-          })}
-          {/* <Text style={styles[textsArray[0]?.tag]}>{textsArray[0]?.text}</Text>
-          <Text style={styles[textsArray[1]?.tag]}>{textsArray[1]?.text}</Text> */}
-        </View>
+        {paginationCompleted && (
+          <FlatList
+            data={pagesArray}
+            // style={styles.flatlist}
+            // onContentSizeChange={(w, h) => {
+            //   if (
+            //     w < screenDimensions.width * 0.9 ||
+            //     readerDimensions.width < 100 ||
+            //     readerDimensions.height < 100
+            //   ) {
+            //     return;
+            //   }
+            //   contentSizeRef.current.width = w;
+            //   contentSizeRef.current.height = h;
+            //   if (debounceRef.current) {
+            //     clearTimeout(debounceRef.current);
+            //   }
+            //   debounceRef.current = setTimeout(() => {
+            //     if (textLayoutsRef?.current?.length === 0) return;
+            //     updateTextLayouts(textLayoutsRef);
+            //   }, 200);
+            // }}
+            // onLayout={(e) => {
+            //   const { height, width } = e.nativeEvent.layout;
+            //   if (height < 100 || width < 100) {
+            //     return;
+            //   }
+            //   updateReaderDimensions(width, height);
+            //   layoutReadyRef.current.container = true;
+            //   checkLayoutReady();
+            // }}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, i) => i.toString()}
+            renderItem={(page) => {
+              return (
+                <View
+                  style={{
+                    paddingHorizontal: 20,
+                    borderColor: "blue",
+                    borderWidth: 1,
+                    marginTop: 30,
+                    width: screenDimensions.width,
+                  }}
+                  key={page?.index}
+                >
+                  {page.item.map((item, index) => {
+                    // console.log(item);
+                    return (
+                      <Text key={index} style={styles[item?.tag]}>
+                        {item?.text}
+                      </Text>
+                    );
+                  })}
+                </View>
+              );
+            }}
+            scrollEnabled={true}
+            removeClippedSubviews={false}
+            initialNumToRender={pagesArray?.length ?? 0}
+            maxToRenderPerBatch={pagesArray?.length ?? 0}
+            windowSize={100}
+          />
+        )}
+        {!paginationCompleted && (
+          <View
+            style={{
+              paddingHorizontal: 20,
+              borderColor: "blue",
+              borderWidth: 1,
+              marginTop: 30,
+            }}
+            onLayout={(e) => {
+              const { height } = e.nativeEvent.layout;
+              setCurrReaderHeight(height);
+            }}
+          >
+            {currentPage.map((item, index) => {
+              return (
+                <Text
+                  key={index}
+                  style={styles[item?.tag]}
+                  onTextLayout={(e) => {
+                    setTextLayout(e.nativeEvent.lines);
+                  }}
+                >
+                  {item?.text}
+                </Text>
+              );
+            })}
+          </View>
+        )}
       </View>
     </View>
   );
