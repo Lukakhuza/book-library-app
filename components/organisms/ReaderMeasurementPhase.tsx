@@ -45,6 +45,9 @@ const ReaderMeasurementPhase = (data: any) => {
   const textSeparationTriggered: any = useRef(false);
   const currentIndex = useRef(0);
   const leftoverText: any = useRef(null);
+  const lastTriggeredRef = useRef(false);
+  const pageWidthRef = useRef(0);
+  const currentIndexRef = useRef(0);
 
   useEffect(() => {
     if (textsArray?.length === 0) return;
@@ -74,7 +77,7 @@ const ReaderMeasurementPhase = (data: any) => {
           // Add extra whitespace at the end for proper justification:
           const updatedCurrentPage = currentPage.map((item, index) =>
             index === currentPage.length - 1
-              ? { ...item, text: item.text + "\u202F".repeat(22) }
+              ? { ...item, text: item.text + emptySpaceForJustification }
               : item,
           );
 
@@ -88,7 +91,6 @@ const ReaderMeasurementPhase = (data: any) => {
               .slice(separationIndex)
               .join(" ")
               .trim();
-            // console.log(result);
           }
 
           leftoverText.current = {
@@ -152,7 +154,7 @@ const ReaderMeasurementPhase = (data: any) => {
           tag: lastParagraph?.tag,
           text: transformedLastParagraphArray[0],
         };
-        // console.log("Item: ", item);
+
         setCurrentPage((prev: any) => {
           const withoutLast = prev?.slice(0, prev?.length - 1);
 
@@ -165,11 +167,10 @@ const ReaderMeasurementPhase = (data: any) => {
         });
       } else {
         if (lastParagraphArray.current.includes("")) {
-          // console.log("EMPTY STRING FOUND 2");
           // Save current page to pages array and reset everything.
           const updatedCurrentPage = currentPage.map((item, index) =>
             index === currentPage.length - 1
-              ? { ...item, text: item.text + "\u202F".repeat(22) }
+              ? { ...item, text: item.text + emptySpaceForJustification }
               : item,
           );
 
@@ -183,7 +184,6 @@ const ReaderMeasurementPhase = (data: any) => {
               .slice(separationIndex)
               .join(" ")
               .trim();
-            // console.log(result);
           }
 
           leftoverText.current = {
@@ -250,6 +250,8 @@ const ReaderMeasurementPhase = (data: any) => {
   // };
   // const listItems = asArray(data?.data?.content?.li);
 
+  const emptySpaceForJustification = "\u202F".repeat(75);
+
   useEffect(() => {
     const xhtmlString = data.data;
     const load = async () => {
@@ -283,16 +285,45 @@ const ReaderMeasurementPhase = (data: any) => {
     load();
   }, []);
 
-  // useEffect(() => {
-  //   if (!textLayoutsRef) {
-  //     return;
+  // const onScroll = (e) => {
+  //   const pageWidth = pageWidthRef.current;
+  //   if (!pageWidth) return;
+
+  //   const x = e.nativeEvent.contentOffset.x;
+
+  //   const lastIndex = pagesArray.length - 1;
+  //   const lastPageX = lastIndex * pageWidth;
+
+  //   const overshoot = x - lastPageX;
+
+  //   const THRESHOLD = 40;
+
+  //   if (overshoot > THRESHOLD && !lastTriggeredRef.current) {
+  //     lastTriggeredRef.current = true;
+  //     console.log("Hello World");
   //   }
 
-  //   // paginateText(readerDimensions, textLayoutsRef, properties);
-  // }, [textLayoutsRef]);
+  //   if (overshoot <= 0) {
+  //     lastTriggeredRef.current = false;
+  //   }
+  // };
 
-  // console.log("TA", textsArray);
-  // console.log("PRO: ", properties);
+  const onMomentumScrollEnd = (e) => {
+    const pageWidth = pageWidthRef.current;
+    if (!pageWidth) return;
+    const x = e.nativeEvent.contentOffset.x;
+    currentIndexRef.current = Math.round(x / pageWidth);
+    // console.log(currentIndexRef.current);
+  };
+
+  const onScrollEndDrag = (e) => {
+    const vx = e.nativeEvent.velocity?.x ?? 0;
+
+    if (currentIndexRef.current === pagesArray.length - 1 && vx < 0.5) {
+      // onSwipePastLast();
+      console.log(vx);
+    }
+  };
 
   return (
     <View style={styles.outerContainer}>
@@ -317,8 +348,6 @@ const ReaderMeasurementPhase = (data: any) => {
                     textAlign: "justify",
                     fontSize: 20,
                     paddingHorizontal: 5,
-                    borderColor: "red",
-                    borderWidth: 1,
                     width: screenDimensions.width,
                   }}
                   allowFontScaling={false}
@@ -373,8 +402,7 @@ const ReaderMeasurementPhase = (data: any) => {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(_, i) => i.toString()}
           renderItem={(itemData) => {
-            // console.log(itemData.item.tag);
-            return (
+                        return (
               <View key={itemData?.index} style={styles.flatlistItem}>
                 <Text
                   style={[
@@ -452,6 +480,10 @@ const ReaderMeasurementPhase = (data: any) => {
             //   layoutReadyRef.current.container = true;
             //   checkLayoutReady();
             // }}
+            // onScroll={onScroll}
+            onLayout={(e) => {
+              pageWidthRef.current = e.nativeEvent.layout.width;
+            }}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -461,15 +493,14 @@ const ReaderMeasurementPhase = (data: any) => {
                 <View
                   style={{
                     paddingHorizontal: 20,
-                    borderColor: "blue",
-                    borderWidth: 1,
+                    // borderColor: "blue",
+                    // borderWidth: 1,
                     marginTop: 30,
                     width: screenDimensions.width,
                   }}
                   key={page?.index}
                 >
                   {page.item.map((item, index) => {
-                    // console.log(item);
                     return (
                       <Text key={index} style={styles[item?.tag]}>
                         {item?.text}
@@ -484,14 +515,18 @@ const ReaderMeasurementPhase = (data: any) => {
             initialNumToRender={pagesArray?.length ?? 0}
             maxToRenderPerBatch={pagesArray?.length ?? 0}
             windowSize={100}
+            overScrollMode="always"
+            onMomentumScrollEnd={onMomentumScrollEnd}
+            onScrollEndDrag={onScrollEndDrag}
           />
         )}
         {!paginationCompleted && (
           <View
             style={{
               paddingHorizontal: 20,
-              borderColor: "blue",
-              borderWidth: 1,
+              minHeight: 1,
+              // borderColor: "blue",
+              // borderWidth: 1,
               marginTop: 30,
             }}
             onLayout={(e) => {
@@ -543,14 +578,10 @@ const styles = StyleSheet.create({
   flatlist: {
     // opacity: 0,
     // borderColor: "red",
-    // margin: 2,
-    // borderWidth: 2,
   },
   flatlistItem: {
     overflow: "hidden",
     // paddingVertical: 2,
-    // borderColor: "brown",
-    // borderWidth: 2,
     // width: 400,
   },
   flatlistItemText: {
@@ -565,6 +596,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  h1: {
+    fontSize: 30,
+    fontWeight: 700,
+    color: "gray",
+    textAlign: "center",
+    marginBottom: 5,
   },
   h2: {
     fontSize: 25,
