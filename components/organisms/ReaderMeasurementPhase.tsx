@@ -50,17 +50,11 @@ const ReaderMeasurementPhase = (data: any) => {
     if (textsArray?.length === 0) return;
     if (currReaderHeight === 0) return;
 
-    if (iRef.current === 55) {
-      console.log("Breakpoint");
-    }
-
     if (iRef.current > textsArray.length - 1) {
       setPagesArray((prev: any) => [...prev, currentPage]);
       setPaginationCompleted(true);
       return;
     }
-
-    console.log(pagesArray);
 
     if (currReaderHeight <= 800) {
       if (leftoverText.current) {
@@ -77,9 +71,14 @@ const ReaderMeasurementPhase = (data: any) => {
         iRef.current = idx + 1;
       } else {
         if (lastParagraphArray.current.includes("")) {
-          // console.log("EMPTY STRING FOUND 1");
-          // Save current page to pages array and reset everything.
-          setPagesArray((prev: any) => [...prev, currentPage]);
+          // Add extra whitespace at the end for proper justification:
+          const updatedCurrentPage = currentPage.map((item, index) =>
+            index === currentPage.length - 1
+              ? { ...item, text: item.text + "\u202F".repeat(22) }
+              : item,
+          );
+
+          setPagesArray((prev: any) => [...prev, updatedCurrentPage]);
 
           const separationIndex = lastParagraphArray.current.indexOf("");
 
@@ -168,7 +167,13 @@ const ReaderMeasurementPhase = (data: any) => {
         if (lastParagraphArray.current.includes("")) {
           // console.log("EMPTY STRING FOUND 2");
           // Save current page to pages array and reset everything.
-          setPagesArray((prev: any) => [...prev, currentPage]);
+          const updatedCurrentPage = currentPage.map((item, index) =>
+            index === currentPage.length - 1
+              ? { ...item, text: item.text + "\u202F".repeat(22) }
+              : item,
+          );
+
+          setPagesArray((prev: any) => [...prev, updatedCurrentPage]);
 
           const separationIndex = lastParagraphArray.current.indexOf("");
 
