@@ -86,6 +86,7 @@ export const downloadEpubFile = async (signedUrl: string, data: object) => {
     if (info.exists) {
       downLoadedFileUri = info.uri;
     } else {
+      console.log(signedUrl);
       const downloadedFile = await File.downloadFileAsync(signedUrl, booksDir, {
         idempotent: true,
       });
@@ -473,6 +474,48 @@ export const paginateText = (
   }
 };
 
-export const paginateText2 = async (texts) => {
-  // console.log(texts);
+export const transformParagraph = (
+  paragraphArray: any,
+  currentIndex: number,
+) => {
+  const text = paragraphArray[currentIndex];
+  const words = text?.trim().split(/\s+/);
+  const middle = Math.floor(words?.length / 2);
+  const firstHalfText = words?.slice(0, middle).join(" ");
+  const secondHalfText = words?.slice(middle).join(" ");
+
+  return [
+    ...paragraphArray.slice(0, currentIndex),
+    firstHalfText,
+    secondHalfText,
+    ...paragraphArray.slice(currentIndex + 1),
+  ];
+};
+
+export const xmlStringToTextsArray = async (xhtmlString: any) => {
+  const doc = parseDocument(xhtmlString, { xmlMode: true });
+  const allText: any = DomUtils.findAll(
+    (el) =>
+      el.type === "tag" &&
+      (el.name === "p" ||
+        el.name === "h1" ||
+        el.name === "h2" ||
+        el.name === "h3" ||
+        el.name === "a"),
+    doc.children,
+  );
+
+  const texts = allText.map((el: any) => ({
+    tag: el.name,
+    text: DomUtils.textContent(el)
+      .trim()
+      .replace(/\s*\r?\n\s*/g, " ") // remove line breaks with surrounding whitespace
+      .replace(/\s+/g, " ") // collapse multiple whitespace into single space
+      .trim(),
+
+    meta: el.attribs ?? {},
+  }));
+
+  const array: any = Array.from(texts);
+  return array;
 };

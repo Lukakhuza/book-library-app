@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useState } from "react";
 import { Directory, Paths } from "expo-file-system";
-import { ReaderContext } from "../store/ReaderContext";
+// import { ReaderContext } from "../store/ReaderContext";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   deleteFromMyBooks,
@@ -12,25 +12,36 @@ import {
   openBook,
 } from "../services/bookServices";
 import { wait } from "../util/helperFunctions";
+import { MyBooksContext } from "../store/MyBooksContext";
+import { BookContext } from "../store/BookContext";
+import { ChapterContext } from "../store/ChapterContext";
 // import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: any) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { updateCurrentBook, currentBook } = useContext(BookContext);
+  const { currentChapter } = useContext(ChapterContext);
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
-  const {
-    bookImageUri,
-    addToMyBooks,
-    removeFromMyBooks,
-    myBooks,
-    updateSpine,
-    spine: sp,
-  }: any = useContext(ReaderContext);
+  // const {
+  //   bookImageUri,
+  //   updateSpine,
+  //   updateBookObjectData,
+  //   spineIndex,
+  //   bookObjectData,
+  //   updateSpineIndex,
+  // }: any = useContext(ReaderContext);
+  const { myBooks, addToMyBooks, removeFromMyBooks }: any =
+    useContext(MyBooksContext);
 
   const { bookData } = route.params;
 
+  useEffect(() => {
+    updateCurrentBook(bookData);
+  }, [bookData]);
+
   const downloaded = myBooks.some((book: any) => {
-    return book._id === bookData._id;
+    return book._id === currentBook?._id;
   });
 
   const handleDownloadBook = async () => {
@@ -70,7 +81,12 @@ const BookDetailsScreen = ({ route }: any) => {
       const { opfPath, spineHrefs, zip }: any = await openBook(
         bookData.fileName,
       );
-      const currentSpineIndex = 2;
+      // updateBookObjectData({
+      //   opfPath: opfPath,
+      //   spineHrefs: spineHrefs,
+      //   zip: zip,
+      // });
+      const currentSpineIndex = currentChapter;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
       const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
       navigation.navigate("Reader", { chapterData: xhtmlString });
@@ -95,59 +111,61 @@ const BookDetailsScreen = ({ route }: any) => {
         },
       ]}
     >
-      <View style={styles.content}>
-        <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
-          <Image
-            source={{
-              uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${bookData.coverKey}`,
-            }}
-            style={{ width: 270, height: 405, marginTop: 10 }}
-            resizeMode="cover"
-          />
-          <View style={styles.bookInfo}>
-            <View style={styles.bookInfoLine}>
-              <Text style={styles.label}>Title:</Text>
-              <Text numberOfLines={2}>{bookData.title}</Text>
+      {currentBook && (
+        <View style={styles.content}>
+          <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
+            <Image
+              source={{
+                uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${currentBook.coverKey}`,
+              }}
+              style={{ width: 270, height: 405, marginTop: 10 }}
+              resizeMode="cover"
+            />
+            <View style={styles.bookInfo}>
+              <View style={styles.bookInfoLine}>
+                <Text style={styles.label}>Title:</Text>
+                <Text numberOfLines={2}>{currentBook.title}</Text>
+              </View>
+              <View style={styles.bookInfoLine}>
+                <Text style={styles.label}>Author:</Text>
+                <Text numberOfLines={2}>{currentBook.author}</Text>
+              </View>
+              <View style={styles.bookInfoLine}>
+                <Text style={styles.label}>Language:</Text>
+                <Text>{currentBook.language}</Text>
+              </View>
+              <View style={styles.bookInfoLine}>
+                <Text style={styles.label}>Published:</Text>
+                <Text>{currentBook.publishedYear}</Text>
+              </View>
             </View>
-            <View style={styles.bookInfoLine}>
-              <Text style={styles.label}>Author:</Text>
-              <Text numberOfLines={2}>{bookData.author}</Text>
-            </View>
-            <View style={styles.bookInfoLine}>
-              <Text style={styles.label}>Language:</Text>
-              <Text>{bookData.language}</Text>
-            </View>
-            <View style={styles.bookInfoLine}>
-              <Text style={styles.label}>Published:</Text>
-              <Text>{bookData.publishedYear}</Text>
-            </View>
+            {!downloaded ? (
+              <Pressable
+                disabled={isLoading}
+                style={styles.downloadButton}
+                onPress={handleDownloadBook}
+              >
+                <Text style={styles.downloadButtonText}>Download</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                disabled={isLoading}
+                style={styles.readButton}
+                onPress={handleReadBook}
+              >
+                <Text style={styles.downloadButtonText}>Read Book</Text>
+              </Pressable>
+            )}
+            <Pressable
+              disabled={isLoading}
+              style={styles.deleteButton}
+              onPress={handleDeleteBook}
+            >
+              <Text style={styles.deleteButtonText}>Delete from My Books</Text>
+            </Pressable>
           </View>
-          {!downloaded ? (
-            <Pressable
-              disabled={isLoading}
-              style={styles.downloadButton}
-              onPress={handleDownloadBook}
-            >
-              <Text style={styles.downloadButtonText}>Download</Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              disabled={isLoading}
-              style={styles.readButton}
-              onPress={handleReadBook}
-            >
-              <Text style={styles.downloadButtonText}>Read Book</Text>
-            </Pressable>
-          )}
-          <Pressable
-            disabled={isLoading}
-            style={styles.deleteButton}
-            onPress={handleDeleteBook}
-          >
-            <Text style={styles.deleteButtonText}>Delete from My Books</Text>
-          </Pressable>
         </View>
-      </View>
+      )}
     </LinearGradient>
   );
 };

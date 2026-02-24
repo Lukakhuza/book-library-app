@@ -11,3 +11,7 @@ in VSCode:
 Prepare my code for lambda.
 
 use vscode copilot agent to prepare my code for lambda.
+
+<!--  -->
+
+use enums where applicable.

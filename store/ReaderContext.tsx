@@ -5,25 +5,16 @@ import {
   useRef,
   useEffect,
   useLayoutEffect,
+  useContext,
 } from "react";
 import { Dimensions } from "react-native";
-import { getBook } from "../services/bookServices";
-import { paginateText } from "../services/bookServices";
-import { getDownloadedBooks } from "../services/bookServices";
+import { paginateText, xmlStringToTextsArray } from "../services/bookServices";
 import { getAllBooks } from "../api/book.api";
 import { TextLayoutLine } from "react-native";
 import { RefObject } from "react";
 import { Directory, File, Paths } from "expo-file-system";
-
-type Book = {
-  title: string;
-  author: string;
-  coverKey: string;
-  epubKey: string;
-  language: string;
-  publishedYear: string;
-  fileName: string;
-};
+import { getXhtmlPath } from "../services/bookServices";
+import { MyBooksContext } from "./MyBooksContext";
 
 type ScreenDimensions = {
   height: number;
@@ -33,6 +24,16 @@ type ScreenDimensions = {
 type Chapter = {
   title: string;
   body: string[];
+};
+
+type Book = {
+  title: string;
+  author: string;
+  coverKey: string;
+  epubKey: string;
+  language: string;
+  publishedYear: string;
+  fileName: string;
 };
 
 type ReaderDimensions = {
@@ -68,9 +69,11 @@ type LayoutChecklist = {
 
 type ReaderContextType = {
   books: Book[];
+  spineIndex: number;
   screenDimensions: ScreenDimensions;
   bookImageUri: string | null;
   chapter: Chapter;
+  textsArray: [];
   pages: [];
   readerDimensions: ReaderDimensions;
   textLayouts: TextLayoutLine[];
@@ -82,17 +85,15 @@ type ReaderContextType = {
   debounceRef: RefObject<NodeJS.Timeout | null>;
   textLayoutsRef: RefObject<TextLayoutLine[]>;
   updateReaderDimensions: (width: number, height: number) => void;
+  updateBookObjectData: (bookObjectData: object) => void;
   updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => void;
   updatePages: (pages: string[]) => void;
   checkLayoutReady: () => void;
   updateBookImageUri: (bookImageUri: string | null) => void;
-  addToMyBooks: (book: object) => {};
-  removeFromMyBooks: (fileName: string) => {};
 };
 
 export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],
-  myBooks: [],
   lineProps: [],
   downloadedBooks: [],
   screenDimensions: {
@@ -111,6 +112,7 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   },
   textLayouts: [],
   readerIsReady: false,
+  bookObjectData: {},
   properties: {
     verticalPadding: 18.6190490722656,
     h2: {
@@ -142,6 +144,7 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   debounceRef: { current: null },
   textLayoutsRef: { current: [] },
   updateReaderDimensions: (width: number, height: number) => {},
+  updateBookObjectData: (bookObjectData: object) => {},
   updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => {},
   updatePages: (pages: any) => {},
   checkLayoutReady: () => {},
@@ -169,6 +172,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     title: "",
     body: [],
   });
+  const [spineIndex, setSpineIndex] = useState(0);
   const [properties, setProperties] = useState({
     verticalPadding: 18.6190490722656,
     h2: {
@@ -191,63 +195,14 @@ const ReaderContextProvider = ({ children }: Props) => {
   });
   const [readerIsReady, setReaderIsReady] = useState(false);
   const [bookImageUri, setBookImageUri] = useState();
-  const [books, setBooks] = useState<Book[]>([]);
-  const [myBooks, setMyBooks] = useState<Book[]>([]);
   const [spine, setSpine] = useState(null);
+  const [bookObjectData, setBookObjectData] = useState<any>(null);
   const [location, setLocation] = useState({
     spineIndex: 0,
     pageIndex: 0,
   });
+  const [textsArray, setTextsArray] = useState([]);
   // Store screen dimensions in screenDimensions state.
-  useLayoutEffect(() => {
-    const { width, height } = Dimensions.get("screen");
-    setScreenDimensions({
-      height: height,
-      width: width,
-    });
-  }, []);
-
-  useEffect(() => {
-    const load = async () => {
-      const books = await getAllBooks();
-      setBooks(books);
-    };
-    load();
-  }, []);
-
-  // Priority 1
-  useEffect(() => {
-    if (books?.length === 0) return;
-    const load = async () => {
-      const booksMetadataDir = new Directory(
-        Paths.document.uri,
-        "books-metadata",
-      );
-      const booksList = booksMetadataDir.list();
-      const fileNameSet = new Set();
-      for (const book of booksList) {
-        const file = new File(book.uri);
-        const text = await file.text();
-        const data = JSON.parse(text);
-        fileNameSet.add(data.bookData.fileName);
-      }
-      let myBooks = [];
-      for (const book of books) {
-        if (fileNameSet.has(book.fileName)) {
-          myBooks.push(book);
-        }
-      }
-      setMyBooks(myBooks);
-    };
-    load();
-  }, [books]);
-
-  // useEffect(() => {
-  //   const load = async () => {
-  //     const downloadedBooks = await getDownloadedBooks();
-  //   };
-  //   load();
-  // }, []);
 
   const textLayoutsRef = useRef<any>([]);
 
@@ -258,14 +213,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     contentSize: false,
     fonts: true,
   });
-
-  // const availableHeight =
-  //   readerDimensions.height -
-  //   (properties.paddingTop + properties.paddingBottom);
-  // const MAX_LINES_PER_PAGE = Math.floor(
-  //   availableHeight / properties.lineHeight,
-  // );
-  // const PAGE_HEIGHT = MAX_LINES_PER_PAGE * properties.lineHeight;
 
   const contentSizeRef = useRef<Size>({
     width: 0,
@@ -319,26 +266,27 @@ const ReaderContextProvider = ({ children }: Props) => {
     setBookImageUri(bookImageUri);
   };
 
-  const addToMyBooks = (book: any) => {
-    setMyBooks((prev) => [...prev, book]);
+  const updateSpineIndex = (spineIndex: number) => {
+    setSpineIndex(spineIndex);
   };
 
-  const removeFromMyBooks = (fileName: string) => {
-    setMyBooks((prev) => prev.filter((book) => book.fileName !== fileName));
+  const updateBookObjectData = (bookObjectData: any) => {
+    setBookObjectData(bookObjectData);
   };
 
   const value = {
-    books,
-    myBooks,
+    bookObjectData,
     properties,
     lineProps,
     bookImageUri,
     chapter,
     pages,
+    spineIndex,
     readerDimensions,
     screenDimensions,
     textLayouts,
     readerIsReady,
+    textsArray,
     contentSizeRef,
     layoutReadyRef,
     containerWidthRef,
@@ -347,11 +295,11 @@ const ReaderContextProvider = ({ children }: Props) => {
     updateReaderDimensions,
     updateTextLayouts,
     updatePages,
+    updateSpineIndex,
     updateSpine,
     checkLayoutReady,
     updateBookImageUri,
-    addToMyBooks,
-    removeFromMyBooks,
+    updateBookObjectData,
   };
 
   return (

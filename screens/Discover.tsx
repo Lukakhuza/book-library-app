@@ -12,14 +12,14 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { Button } from "react-native";
-import { ReaderContext } from "../store/ReaderContext";
 import { useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "../constants/Colors";
+import { LibraryContext } from "../store/LibraryContext";
 
 const DiscoverScreen = () => {
   const navigation: any = useNavigation();
-  const { books }: any = useContext(ReaderContext);
+  const { books }: any = useContext(LibraryContext);
 
   return (
     <LinearGradient

@@ -7,11 +7,12 @@ import {
   FlatList,
   Dimensions,
   Button,
+  Animated,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { useContext, useCallback } from "react";
-import { ReaderContext } from "../store/ReaderContext";
+import { useContext, useCallback, useRef, useEffect } from "react";
+import { MyBooksContext } from "../store/MyBooksContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "../constants/Colors";
 
@@ -19,7 +20,29 @@ const HomeScreen = () => {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = Dimensions.get("screen");
-  const { myBooks }: any = useContext(ReaderContext);
+  const { myBooks }: any = useContext(MyBooksContext);
+
+  const FadeInView = ({ children }: any) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start();
+    }, [fadeAnim]);
+
+    return (
+      <Animated.View // Special animatable View
+        style={{
+          opacity: fadeAnim, // Bind opacity to animated value
+        }}
+      >
+        {children}
+      </Animated.View>
+    );
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -40,6 +63,17 @@ const HomeScreen = () => {
       <View style={styles.headerContainer}>
         <Text style={styles.header}>My Books</Text>
       </View>
+      {/* <FadeInView
+        style={{
+          width: 250,
+          height: 50,
+          backgroundColor: "powderblue",
+        }}
+      >
+        <Text style={{ fontSize: 28, textAlign: "center", margin: 10 }}>
+          Fading in
+        </Text>
+      </FadeInView> */}
       {myBooks?.length === 0 && (
         <View style={styles.content}>
           <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
@@ -55,7 +89,7 @@ const HomeScreen = () => {
         </View>
       )}
       {myBooks?.length > 0 && (
-        <View
+        <FadeInView
           style={{
             flex: 1,
           }}
@@ -105,7 +139,7 @@ const HomeScreen = () => {
               );
             }}
           />
-        </View>
+        </FadeInView>
       )}
     </LinearGradient>
   );

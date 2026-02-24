@@ -6,12 +6,16 @@ import {
   useContext,
 } from "react";
 import { Dimensions, FlatList, StyleSheet, Text, View } from "react-native";
-import LoadingOverlay from "../util/LoadingOverlay";
-import { getDimensions, paginateText, wait } from "../util/helperFunctions";
-import { getBook } from "../util/helperFunctions";
-import { ReaderContext } from "../store/ReaderContext";
+// import LoadingOverlay from "../util/LoadingOverlay";
+import {
+  getDimensions,
+  //  paginateText,
+  wait,
+} from "../util/helperFunctions";
+// import { getBook } from "../util/helperFunctions";
+// import { ReaderContext } from "../store/ReaderContext";
 import ReaderMeasurementPhase from "../components/organisms/ReaderMeasurementPhase";
-import ReaderReadingPhase from "../components/organisms/ReaderReadingPhase";
+// import ReaderReadingPhase from "../components/organisms/ReaderReadingPhase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useNavigation,
@@ -22,7 +26,7 @@ import {
 } from "@react-navigation/native";
 
 const ReaderScreen = ({ route }: any) => {
-  const { readerIsReady }: any = useContext(ReaderContext);
+  // const { readerIsReady }: any = useContext(ReaderContext);
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -35,7 +39,7 @@ const ReaderScreen = ({ route }: any) => {
       }}
     >
       {/* <ReaderReadingPhase /> */}
-      <ReaderMeasurementPhase data={chapterData} />
+      <ReaderMeasurementPhase chapterData={chapterData} />
 
       {/* {readerIsReady ? (
         <ReaderReadingPhase />
