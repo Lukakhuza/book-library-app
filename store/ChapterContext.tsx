@@ -35,13 +35,14 @@ const ChapterContextProvider = ({ children }: Props) => {
   const nextChapter = () => {
     console.log(currentBookObject.spineHrefs.length);
     console.log(currentChapter);
-    if (currentChapter < currentBookObject.spineHrefs.length - 1) {
+    if (currentChapter < currentBookObject.spineHrefs.length - 2) {
       setCurrentChapter((prev) => prev + 1);
     }
   };
 
   const previousChapter = () => {
     if (currentChapter > 0) {
+      console.log("Hi");
       setCurrentChapter((prev) => prev - 1);
     }
   };

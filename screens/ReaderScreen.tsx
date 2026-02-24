@@ -62,12 +62,17 @@ const ReaderScreen = () => {
     // Ignore initial currReaderHeight of 0.
     if (currReaderHeight === 0) return;
 
-    if (iRef.current > textsArray?.length - 1) {
-      // After paragraphs have been added to the last currentPage, add this currentPage data to pagesArray.
-      setPagesArray((prev: any) => [...prev, currentPage]);
-      // After all chapter data has been added to pagesArray, set PaginationCompleted to true so that FlatList can be rendered.
-      setPaginationCompleted(true);
-      return;
+    if (
+      iRef.current > textsArray?.length - 1 &&
+      lastParagraphData.current.text === ""
+    ) {
+      if (currReaderHeight <= 800 && !leftoverText?.current?.text) {
+        // After paragraphs have been added to the last currentPage, add this currentPage data to pagesArray.
+        setPagesArray((prev: any) => [...prev, currentPage]);
+        // After all chapter data has been added to pagesArray, set PaginationCompleted to true so that FlatList can be rendered.
+        setPaginationCompleted(true);
+        return;
+      }
     }
 
     // Keep adding data to current page until reader height is exceeded.
@@ -76,7 +81,7 @@ const ReaderScreen = () => {
       if (leftoverText.current) {
         const currLeftover = leftoverText.current;
         setCurrentPage((prev: any) =>
-          currLeftover.text.trim() === "" ? prev : [...prev, currLeftover],
+          currLeftover?.text?.trim() === "" ? prev : [...prev, currLeftover],
         );
         leftoverText.current = null;
         // If there is no leftover text, simply add current paragraph to current page and update index:
@@ -92,7 +97,7 @@ const ReaderScreen = () => {
           // Add extra whitespace at the end for proper justification:
           const updatedCurrentPage = currentPage.map((item, index) =>
             index === currentPage.length - 1
-              ? { ...item, text: item.text + emptySpaceForJustification }
+              ? { ...item, text: item?.text + emptySpaceForJustification }
               : item,
           );
 
@@ -108,7 +113,7 @@ const ReaderScreen = () => {
             result = lastParagraphArray.current
               .slice(separationIndex)
               .join(" ")
-              .trim();
+              ?.trim();
           }
 
           // Update leftover text for next page:
@@ -117,7 +122,7 @@ const ReaderScreen = () => {
             tag: lastParagraphData.current.tag,
             text: result,
           };
-
+          lastParagraphData.current = { meta: "", tag: "", text: "" };
           // Reset all variables that were specific to current page:
           lastParagraphArray.current = [];
           textSeparationTriggered.current = false;
@@ -147,7 +152,7 @@ const ReaderScreen = () => {
       } else if (lastParagraphArray.current.length === 0) {
         const lastParagraph: any = currentPage[currentPage?.length - 1];
         lastParagraphData.current = lastParagraph;
-        const arr = [lastParagraph.text];
+        const arr = [lastParagraph?.text];
         const idx3 = 0;
         updateLastParagraph(idx3, arr, lastParagraph, "b");
       } else {
@@ -155,7 +160,7 @@ const ReaderScreen = () => {
           // Save current page to pages array and reset everything.
           const updatedCurrentPage = currentPage.map((item, index) =>
             index === currentPage.length - 1
-              ? { ...item, text: item.text + emptySpaceForJustification }
+              ? { ...item, text: item?.text + emptySpaceForJustification }
               : item,
           );
 
@@ -168,7 +173,7 @@ const ReaderScreen = () => {
             result = lastParagraphArray.current
               .slice(separationIndex)
               .join(" ")
-              .trim();
+              ?.trim();
           }
 
           leftoverText.current = {
@@ -225,7 +230,7 @@ const ReaderScreen = () => {
       setCurrentPage((prev: any) => {
         const withoutLast = prev?.slice(0, prev?.length - 1);
 
-        if (item.text.trim() === "") {
+        if (item?.text?.trim() === "") {
           return withoutLast;
         }
 
@@ -242,10 +247,12 @@ const ReaderScreen = () => {
     // console.log(currentIndexRef.current);
   };
 
+  // console.log(currentIndexRef.current);
   const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const vx = e.nativeEvent.velocity?.x ?? 0;
 
     if (currentIndexRef.current === pagesArray.length - 1 && vx < 0.5) {
+      // console.log(vx);
       iRef.current = 0;
       setPaginationCompleted(false);
       setPagesArray([]);
@@ -253,7 +260,9 @@ const ReaderScreen = () => {
       nextChapter();
     }
 
-    if (currentIndexRef.current === pagesArray.length - 1 && vx > 0.5) {
+    // console.log(currentIndexRef.current, pagesArray.length, vx);
+    if (currentIndexRef.current === 0 && vx > 0.5) {
+      // console.log(vx);
       iRef.current = 0;
       setPaginationCompleted(false);
       setPagesArray([]);
@@ -294,7 +303,7 @@ const ReaderScreen = () => {
                 >
                   {page.item.map((item, index) => {
                     return (
-                      <Text key={index} style={tagStyles[item.tag]}>
+                      <Text key={index} style={tagStyles[item?.tag]}>
                         {item?.text}
                       </Text>
                     );
@@ -328,7 +337,7 @@ const ReaderScreen = () => {
               return (
                 <Text
                   key={index}
-                  style={tagStyles[item.tag]}
+                  style={[{ opacity: 0 }, tagStyles[item?.tag]]}
                   onTextLayout={(
                     e: NativeSyntheticEvent<TextLayoutEventData>,
                   ) => {
@@ -344,8 +353,8 @@ const ReaderScreen = () => {
         {!paginationCompleted && (
           <View
             style={{
-              backgroundColor: "lightblue",
-              opacity: 1,
+              // backgroundColor: "lightblue",
+              // opacity: 1,
               position: "absolute",
               top: 0,
               left: 0,

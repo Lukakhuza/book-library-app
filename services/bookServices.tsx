@@ -361,7 +361,7 @@ export const paginateText = (
       capHeight: textLayouts.current[1].lines[0].capHeight,
       descender: textLayouts.current[1].lines[0].descender,
       height: textLayouts.current[1].lines[0].height,
-      text: textLayouts.current[1].lines[0].text,
+      text: textLayouts.current[1].lines[0]?.text,
       width: textLayouts.current[1].lines[0].width,
       x: textLayouts.current[1].lines[0].x,
       xHeight: textLayouts.current[1].lines[0].xHeight,
@@ -390,17 +390,12 @@ export const paginateText = (
           currentPageHeightUsed + textLayouts?.current[i]?.lines[j]?.height <=
           availableHeight
         ) {
-          currentText += " " + textLayouts.current[i].lines[j].text.trim();
-          // const data = {
-          //   text: currentText.trim(),
-          //   tag: currentTag,
-          // };
+          currentText += " " + textLayouts.current[i].lines[j]?.text?.trim();
 
-          // currentPage.push(data);
           currentPageHeightUsed += textLayouts.current[i].lines[j].height;
         } else {
           data = {
-            text: currentText.trim(),
+            text: currentText?.trim(),
             tag: currentTag,
           };
           currentPage.push(data);
@@ -408,68 +403,20 @@ export const paginateText = (
           currentText = "";
           currentPage = [];
           currentPageHeightUsed = 0;
-          currentText += " " + textLayouts.current[i].lines[j].text.trim();
+          currentText += " " + textLayouts.current[i].lines[j]?.text?.trim();
           currentPageHeightUsed += textLayouts.current[i].lines[j].height;
         }
       }
       data = {
-        text: currentText.trim(),
+        text: currentText?.trim(),
         tag: currentTag,
       };
       currentPage.push(data);
       currentText = "";
     }
     pages.push(currentPage);
-    // console.log(pages[5]?.[1]?.text);
 
     return pages;
-
-    // const pages: string[][] = [];
-    // let lineIndex = 0;
-    // let currentPage: any = [];
-
-    // for (let i = 0; i < textLayouts.current.length; i++) {
-    //   for (let j = 0; j < textLayouts.current[i].length; j++) {
-    //     currentPage.push(textLayouts.current[i][j].text.trim());
-    //     if (lineIndex % 34 === 0) {
-    //       pages.push(currentPage);
-    //       currentPage = [];
-    //     }
-    //     lineIndex++;
-    //   }
-    //   if (currentPage.length !== 0) {
-    //     currentPage.push("");
-    //     if (lineIndex % 34 === 0) {
-    //       pages.push(currentPage);
-    //       currentPage = [];
-    //     }
-    //     lineIndex++;
-    //   }
-    // }
-    // pages.push(currentPage);
-
-    // for (let i = 0; i < textLayouts.current.length; i++) {
-    //   for (let j = 0; j < textLayouts.current[i].length; j++) {
-    //     currentPage.push(textLayouts.current[i][j].text.trim());
-    //     lineIndex++;
-    //     if (lineIndex % 34 === 0) {
-    //       pages.push(currentPage);
-    //       currentPage = [];
-    //     }
-    //   }
-    //   if (currentPage.length === 0) {
-    //     continue;
-    //   }
-    //   currentPage.push("");
-    //   lineIndex++;
-    //   if (lineIndex % 34 === 0) {
-    //     pages.push(currentPage);
-    //     currentPage = [];
-    //   }
-    // }
-    // pages.push(currentPage);
-
-    // return pages;
   } catch (error) {
     console.log(error);
   }
@@ -509,10 +456,10 @@ export const xmlStringToTextsArray = async (xhtmlString: any) => {
   const texts = allText.map((el: any) => ({
     tag: el.name,
     text: DomUtils.textContent(el)
-      .trim()
+      ?.trim()
       .replace(/\s*\r?\n\s*/g, " ") // remove line breaks with surrounding whitespace
       .replace(/\s+/g, " ") // collapse multiple whitespace into single space
-      .trim(),
+      ?.trim(),
 
     meta: el.attribs ?? {},
   }));
