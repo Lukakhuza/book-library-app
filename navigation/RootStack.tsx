@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ReaderScreen from "../screens/Reader";
+import ReaderScreen from "../screens/ReaderScreen";
 import ModalDummyScreen from "../screens/modal/ModalDummyScreen";
 import HomeStack from "../navigation/HomeStack";
 import BookDetailsScreen from "../screens/BookDetails";

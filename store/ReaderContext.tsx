@@ -4,93 +4,19 @@ import {
   type ReactNode,
   useRef,
   useEffect,
-  useLayoutEffect,
-  useContext,
+  RefObject,
 } from "react";
-import { Dimensions } from "react-native";
-import { paginateText, xmlStringToTextsArray } from "../services/bookServices";
-import { getAllBooks } from "../api/book.api";
 import { TextLayoutLine } from "react-native";
-import { RefObject } from "react";
+import { paginateText } from "../services/bookServices";
+import {
+  Size,
+  ContainerWidth,
+  ReaderContextType,
+} from "../types/readerContextTypes";
+
 import { Directory, File, Paths } from "expo-file-system";
 import { getXhtmlPath } from "../services/bookServices";
 import { MyBooksContext } from "./MyBooksContext";
-
-type ScreenDimensions = {
-  height: number;
-  width: number;
-};
-
-type Chapter = {
-  title: string;
-  body: string[];
-};
-
-type Book = {
-  title: string;
-  author: string;
-  coverKey: string;
-  epubKey: string;
-  language: string;
-  publishedYear: string;
-  fileName: string;
-};
-
-type ReaderDimensions = {
-  height: number;
-  width: number;
-};
-
-type Properties = {
-  verticalPadding: number;
-  paddingTop: number;
-  paddingBottom: number;
-  horizontalPadding: number;
-  fontSize: number;
-  lineHeight: number;
-  fontWeight: number;
-};
-
-type Size = {
-  width: number;
-  height: number;
-};
-
-type ContainerWidth = {
-  width: number;
-};
-
-type LayoutChecklist = {
-  container: boolean;
-  textLayout: boolean;
-  contentSize: boolean;
-  fonts: boolean;
-};
-
-type ReaderContextType = {
-  books: Book[];
-  spineIndex: number;
-  screenDimensions: ScreenDimensions;
-  bookImageUri: string | null;
-  chapter: Chapter;
-  textsArray: [];
-  pages: [];
-  readerDimensions: ReaderDimensions;
-  textLayouts: TextLayoutLine[];
-  readerIsReady: boolean;
-  properties: Properties;
-  contentSizeRef: RefObject<Size>;
-  containerWidthRef: RefObject<ContainerWidth>;
-  layoutReadyRef: RefObject<LayoutChecklist>;
-  debounceRef: RefObject<NodeJS.Timeout | null>;
-  textLayoutsRef: RefObject<TextLayoutLine[]>;
-  updateReaderDimensions: (width: number, height: number) => void;
-  updateBookObjectData: (bookObjectData: object) => void;
-  updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => void;
-  updatePages: (pages: string[]) => void;
-  checkLayoutReady: () => void;
-  updateBookImageUri: (bookImageUri: string | null) => void;
-};
 
 export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],
@@ -172,7 +98,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     title: "",
     body: [],
   });
-  const [spineIndex, setSpineIndex] = useState(0);
   const [properties, setProperties] = useState({
     verticalPadding: 18.6190490722656,
     h2: {
@@ -197,10 +122,6 @@ const ReaderContextProvider = ({ children }: Props) => {
   const [bookImageUri, setBookImageUri] = useState();
   const [spine, setSpine] = useState(null);
   const [bookObjectData, setBookObjectData] = useState<any>(null);
-  const [location, setLocation] = useState({
-    spineIndex: 0,
-    pageIndex: 0,
-  });
   const [textsArray, setTextsArray] = useState([]);
   // Store screen dimensions in screenDimensions state.
 
@@ -266,10 +187,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     setBookImageUri(bookImageUri);
   };
 
-  const updateSpineIndex = (spineIndex: number) => {
-    setSpineIndex(spineIndex);
-  };
-
   const updateBookObjectData = (bookObjectData: any) => {
     setBookObjectData(bookObjectData);
   };
@@ -281,7 +198,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     bookImageUri,
     chapter,
     pages,
-    spineIndex,
     readerDimensions,
     screenDimensions,
     textLayouts,
@@ -295,7 +211,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     updateReaderDimensions,
     updateTextLayouts,
     updatePages,
-    updateSpineIndex,
     updateSpine,
     checkLayoutReady,
     updateBookImageUri,

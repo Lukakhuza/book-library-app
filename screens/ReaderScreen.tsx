@@ -1,31 +1,54 @@
-import { LibraryContext } from "../../store/LibraryContext";
-import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import { LibraryContext } from "../store/LibraryContext";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Pressable,
+  LayoutChangeEvent,
+  TextLayoutEventData,
+  NativeSyntheticEvent,
+  TextLayoutLine,
+  NativeScrollEvent,
+  TextStyle,
+} from "react-native";
 import { useContext, useEffect, useRef, useState } from "react";
-import { ReaderContext } from "../../store/ReaderContext";
-import LoadingOverlay from "../../util/LoadingOverlay";
+import { ReaderContext } from "../store/ReaderContext";
+import LoadingOverlay from "../util/LoadingOverlay";
 import { parseHTML } from "linkedom";
-import { asArray, wait } from "../../util/helperFunctions";
+import { asArray, wait } from "../util/helperFunctions";
 import { XMLParser } from "fast-xml-parser";
 import JSZip from "jszip";
-import { resolveHref } from "../../util/helperFunctions";
+import { resolveHref } from "../util/helperFunctions";
 import { ScrollView } from "react-native";
 import {
   transformParagraph,
   xmlStringToTextsArray,
-} from "../../services/bookServices";
-import { ChapterContext } from "../../store/ChapterContext";
+} from "../services/bookServices";
+import { ChapterContext } from "../store/ChapterContext";
 
-const ReaderMeasurementPhase = (chapterData: any) => {
+type Tag = "p" | "h1" | "h2" | "h3" | "a";
+
+type PageItem = {
+  meta: Record<string, unknown>;
+  text: string;
+  tag: Tag;
+};
+
+type Page = PageItem[];
+type Pages = Page[];
+
+const ReaderScreen = () => {
   const { screenDimensions }: any = useContext(LibraryContext);
   const { textsArray, currentChapter, nextChapter, previousChapter } =
     useContext(ChapterContext);
   const iRef = useRef(0);
   const [paginationCompleted, setPaginationCompleted] = useState(false);
-  const [currentPage, setCurrentPage] = useState<any>([]);
-  const [pagesArray, setPagesArray] = useState<any>([]);
+  const [currentPage, setCurrentPage] = useState<PageItem[]>([]);
+  const [pagesArray, setPagesArray] = useState<Pages>([]);
   const [currReaderHeight, setCurrReaderHeight] = useState(0);
-  const [textLayout, setTextLayout] = useState([]);
-  const lastParagraphArray = useRef([]);
+  const [textLayout, setTextLayout] = useState<TextLayoutLine[]>([]);
+  const lastParagraphArray = useRef<string[]>([]);
   const lastParagraphData = useRef({ meta: "", tag: "", text: "" });
   const textSeparationTriggered: any = useRef(false);
   const currentIndex = useRef(0);
@@ -211,7 +234,7 @@ const ReaderMeasurementPhase = (chapterData: any) => {
     }
   };
 
-  const onMomentumScrollEnd = (e) => {
+  const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const pageWidth = pageWidthRef.current;
     if (!pageWidth) return;
     const x = e.nativeEvent.contentOffset.x;
@@ -219,7 +242,7 @@ const ReaderMeasurementPhase = (chapterData: any) => {
     // console.log(currentIndexRef.current);
   };
 
-  const onScrollEndDrag = (e) => {
+  const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const vx = e.nativeEvent.velocity?.x ?? 0;
 
     if (currentIndexRef.current === pagesArray.length - 1 && vx < 0.5) {
@@ -250,7 +273,7 @@ const ReaderMeasurementPhase = (chapterData: any) => {
         {paginationCompleted && (
           <FlatList
             data={pagesArray}
-            onLayout={(e) => {
+            onLayout={(e: LayoutChangeEvent) => {
               pageWidthRef.current = e.nativeEvent.layout.width;
             }}
             horizontal
@@ -271,7 +294,7 @@ const ReaderMeasurementPhase = (chapterData: any) => {
                 >
                   {page.item.map((item, index) => {
                     return (
-                      <Text key={index} style={styles[item?.tag]}>
+                      <Text key={index} style={tagStyles[item.tag]}>
                         {item?.text}
                       </Text>
                     );
@@ -296,7 +319,7 @@ const ReaderMeasurementPhase = (chapterData: any) => {
               minHeight: 1,
               marginTop: 30,
             }}
-            onLayout={(e) => {
+            onLayout={(e: LayoutChangeEvent) => {
               const { height } = e.nativeEvent.layout;
               setCurrReaderHeight(height);
             }}
@@ -305,8 +328,10 @@ const ReaderMeasurementPhase = (chapterData: any) => {
               return (
                 <Text
                   key={index}
-                  style={styles[item?.tag]}
-                  onTextLayout={(e) => {
+                  style={tagStyles[item.tag]}
+                  onTextLayout={(
+                    e: NativeSyntheticEvent<TextLayoutEventData>,
+                  ) => {
                     setTextLayout(e.nativeEvent.lines);
                   }}
                 >
@@ -336,7 +361,7 @@ const ReaderMeasurementPhase = (chapterData: any) => {
   );
 };
 
-export default ReaderMeasurementPhase;
+export default ReaderScreen;
 
 const styles = StyleSheet.create({
   outerContainer: {
@@ -347,18 +372,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 600,
   },
-  flatlist: {
-    // opacity: 0,
-    // borderColor: "red",
-  },
   flatlistItem: {
     overflow: "hidden",
-    // paddingVertical: 2,
-    // width: 400,
   },
   flatlistItemText: {
     fontSize: 20,
-    // lineHeight: 22,
     includeFontPadding: false, // 🔑
   },
   loadingOverlayContainer: {
@@ -369,6 +387,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+});
+
+const tagStyles: Record<Tag, TextStyle> = StyleSheet.create({
   h1: {
     fontSize: 30,
     fontWeight: 700,

@@ -7,8 +7,9 @@ import { parser1, parser2 } from "../util/helperFunctions";
 import JSZip, { forEach } from "jszip";
 import { parseDocument } from "htmlparser2";
 import { DomUtils } from "htmlparser2";
+import { Book } from "../types/book";
 
-export const downloadBook = async (bookData: object) => {
+export const downloadBook = async (bookData: Book) => {
   try {
     // Get signed url
     const signedUrl = await fetchBookSignedUrl(bookData);

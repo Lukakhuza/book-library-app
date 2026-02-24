@@ -19,7 +19,6 @@ const ChapterContextProvider = ({ children }: Props) => {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [textsArray, setTextsArray] = useState([]);
   const { currentBook, currentBookObject } = useContext(BookContext);
-  const [spineHrefs, setSpineHrefs] = useState([]);
 
   useEffect(() => {
     if (!currentBookObject) return;

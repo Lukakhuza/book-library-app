@@ -27,9 +27,7 @@ const BookDetailsScreen = ({ route }: any) => {
   //   bookImageUri,
   //   updateSpine,
   //   updateBookObjectData,
-  //   spineIndex,
   //   bookObjectData,
-  //   updateSpineIndex,
   // }: any = useContext(ReaderContext);
   const { myBooks, addToMyBooks, removeFromMyBooks }: any =
     useContext(MyBooksContext);
