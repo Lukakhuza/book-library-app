@@ -13,7 +13,7 @@ import {
   ContainerWidth,
   ReaderContextType,
 } from "../types/readerContextTypes";
-
+import { Props } from "../types/basic";
 import { Directory, File, Paths } from "expo-file-system";
 import { getXhtmlPath } from "../services/bookServices";
 import { MyBooksContext } from "./MyBooksContext";
@@ -77,10 +77,6 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   updateBookImageUri: () => {},
   updateSpine: () => {},
 });
-
-type Props = {
-  children: ReactNode;
-};
 
 const ReaderContextProvider = ({ children }: Props) => {
   const [screenDimensions, setScreenDimensions] = useState({

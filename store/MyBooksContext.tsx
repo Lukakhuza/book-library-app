@@ -7,14 +7,11 @@ import {
 } from "react";
 import { LibraryContext } from "./LibraryContext";
 import { Directory, File, Paths } from "expo-file-system";
+import { Props } from "../types/basic";
 
 export const MyBooksContext = createContext<any>({
   myBooks: [],
 });
-
-type Props = {
-  children: ReactNode;
-};
 
 type Book = {
   title: string;

@@ -23,12 +23,6 @@ const BookDetailsScreen = ({ route }: any) => {
   const { currentChapter } = useContext(ChapterContext);
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
-  // const {
-  //   bookImageUri,
-  //   updateSpine,
-  //   updateBookObjectData,
-  //   bookObjectData,
-  // }: any = useContext(ReaderContext);
   const { myBooks, addToMyBooks, removeFromMyBooks }: any =
     useContext(MyBooksContext);
 
@@ -53,7 +47,7 @@ const BookDetailsScreen = ({ route }: any) => {
       addToMyBooks(bookData);
       navigation.navigate("App");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -68,7 +62,7 @@ const BookDetailsScreen = ({ route }: any) => {
       removeFromMyBooks(bookData.fileName);
       navigation.navigate("App");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -79,17 +73,12 @@ const BookDetailsScreen = ({ route }: any) => {
       const { opfPath, spineHrefs, zip }: any = await openBook(
         bookData.fileName,
       );
-      // updateBookObjectData({
-      //   opfPath: opfPath,
-      //   spineHrefs: spineHrefs,
-      //   zip: zip,
-      // });
       const currentSpineIndex = currentChapter;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
       const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
       navigation.navigate("Reader", { chapterData: xhtmlString });
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 

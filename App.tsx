@@ -1,15 +1,15 @@
 import { useColorScheme } from "react-native";
 import {
-  createStaticNavigation,
   DefaultTheme,
   DarkTheme,
+  useNavigation,
 } from "@react-navigation/native";
 import ReaderContextProvider from "./store/ReaderContext";
-import RootStack from "./navigation/RootStack";
 import ChapterContextProvider from "./store/ChapterContext";
 import BookContextProvider from "./store/BookContext";
 import MyBooksContextProvider from "./store/MyBooksContext";
 import LibraryContextProvider from "./store/LibraryContext";
+import { Navigation } from "./navigation/Navigation";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -20,8 +20,6 @@ const MyTheme = {
     card: "rgb(120,120,120)",
   },
 };
-
-const Navigation = createStaticNavigation(RootStack);
 
 export default function App() {
   const scheme = useColorScheme();

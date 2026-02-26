@@ -1,4 +1,5 @@
 import { LibraryContext } from "../store/LibraryContext";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -26,6 +27,7 @@ import {
   xmlStringToTextsArray,
 } from "../services/bookServices";
 import { ChapterContext } from "../store/ChapterContext";
+import { BookContext } from "../store/BookContext";
 
 type Tag = "p" | "h1" | "h2" | "h3" | "a";
 
@@ -40,8 +42,15 @@ type Pages = Page[];
 
 const ReaderScreen = () => {
   const { screenDimensions }: any = useContext(LibraryContext);
-  const { textsArray, currentChapter, nextChapter, previousChapter } =
-    useContext(ChapterContext);
+  const {
+    textsArray,
+    currentChapter,
+    nextChapter,
+    previousChapter,
+    updateCurrentChapter,
+  } = useContext(ChapterContext);
+  const { shouldExitBook, resetShouldExitBook } = useContext(ChapterContext);
+  const { currentBook } = useContext(BookContext);
   const iRef = useRef(0);
   const [paginationCompleted, setPaginationCompleted] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageItem[]>([]);
@@ -55,9 +64,20 @@ const ReaderScreen = () => {
   const leftoverText: any = useRef(null);
   const pageWidthRef = useRef(0);
   const currentIndexRef = useRef(0);
+  const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (shouldExitBook) {
+      navigation.navigate("BookDetails", { bookData: currentBook });
+      resetShouldExitBook();
+      updateCurrentChapter(0);
+    }
+  }, [shouldExitBook]);
 
   useEffect(() => {
     // If textsArray doesn't contain chapter data, return.
+    if (shouldExitBook) return;
     if (textsArray?.length === 0) return;
     // Ignore initial currReaderHeight of 0.
     if (currReaderHeight === 0) return;
@@ -244,15 +264,12 @@ const ReaderScreen = () => {
     if (!pageWidth) return;
     const x = e.nativeEvent.contentOffset.x;
     currentIndexRef.current = Math.round(x / pageWidth);
-    // console.log(currentIndexRef.current);
   };
 
-  // console.log(currentIndexRef.current);
   const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const vx = e.nativeEvent.velocity?.x ?? 0;
 
     if (currentIndexRef.current === pagesArray.length - 1 && vx < 0.5) {
-      // console.log(vx);
       iRef.current = 0;
       setPaginationCompleted(false);
       setPagesArray([]);
@@ -260,9 +277,7 @@ const ReaderScreen = () => {
       nextChapter();
     }
 
-    // console.log(currentIndexRef.current, pagesArray.length, vx);
     if (currentIndexRef.current === 0 && vx > 0.5) {
-      // console.log(vx);
       iRef.current = 0;
       setPaginationCompleted(false);
       setPagesArray([]);

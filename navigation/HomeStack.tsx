@@ -34,7 +34,6 @@ const HomeStack = createBottomTabNavigator({
         tabBarActiveTintColor: "tomato",
         tabBarInactiveTintColor: "white",
       },
-      // tabBarIcon: <Ionicons name="home-outline" size={10} color="blue" />,
     },
     Settings: {
       screen: SettingsScreen,

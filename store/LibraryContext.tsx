@@ -7,6 +7,7 @@ import {
 } from "react";
 import { Dimensions } from "react-native";
 import { getAllBooks } from "../api/book.api";
+import { Props } from "../types/basic";
 
 type Book = {
   title: string;
@@ -19,10 +20,6 @@ type Book = {
 };
 
 export const LibraryContext = createContext<any>({});
-
-type Props = {
-  children: ReactNode;
-};
 
 const LibraryContextProvider = ({ children }: Props) => {
   const [books, setBooks] = useState<Book[]>([]);
