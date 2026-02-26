@@ -7,10 +7,11 @@ import {
 import { Button } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "../constants/Colors";
+// import { Colors } from "../constants/Colors";
+import { HomeStackNavigationProp } from "../types/navigation";
 
 const SettingsScreen = () => {
-  const navigation: any = useNavigation();
+  const navigation: HomeStackNavigationProp = useNavigation();
 
   return (
     <LinearGradient

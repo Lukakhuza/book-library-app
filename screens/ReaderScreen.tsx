@@ -28,6 +28,7 @@ import {
 } from "../services/bookServices";
 import { ChapterContext } from "../store/ChapterContext";
 import { BookContext } from "../store/BookContext";
+import { RootNavigationProp } from "../types/navigation";
 
 type Tag = "p" | "h1" | "h2" | "h3" | "a";
 
@@ -64,7 +65,7 @@ const ReaderScreen = () => {
   const leftoverText: any = useRef(null);
   const pageWidthRef = useRef(0);
   const currentIndexRef = useRef(0);
-  const navigation = useNavigation();
+  const navigation: RootNavigationProp = useNavigation();
   const isFocused = useIsFocused();
 
   useEffect(() => {

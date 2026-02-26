@@ -14,10 +14,11 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useContext, useCallback, useRef, useEffect } from "react";
 import { MyBooksContext } from "../store/MyBooksContext";
 import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "../constants/Colors";
+// import { Colors } from "../constants/Colors";
+import { AppNavigationProp } from "../types/navigation";
 
 const HomeScreen = () => {
-  const navigation: any = useNavigation();
+  const navigation: AppNavigationProp = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = Dimensions.get("screen");
   const { myBooks }: any = useContext(MyBooksContext);

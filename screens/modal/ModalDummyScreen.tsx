@@ -5,9 +5,10 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { Button } from "react-native";
+import { AppNavigationProp } from "../../types/navigation";
 
 const ModalDummyScreen = () => {
-  const navigation: any = useNavigation();
+  const navigation: AppNavigationProp = useNavigation();
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

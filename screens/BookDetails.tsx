@@ -15,13 +15,14 @@ import { wait } from "../util/helperFunctions";
 import { MyBooksContext } from "../store/MyBooksContext";
 import { BookContext } from "../store/BookContext";
 import { ChapterContext } from "../store/ChapterContext";
+import { RootNavigationProp } from "../types/navigation";
 // import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const { updateCurrentBook, currentBook } = useContext(BookContext);
   const { currentChapter } = useContext(ChapterContext);
-  const navigation: any = useNavigation();
+  const navigation: RootNavigationProp = useNavigation();
   const insets = useSafeAreaInsets();
   const { myBooks, addToMyBooks, removeFromMyBooks }: any =
     useContext(MyBooksContext);
