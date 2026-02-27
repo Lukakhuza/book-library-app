@@ -3,6 +3,8 @@ import ReaderScreen from "../screens/ReaderScreen";
 import ModalDummyScreen from "../screens/modal/ModalDummyScreen";
 import HomeStack from "../navigation/HomeStack";
 import BookDetailsScreen from "../screens/BookDetails";
+import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
 
 const RootStack = createNativeStackNavigator({
   groups: {
@@ -16,10 +18,15 @@ const RootStack = createNativeStackNavigator({
         },
         BookDetails: {
           screen: BookDetailsScreen,
-          options: {
+          options: ({ navigation }) => ({
             title: "Book Details",
             headerTitleAlign: "center",
-          },
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.navigate("App")}>
+                <Ionicons name="arrow-back" size={24} color="black" />
+              </TouchableOpacity>
+            ),
+          }),
         },
         Reader: {
           screen: ReaderScreen,
