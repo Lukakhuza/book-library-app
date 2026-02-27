@@ -16,24 +16,24 @@ import { MyBooksContext } from "../store/MyBooksContext";
 import { BookContext } from "../store/BookContext";
 import { ChapterContext } from "../store/ChapterContext";
 import { RootNavigationProp } from "../types/navigation";
+import { Book, BookRouteProps, OpenBookResult } from "../types/book";
 // import { Colors } from "../constants/Colors";
 
-const BookDetailsScreen = ({ route }: any) => {
+const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { updateCurrentBook, currentBook } = useContext(BookContext);
   const { currentChapter } = useContext(ChapterContext);
   const navigation: RootNavigationProp = useNavigation();
   const insets = useSafeAreaInsets();
-  const { myBooks, addToMyBooks, removeFromMyBooks }: any =
+  const { myBooks, addToMyBooks, removeFromMyBooks } =
     useContext(MyBooksContext);
-
   const { bookData } = route.params;
 
   useEffect(() => {
     updateCurrentBook(bookData);
   }, [bookData]);
 
-  const downloaded = myBooks.some((book: any) => {
+  const downloaded = myBooks.some((book: Book) => {
     return book._id === currentBook?._id;
   });
 
@@ -71,12 +71,15 @@ const BookDetailsScreen = ({ route }: any) => {
     if (isLoading) return;
     try {
       setIsLoading(true);
-      const { opfPath, spineHrefs, zip }: any = await openBook(
+      const { opfPath, spineHrefs, zip }: OpenBookResult = await openBook(
         bookData.fileName,
       );
       const currentSpineIndex = currentChapter;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
-      const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
+      const xhtmlString: string | undefined = await zip
+        .file(xhtmlPath)
+        ?.async("string");
+      if (!xhtmlString) return;
       navigation.navigate("Reader", { chapterData: xhtmlString });
     } finally {
       // setIsLoading(false);

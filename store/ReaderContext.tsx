@@ -20,7 +20,6 @@ import { MyBooksContext } from "./MyBooksContext";
 
 export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],
-  lineProps: [],
   downloadedBooks: [],
   screenDimensions: {
     height: 0,
@@ -83,7 +82,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     height: 0,
     width: 0,
   });
-  const [lineProps, setLineProps] = useState([]);
   const [pages, setPages]: any = useState([]);
   const [textLayouts, setTextLayouts] = useState<TextLayoutLine[]>([]);
   const [readerDimensions, setReaderDimensions] = useState({
@@ -142,25 +140,25 @@ const ReaderContextProvider = ({ children }: Props) => {
 
   const didPaginateRef = useRef<boolean>(false);
 
-  const checkLayoutReady = () => {
-    if (!didPaginateRef) return;
-    const ready = Object.values(layoutReadyRef.current).every(Boolean);
-    if (!ready) return;
-    didPaginateRef.current = true;
-    const lineProperties: any = paginateText(
-      textLayouts,
-      readerDimensions,
-      properties,
-    );
-    setLineProps(lineProperties);
-    // setPages(pages);
-    // setReaderIsReady(true);
-  };
+  // const checkLayoutReady = () => {
+  //   if (!didPaginateRef) return;
+  //   const ready = Object.values(layoutReadyRef.current).every(Boolean);
+  //   if (!ready) return;
+  //   didPaginateRef.current = true;
+  //   const lineProperties: any = paginateText(
+  //     textLayouts,
+  //     readerDimensions,
+  //     properties,
+  //   );
+  //   setLineProps(lineProperties);
+  //   // setPages(pages);
+  //   // setReaderIsReady(true);
+  // };
 
   useEffect(() => {
     if (!textLayouts) return;
     layoutReadyRef.current.contentSize = true;
-    checkLayoutReady();
+    // checkLayoutReady();
   }, [textLayouts]);
 
   const updateReaderDimensions = (width: number, height: number) => {
@@ -190,7 +188,6 @@ const ReaderContextProvider = ({ children }: Props) => {
   const value = {
     bookObjectData,
     properties,
-    lineProps,
     bookImageUri,
     chapter,
     pages,
@@ -208,7 +205,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     updateTextLayouts,
     updatePages,
     updateSpine,
-    checkLayoutReady,
+    // checkLayoutReady,
     updateBookImageUri,
     updateBookObjectData,
   };

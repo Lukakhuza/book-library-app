@@ -1,7 +1,7 @@
 import { CompositeNavigationProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { Book } from "./readerContextTypes";
+import { Book } from "./book";
 
 export type RootStackParamList = {
   App: undefined;

@@ -33,7 +33,7 @@ import { RootNavigationProp } from "../types/navigation";
 type Tag = "p" | "h1" | "h2" | "h3" | "a";
 
 type PageItem = {
-  meta: Record<string, unknown>;
+  meta: Record<string, unknown> | string;
   text: string;
   tag: Tag;
 };
@@ -41,8 +41,14 @@ type PageItem = {
 type Page = PageItem[];
 type Pages = Page[];
 
+type LeftoverText = {
+  meta: Record<string, unknown> | string;
+  text: string;
+  tag: Tag;
+} | null;
+
 const ReaderScreen = () => {
-  const { screenDimensions }: any = useContext(LibraryContext);
+  const { screenDimensions } = useContext(LibraryContext);
   const {
     textsArray,
     currentChapter,
@@ -59,12 +65,12 @@ const ReaderScreen = () => {
   const [currReaderHeight, setCurrReaderHeight] = useState(0);
   const [textLayout, setTextLayout] = useState<TextLayoutLine[]>([]);
   const lastParagraphArray = useRef<string[]>([]);
-  const lastParagraphData = useRef({ meta: "", tag: "", text: "" });
-  const textSeparationTriggered: any = useRef(false);
-  const currentIndex = useRef(0);
-  const leftoverText: any = useRef(null);
-  const pageWidthRef = useRef(0);
-  const currentIndexRef = useRef(0);
+  const lastParagraphData = useRef<PageItem>({ meta: "", tag: "p", text: "" });
+  const textSeparationTriggered = useRef<boolean>(false);
+  const currentIndex = useRef<number>(0);
+  const leftoverText = useRef<LeftoverText>(null);
+  const pageWidthRef = useRef<number>(0);
+  const currentIndexRef = useRef<number>(0);
   const navigation: RootNavigationProp = useNavigation();
   const isFocused = useIsFocused();
 
@@ -89,7 +95,7 @@ const ReaderScreen = () => {
     ) {
       if (currReaderHeight <= 800 && !leftoverText?.current?.text) {
         // After paragraphs have been added to the last currentPage, add this currentPage data to pagesArray.
-        setPagesArray((prev: any) => [...prev, currentPage]);
+        setPagesArray((prev) => [...prev, currentPage]);
         // After all chapter data has been added to pagesArray, set PaginationCompleted to true so that FlatList can be rendered.
         setPaginationCompleted(true);
         return;
@@ -101,14 +107,14 @@ const ReaderScreen = () => {
       // If there is a leftover text from previous page, add that to the beginning of current page.
       if (leftoverText.current) {
         const currLeftover = leftoverText.current;
-        setCurrentPage((prev: any) =>
+        setCurrentPage((prev) =>
           currLeftover?.text?.trim() === "" ? prev : [...prev, currLeftover],
         );
         leftoverText.current = null;
         // If there is no leftover text, simply add current paragraph to current page and update index:
       } else if (textSeparationTriggered?.current === false) {
         const idx = iRef.current;
-        setCurrentPage((prev: any) => [...prev, textsArray[idx]]);
+        setCurrentPage((prev) => [...prev, textsArray[idx]]);
         iRef.current = idx + 1;
         // If there is a lastParagraph array:
       } else {
@@ -123,7 +129,7 @@ const ReaderScreen = () => {
           );
 
           // add updated current page to pages array:
-          setPagesArray((prev: any) => [...prev, updatedCurrentPage]);
+          setPagesArray((prev) => [...prev, updatedCurrentPage]);
 
           // Get the index of where last paragraph was split, so that we can gather
           // the remaining part for the following page:
@@ -143,7 +149,7 @@ const ReaderScreen = () => {
             tag: lastParagraphData.current.tag,
             text: result,
           };
-          lastParagraphData.current = { meta: "", tag: "", text: "" };
+          lastParagraphData.current = { meta: "", tag: "p", text: "" };
           // Reset all variables that were specific to current page:
           lastParagraphArray.current = [];
           textSeparationTriggered.current = false;
@@ -169,9 +175,9 @@ const ReaderScreen = () => {
       // If there is an overflow of last paragraph, create lastParagraph array
       // based on current last paragraph and splitIndex.
       if (leftoverText.current) {
-        lastParagraphArray.current = leftoverText.current;
+        lastParagraphArray.current = [leftoverText.current.text];
       } else if (lastParagraphArray.current.length === 0) {
-        const lastParagraph: any = currentPage[currentPage?.length - 1];
+        const lastParagraph = currentPage[currentPage?.length - 1];
         lastParagraphData.current = lastParagraph;
         const arr = [lastParagraph?.text];
         const idx3 = 0;
@@ -185,7 +191,7 @@ const ReaderScreen = () => {
               : item,
           );
 
-          setPagesArray((prev: any) => [...prev, updatedCurrentPage]);
+          setPagesArray((prev) => [...prev, updatedCurrentPage]);
 
           const separationIndex = lastParagraphArray.current.indexOf("");
 
@@ -223,8 +229,8 @@ const ReaderScreen = () => {
 
   const updateLastParagraph = (
     idx: number,
-    array: any,
-    lastParagraphData: any,
+    array: string[],
+    lastParagraphData: PageItem,
     selection: string,
   ) => {
     const transformedLastParagraphArray1 = transformParagraph(array, idx);
@@ -244,11 +250,11 @@ const ReaderScreen = () => {
     };
 
     if (selection === "a") {
-      setCurrentPage((prev: any) => {
+      setCurrentPage((prev) => {
         return [...prev?.slice(0, prev?.length - 1), item];
       });
     } else if (selection === "b" || selection === "c") {
-      setCurrentPage((prev: any) => {
+      setCurrentPage((prev) => {
         const withoutLast = prev?.slice(0, prev?.length - 1);
 
         if (item?.text?.trim() === "") {

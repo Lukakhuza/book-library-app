@@ -8,18 +8,23 @@ import {
 import { Dimensions } from "react-native";
 import { getAllBooks } from "../api/book.api";
 import { Props } from "../types/basic";
+import { Book } from "../types/book";
 
-type Book = {
-  title: string;
-  author: string;
-  coverKey: string;
-  epubKey: string;
-  language: string;
-  publishedYear: string;
-  fileName: string;
+type LibraryContextType = {
+  books: Book[];
+  screenDimensions: {
+    height: number;
+    width: number;
+  };
 };
 
-export const LibraryContext = createContext<any>({});
+export const LibraryContext = createContext<LibraryContextType>({
+  books: [],
+  screenDimensions: {
+    width: 0,
+    height: 0,
+  },
+});
 
 const LibraryContextProvider = ({ children }: Props) => {
   const [books, setBooks] = useState<Book[]>([]);

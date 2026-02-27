@@ -1,5 +1,6 @@
 import { RefObject } from "react";
 import { TextLayoutLine } from "react-native";
+import { Book } from "./book";
 
 export type ScreenDimensions = {
   height: number;
@@ -9,16 +10,6 @@ export type ScreenDimensions = {
 export type Chapter = {
   title: string;
   body: string[];
-};
-
-export type Book = {
-  title: string;
-  author: string;
-  coverKey: string;
-  epubKey: string;
-  language: string;
-  publishedYear: string;
-  fileName: string;
 };
 
 export type ReaderDimensions = {

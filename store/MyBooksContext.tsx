@@ -8,20 +8,21 @@ import {
 import { LibraryContext } from "./LibraryContext";
 import { Directory, File, Paths } from "expo-file-system";
 import { Props } from "../types/basic";
+import { Book } from "../types/book";
 
-export const MyBooksContext = createContext<any>({
-  myBooks: [],
-});
-
-type Book = {
-  title: string;
-  author: string;
-  coverKey: string;
-  epubKey: string;
-  language: string;
-  publishedYear: string;
-  fileName: string;
+type MyBooksContextType = {
+  myBooks: Book[];
+  addToMyBooks: (book: Book) => void;
+  removeFromMyBooks: (fileName: string) => void;
+  updateMyBooks: (books: Book[]) => void;
 };
+
+export const MyBooksContext = createContext<MyBooksContextType>({
+  myBooks: [],
+  addToMyBooks: (book: Book) => {},
+  removeFromMyBooks: (fileName: string) => {},
+  updateMyBooks: (books: Book[]) => {},
+});
 
 const MyBooksContextProvider = ({ children }: Props) => {
   const { books } = useContext(LibraryContext);
@@ -53,7 +54,7 @@ const MyBooksContextProvider = ({ children }: Props) => {
     load();
   }, [books]);
 
-  const addToMyBooks = (book: any) => {
+  const addToMyBooks = (book: Book) => {
     setMyBooks((prev) => [...prev, book]);
   };
 

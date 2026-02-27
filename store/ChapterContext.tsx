@@ -25,7 +25,6 @@ const ChapterContextProvider = ({ children }: Props) => {
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentChapter);
       const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
       const array = await xmlStringToTextsArray(xhtmlString);
-      // console.log(textsArray);
       setTextsArray(array);
     };
     load();

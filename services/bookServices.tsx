@@ -1,4 +1,4 @@
-import { Directory, File, Paths } from "expo-file-system";
+import { Directory, File, Paths, FileInfo } from "expo-file-system";
 import { fetchBookSignedUrl, getAllBooks } from "../api/book.api";
 import { resolveHref } from "../util/helperFunctions";
 import { parseHTML } from "linkedom";
@@ -7,7 +7,7 @@ import { parser1, parser2 } from "../util/helperFunctions";
 import JSZip, { forEach } from "jszip";
 import { parseDocument } from "htmlparser2";
 import { DomUtils } from "htmlparser2";
-import { Book } from "../types/book";
+import { Book, OpenBookResult } from "../types/book";
 
 export const downloadBook = async (bookData: Book) => {
   try {
@@ -46,7 +46,7 @@ export const deleteFromMyBooks = async (fileName: string) => {
     const bookUri = booksDir.uri + epubFileName;
 
     // Delete Epub File
-    const epubFile = new File(bookUri);
+    const epubFile: File = new File(bookUri);
     epubFile.delete();
 
     // Generate json file uri
@@ -58,7 +58,7 @@ export const deleteFromMyBooks = async (fileName: string) => {
     const bookMetadataUri = booksMetadataDir.uri + jsonFileName;
 
     // Delete json file
-    const jsonFile = new File(bookMetadataUri);
+    const jsonFile: File = new File(bookMetadataUri);
     jsonFile.delete();
 
     return;
@@ -67,9 +67,20 @@ export const deleteFromMyBooks = async (fileName: string) => {
   }
 };
 
-export const downloadEpubFile = async (signedUrl: string, data: object) => {
+// type FileInfo = {
+//   contentUri: string;
+//   creationTime: number | null;
+//   exists: boolean;
+//   md5: string | null;
+//   modificationTime: number | null;
+//   size: number;
+//   type: string;
+//   uri: string;
+// };
+
+export const downloadEpubFile = async (signedUrl: string, data: Book) => {
   try {
-    const bookData: any = data;
+    const bookData = data;
     const booksDir = new Directory(Paths.document.uri, "books");
 
     if (!booksDir.exists) {
@@ -81,19 +92,20 @@ export const downloadEpubFile = async (signedUrl: string, data: object) => {
 
     // Check if there is any info on this fileUri
     const info = new File(fileUri).info();
+    console.log(info);
 
     // // Check for downloaded file Uri and set it to filePath
-    let downLoadedFileUri: any = "";
-    if (info.exists) {
+    let downLoadedFileUri: string = "";
+    if (info.exists && info.uri) {
       downLoadedFileUri = info.uri;
     } else {
-      console.log(signedUrl);
       const downloadedFile = await File.downloadFileAsync(signedUrl, booksDir, {
         idempotent: true,
       });
       downLoadedFileUri = downloadedFile.uri;
     }
-    const file = new File(downLoadedFileUri);
+    const file: File = new File(downLoadedFileUri);
+
     return file;
   } catch (error) {
     console.log(error);
@@ -102,7 +114,7 @@ export const downloadEpubFile = async (signedUrl: string, data: object) => {
 
 export const saveDataToJsonFile = async (
   epubFileUri: string,
-  bookData: any,
+  bookData: Book,
 ) => {
   try {
     const enhancedBookData = {
@@ -132,9 +144,10 @@ export const saveDataToJsonFile = async (
   }
 };
 
-export const getBook = async (signedUrl: string, bookData: object) => {
+export const getBook = async (signedUrl: string, bookData: Book) => {
   try {
-    const epubFile: any = await downloadEpubFile(signedUrl, bookData);
+    const epubFile = await downloadEpubFile(signedUrl, bookData);
+    if (!epubFile) return;
     const jsonFile = await saveDataToJsonFile(epubFile.uri, bookData);
 
     const bookFile = {
@@ -143,30 +156,6 @@ export const getBook = async (signedUrl: string, bookData: object) => {
     };
 
     return bookFile;
-
-    // It is working upto here. Continue from here on.
-    const encoded: any = await epubFile?.base64();
-    const zip = await JSZip.loadAsync(encoded, { base64: true });
-    const zipObjects = Object.keys(zip.files);
-    const content: any = await zip.file(zipObjects[5])?.async("text");
-    // await zip.file("OEBPS/package.opf")?.async("text");
-
-    const { document } = parseHTML(content);
-    const title: string | undefined =
-      document?.querySelector("h1.title")?.textContent;
-
-    const body1: any = document?.querySelectorAll("p");
-    const body2: any = body1.map((paragraph: any) => {
-      return JSON.stringify(paragraph.textContent)
-        .replaceAll(/\\n/g, " ")
-        .replace(/^["']|["']$/g, "");
-    });
-    const chapter = {
-      title: title,
-      body: body2,
-    };
-
-    return chapter;
   } catch (error) {
     console.log(error);
   }
@@ -179,17 +168,19 @@ export const getEpubFile = (directoryName: string, fileName: string) => {
   return epubFile;
 };
 
-export const getZip = async (epubFile: any) => {
+export const getZip = async (epubFile: File) => {
+  console.log("Hiiii", epubFile);
   const encoded = await epubFile.base64();
   const zip = await JSZip.loadAsync(encoded, { base64: true });
   return zip;
 };
 
-export const getOpfPath = async (zip: any) => {
-  const containerXmlFile: any = await zip
+export const getOpfPath = async (zip: JSZip) => {
+  const containerXmlFile = await zip
     .file("META-INF/container.xml")
     ?.async("text");
 
+  if (!containerXmlFile) return;
   const parsed = parser1.parse(containerXmlFile);
 
   const rootfiles = parsed.container.rootfiles.rootfile;
@@ -260,15 +251,15 @@ export const getSpineHrefs = (parsedPackage: any) => {
 };
 
 export const getXhtmlPath = (
-  opfPath: any,
-  spineHrefs: any,
-  currentSpineIndex: any,
+  opfPath: string,
+  spineHrefs: string[],
+  currentSpineIndex: number,
 ) => {
   const xhtmlPath = resolveHref(opfPath, spineHrefs[currentSpineIndex]);
   return xhtmlPath;
 };
 
-export const openBook = async (fileName: any) => {
+export const openBook = async (fileName: string): Promise<OpenBookResult> => {
   try {
     const epubFile = getEpubFile("books", fileName);
     const zip = await getZip(epubFile);
@@ -283,69 +274,9 @@ export const openBook = async (fileName: any) => {
       zip: zip,
     };
     return data;
-    const currentSpineIndex = 2;
-    const xhtmlPath = resolveHref(opfPath, spineHrefs[currentSpineIndex]);
-    const xhtmlString: any = await zip.file(xhtmlPath)?.async("string");
-    // const cleaned = xhtmlString
-    //   .replace(/<\?xml[\s\S]*?\?>\s*/i, "")
-    //   .replace(/<!DOCTYPE[\s\S]*?>\s*/i, "")
-    //   .trim();
-
-    // const obj = parser2.parse(cleaned);
-
-    // from here
-
-    return;
-    const chapterToRender =
-      parsedPackage.package.spine.itemref[currentSpineIndex];
-    console.log(chapterToRender);
-    // const mItems = parsedPackage.package.manifest.item;
-    // const found = mItems.find((item: any) => {
-    //   return item["@_id"] === chapterToRender["@_idref"];
-    // });
-    // console.log(found);
-    // return;
-
-    // console.log("Metadata", parsedPackage.package.metadata);
-    // console.log(
-    //   "Manifest",
-    //   parsedPackage?.package?.manifest?.item[9]?.["@_href"]
-    // );
-
-    // console.log(xhtmlPath);
-    // console.log("OBJ 2: ", obj2.html.body.div.div.div.div);
-
-    // const data = {
-    //   opfPath: opfPath,
-    //   html: obj.html,
-    //   epubFile: epubFile,
-    //   spineHrefs: spineHrefs,
-    //   xhtmlString: xhtmlString,
-    // };
-
-    // console.log("Table of Contents: ", obj.html.body.div.div["#text"]);
-    // console.log("Title: ", obj.html.head.title);
-    // console.log("Title: ", obj.html.body.div.nav.ol);
-
-    const { document } = parseHTML(xhtmlString);
-
-    const title: string | undefined =
-      document?.querySelector("h1.title")?.textContent;
-
-    const body1: any = document?.querySelectorAll("p");
-    const body2: any = body1.map((paragraph: any) => {
-      return JSON.stringify(paragraph.textContent)
-        .replaceAll(/\\n/g, " ")
-        .replace(/^["']|["']$/g, "");
-    });
-    const chapter = {
-      title: title,
-      body: body2,
-    };
-
-    return chapter;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 };
 
@@ -355,7 +286,6 @@ export const paginateText = (
   properties: any,
 ) => {
   try {
-    // console.log(textLayouts.current[2].lines[0]);
     const lineProperties = {
       ascender: textLayouts.current[1].lines[0].ascender,
       capHeight: textLayouts.current[1].lines[0].capHeight,
@@ -368,8 +298,6 @@ export const paginateText = (
       y: textLayouts.current[1].lines[0].y,
     };
 
-    // console.log(properties);
-    // const verticalPadding = properties.verticalPadding ?? 0;
     const availableHeight =
       readerDimensions.height - properties.verticalPadding;
 

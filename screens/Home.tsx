@@ -21,7 +21,7 @@ const HomeScreen = () => {
   const navigation: AppNavigationProp = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = Dimensions.get("screen");
-  const { myBooks }: any = useContext(MyBooksContext);
+  const { myBooks } = useContext(MyBooksContext);
 
   const FadeInView = ({ children }: any) => {
     const fadeAnim = useRef(new Animated.Value(0)).current;

@@ -20,7 +20,7 @@ import { AppNavigationProp } from "../types/navigation";
 
 const DiscoverScreen = () => {
   const navigation: AppNavigationProp = useNavigation();
-  const { books }: any = useContext(LibraryContext);
+  const { books } = useContext(LibraryContext);
 
   return (
     <LinearGradient
