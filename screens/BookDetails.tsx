@@ -1,5 +1,4 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useState } from "react";
 import { Directory, Paths } from "expo-file-system";
@@ -17,6 +16,7 @@ import { BookContext } from "../store/BookContext";
 import { ChapterContext } from "../store/ChapterContext";
 import { RootNavigationProp } from "../types/navigation";
 import { Book, BookRouteProps, OpenBookResult } from "../types/book";
+import { LibraryContext } from "../store/LibraryContext";
 // import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: BookRouteProps) => {
@@ -24,7 +24,6 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const { updateCurrentBook, currentBook } = useContext(BookContext);
   const { currentChapter } = useContext(ChapterContext);
   const navigation: RootNavigationProp = useNavigation();
-  const insets = useSafeAreaInsets();
   const { myBooks, addToMyBooks, removeFromMyBooks } =
     useContext(MyBooksContext);
   const { bookData } = route.params;
@@ -88,16 +87,12 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
 
   return (
     <LinearGradient
-      colors={["#d3d86cf5", "#f85454ff"]}
+      colors={["#45453ef5", "#f85454ff"]}
       style={[
         styles.outerContainer,
         {
           // alignItems: "center",
           // justifyContent: "center",
-          paddingTop: insets.top,
-          // paddingBottom: insets.bottom,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
           opacity: isLoading ? 0.5 : 1,
         },
       ]}

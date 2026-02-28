@@ -7,6 +7,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 
 const RootStack = createNativeStackNavigator({
+  screenOptions: {
+    animation: "fade_from_bottom",
+  },
   groups: {
     Home: {
       screens: {
@@ -23,7 +26,7 @@ const RootStack = createNativeStackNavigator({
             headerTitleAlign: "center",
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.navigate("App")}>
-                <Ionicons name="arrow-back" size={24} color="black" />
+                <Ionicons name="home-outline" size={24} color="black" />
               </TouchableOpacity>
             ),
           }),

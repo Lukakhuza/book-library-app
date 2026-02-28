@@ -17,19 +17,20 @@ import { LinearGradient } from "expo-linear-gradient";
 // import { Colors } from "../constants/Colors";
 import { LibraryContext } from "../store/LibraryContext";
 import { AppNavigationProp } from "../types/navigation";
+import { Header } from "../components/atoms/Header";
+import { Container } from "../components/atoms/Container";
 
 const DiscoverScreen = () => {
   const navigation: AppNavigationProp = useNavigation();
   const { books } = useContext(LibraryContext);
 
   return (
-    <LinearGradient
-      colors={["#d3d86cf5", "#f85454ff"]}
-      style={styles.outerContainer}
-    >
-      <View style={styles.headerContainer}>
-        <Text style={styles.header}>Explore Books</Text>
-      </View>
+    <Container>
+      {/* // <LinearGradient */}
+      {/* //   colors={["#d3d86cf5", "#f85454ff"]} */}
+      {/* //   style={styles.outerContainer} */}
+      {/* // > */}
+      <Header text="Explore Books" />
       <FlatList
         data={books}
         columnWrapperStyle={styles.flatlistColumnWrapperStyle}
@@ -61,7 +62,8 @@ const DiscoverScreen = () => {
         }}
         numColumns={2}
       />
-    </LinearGradient>
+      {/* </LinearGradient> */}
+    </Container>
   );
 };
 
@@ -69,16 +71,16 @@ export default DiscoverScreen;
 
 const styles = StyleSheet.create({
   outerContainer: { flex: 1, paddingHorizontal: 15 },
-  header: {
-    fontSize: 20,
-    fontWeight: 800,
-  },
-  headerContainer: {
-    marginTop: 20,
-    marginBottom: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  // header: {
+  //   fontSize: 20,
+  //   fontWeight: 800,
+  // },
+  // headerContainer: {
+  //   marginTop: 20,
+  //   marginBottom: 10,
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  // },
   flatlistColumnWrapperStyle: { gap: 12, justifyContent: "flex-end" },
   flatlistContentContainerStyle: {
     paddingTop: 20,

@@ -11,14 +11,21 @@ const HomeStack = createBottomTabNavigator({
     headerStyle: { backgroundColor: "tomato" },
     headerTitleAlign: "center",
     headerShown: false,
+    animation: "shift",
   },
   screens: {
     Home: {
       screen: HomeScreen,
       options: {
         title: "Home",
-        tabBarIcon: ({ color, size }) => {
-          return <Ionicons name="home-outline" size={size} color={color} />;
+        tabBarIcon: ({ color, size, focused }) => {
+          return (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={size}
+              color={color}
+            />
+          );
         },
         tabBarActiveTintColor: "tomato",
         tabBarInactiveTintColor: "white",
@@ -28,8 +35,14 @@ const HomeStack = createBottomTabNavigator({
       screen: DiscoverScreen,
       options: {
         title: "Discover",
-        tabBarIcon: ({ color, size }) => {
-          return <Ionicons name="book-outline" size={size} color={color} />;
+        tabBarIcon: ({ color, size, focused }) => {
+          return (
+            <Ionicons
+              name={focused ? "book" : "book-outline"}
+              size={size}
+              color={color}
+            />
+          );
         },
         tabBarActiveTintColor: "tomato",
         tabBarInactiveTintColor: "white",
@@ -38,8 +51,14 @@ const HomeStack = createBottomTabNavigator({
     Settings: {
       screen: SettingsScreen,
       options: {
-        tabBarIcon: ({ color, size }) => {
-          return <Ionicons name="settings-outline" size={size} color={color} />;
+        tabBarIcon: ({ color, size, focused }) => {
+          return (
+            <Ionicons
+              name={focused ? "settings" : "settings-outline"}
+              size={size}
+              color={color}
+            />
+          );
         },
         tabBarActiveTintColor: "tomato",
         tabBarInactiveTintColor: "white",

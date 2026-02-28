@@ -7,142 +7,150 @@ import {
   FlatList,
   Dimensions,
   Button,
-  Animated,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { useContext, useCallback, useRef, useEffect } from "react";
+import { useContext, useCallback, useRef, useEffect, useState } from "react";
 import { MyBooksContext } from "../store/MyBooksContext";
 import { LinearGradient } from "expo-linear-gradient";
 // import { Colors } from "../constants/Colors";
 import { AppNavigationProp } from "../types/navigation";
+// const scale = useRef(new Animated.Value(1)).current;
+import * as reanimated from "react-native-reanimated";
+import { BookItem } from "../components/atoms/BookItem";
+import { Header } from "../components/atoms/Header";
+import LoadingOverlay from "../util/LoadingOverlay";
+import { LibraryContext } from "../store/LibraryContext";
+import { Container } from "../components/atoms/Container";
+import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
+import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { Colors } from "../constants/colors";
+import { ProgressBar } from "../components/atoms/ProgressBar";
+
+// const handlePressIn = () => {
+//   Animated.spring(scale, {
+//     toValue: 1.1,
+//     useNativeDriver: true,
+//   }).start();
+// };
+
+// const handlePressOut = () => {
+//   Animated.spring(scale, {
+//     toValue: 1,
+//     useNativeDriver: true,
+//   }).start();
+// };
 
 const HomeScreen = () => {
-  const navigation: AppNavigationProp = useNavigation();
-  const insets = useSafeAreaInsets();
+  const [isPressed, setIsPressed] = useState(false);
   const { width } = Dimensions.get("screen");
-  const { myBooks } = useContext(MyBooksContext);
+  const navigation: AppNavigationProp = useNavigation();
+  const { myBooks, isLoading: myBooksLoading } = useContext(MyBooksContext);
+  const [fontsLoaded] = useFonts({ Roboto_700Bold });
+  const { safeAreaInsets: insets } = useContext(LibraryContext);
 
   const FadeInView = ({ children }: any) => {
-    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const opacity = useSharedValue(0);
 
     useEffect(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 2000,
-        useNativeDriver: true,
-      }).start();
-    }, [fadeAnim]);
+      opacity.value = withTiming(1, { duration: 2000 });
+    }, []);
 
-    return (
-      <Animated.View // Special animatable View
-        style={{
-          opacity: fadeAnim, // Bind opacity to animated value
-        }}
-      >
-        {children}
-      </Animated.View>
-    );
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+    }));
+
+    return <Animated.View style={animatedStyle}>{children}</Animated.View>;
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      // Refresh myBooks
-    }, [myBooks]),
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     // Refresh myBooks
+  //   }, [myBooks]),
+  // );
 
-  return (
-    <LinearGradient
-      colors={["#d3d86cf5", "#f85454ff"]}
-      style={{
-        flex: 1,
-        paddingTop: insets.top,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }}
-    >
-      <View style={styles.headerContainer}>
-        <Text style={styles.header}>My Books</Text>
+  if (myBooksLoading) {
+    return <LoadingOverlay message="Loading Books..." />;
+  }
+
+  let myBooksContent;
+
+  if (myBooks?.length === 0) {
+    myBooksContent = (
+      <View style={styles.content}>
+        <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
+          <Text style={styles.noBooksText}>You currently have no books.</Text>
+          <Text style={styles.noBooksText}>Click below to explore:</Text>
+        </View>
+        <Button
+          title="Discover"
+          onPress={() => {
+            navigation.navigate("Discover");
+          }}
+        />
       </View>
-      {/* <FadeInView
+    );
+  }
+
+  if (myBooks?.length > 0) {
+    myBooksContent = (
+      <FadeInView
         style={{
-          width: 250,
-          height: 50,
-          backgroundColor: "powderblue",
+          flex: 1,
         }}
       >
-        <Text style={{ fontSize: 28, textAlign: "center", margin: 10 }}>
-          Fading in
-        </Text>
-      </FadeInView> */}
-      {myBooks?.length === 0 && (
-        <View style={styles.content}>
-          <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
-            <Text style={styles.noBooksText}>You currently have no books.</Text>
-            <Text style={styles.noBooksText}>Click below to explore:</Text>
-          </View>
-          <Button
-            title="Discover"
-            onPress={() => {
-              navigation.navigate("Discover");
-            }}
-          />
-        </View>
-      )}
-      {myBooks?.length > 0 && (
-        <FadeInView
+        <FlatList
+          data={myBooks}
+          contentContainerStyle={
+            {
+              // alignItems: "stretch",
+              // paddingTop: 20,
+              // paddingBottom: 15,
+              // width: "100%",
+              // flex: 1,
+            }
+          }
+          style={{ marginTop: 20 }}
+          renderItem={(book) => {
+            return <BookItem book={book} />;
+          }}
+        />
+      </FadeInView>
+    );
+  }
+
+  return (
+    <Container>
+      <View>
+        <Text
           style={{
-            flex: 1,
+            textTransform: "uppercase",
+            fontFamily: "Roboto_700Bold",
+            letterSpacing: 2,
+            fontSize: 15,
+            color: Colors.dark.textMuted,
           }}
         >
-          <FlatList
-            data={myBooks}
-            contentContainerStyle={{
-              alignItems: "center",
-              paddingTop: 20,
-              paddingBottom: 15,
-            }}
-            renderItem={(book) => {
-              return (
-                <Pressable
-                  onPress={() => {
-                    navigation.navigate("BookDetails", { bookData: book.item });
-                  }}
-                  style={{
-                    backgroundColor: "lightblue",
-                    borderRadius: 20,
-                    width: width * 0.5,
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                    marginBottom: 10,
-                    paddingHorizontal: 8,
-                  }}
-                >
-                  <Text
-                    ellipsizeMode="tail"
-                    numberOfLines={2}
-                    style={{
-                      textAlign: "center",
-                      color: "Gray",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {book.item.title}
-                  </Text>
-                  <Image
-                    source={{
-                      uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${book.item.coverKey}`,
-                    }}
-                    style={{ width: 90, height: 135, marginTop: 10 }}
-                    resizeMode="cover"
-                  />
-                </Pressable>
-              );
-            }}
-          />
-        </FadeInView>
-      )}
-    </LinearGradient>
+          Good Evening
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Header text="What will you read?" />
+        <ThemeSwitchButton viewStyle={{ marginRight: 5, marginTop: 5 }} />
+      </View>
+      {myBooksContent}
+    </Container>
   );
 };
 export default HomeScreen;

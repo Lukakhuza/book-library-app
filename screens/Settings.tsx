@@ -4,21 +4,20 @@ import {
   createStaticNavigation,
   useNavigation,
 } from "@react-navigation/native";
+import { Container } from "../components/atoms/Container";
 import { Button } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 // import { Colors } from "../constants/Colors";
 import { HomeStackNavigationProp } from "../types/navigation";
+import { Header } from "../components/atoms/Header";
 
 const SettingsScreen = () => {
   const navigation: HomeStackNavigationProp = useNavigation();
 
   return (
-    <LinearGradient
-      colors={["#d3d86cf5", "#f85454ff"]}
-      style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-    >
-      <Text>Settings Screen</Text>
+    <Container>
+      <Header text="Settings" />
       <Ionicons name="home-outline" size={20} color="blue" />
       <Button
         title="Go Home"
@@ -26,7 +25,7 @@ const SettingsScreen = () => {
           navigation.navigate("Home");
         }}
       />
-    </LinearGradient>
+    </Container>
   );
 };
 

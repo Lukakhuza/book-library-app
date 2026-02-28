@@ -10,6 +10,7 @@ import BookContextProvider from "./store/BookContext";
 import MyBooksContextProvider from "./store/MyBooksContext";
 import LibraryContextProvider from "./store/LibraryContext";
 import { Navigation } from "./navigation/Navigation";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -23,17 +24,20 @@ const MyTheme = {
 
 export default function App() {
   const scheme = useColorScheme();
+
   return (
-    <LibraryContextProvider>
-      <MyBooksContextProvider>
-        <BookContextProvider>
-          <ChapterContextProvider>
-            <ReaderContextProvider>
-              <Navigation theme={scheme === "dark" ? DarkTheme : MyTheme} />
-            </ReaderContextProvider>
-          </ChapterContextProvider>
-        </BookContextProvider>
-      </MyBooksContextProvider>
-    </LibraryContextProvider>
+    <SafeAreaProvider>
+      <LibraryContextProvider>
+        <MyBooksContextProvider>
+          <BookContextProvider>
+            <ChapterContextProvider>
+              <ReaderContextProvider>
+                <Navigation theme={scheme === "dark" ? DarkTheme : MyTheme} />
+              </ReaderContextProvider>
+            </ChapterContextProvider>
+          </BookContextProvider>
+        </MyBooksContextProvider>
+      </LibraryContextProvider>
+    </SafeAreaProvider>
   );
 }

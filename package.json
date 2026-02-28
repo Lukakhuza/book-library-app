@@ -9,6 +9,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/google-sans": "^0.4.0",
+    "@expo-google-fonts/open-sans": "^0.4.2",
+    "@expo-google-fonts/roboto": "^0.4.3",
     "@expo/vector-icons": "^14.1.0",
     "@ndvi3t/epubjs-rn": "^0.4.2",
     "@react-navigation/bottom-tabs": "^7.9.0",
@@ -34,6 +37,7 @@
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-gesture-handler": "^2.30.0",
+    "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "^5.6.2",
     "react-native-screens": "~4.11.1",
     "react-native-webview": "13.13.5"
