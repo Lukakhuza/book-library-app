@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useState } from "react";
 import { Directory, Paths } from "expo-file-system";
+import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
 // import { ReaderContext } from "../store/ReaderContext";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -17,6 +18,8 @@ import { ChapterContext } from "../store/ChapterContext";
 import { RootNavigationProp } from "../types/navigation";
 import { Book, BookRouteProps, OpenBookResult } from "../types/book";
 import { LibraryContext } from "../store/LibraryContext";
+import { Container } from "../components/atoms/Container";
+import { Colors } from "../constants/colors";
 // import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: BookRouteProps) => {
@@ -86,29 +89,75 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
   };
 
   return (
-    <LinearGradient
-      colors={["#45453ef5", "#f85454ff"]}
-      style={[
-        styles.outerContainer,
-        {
-          // alignItems: "center",
-          // justifyContent: "center",
-          opacity: isLoading ? 0.5 : 1,
-        },
-      ]}
-    >
+    // <LinearGradient
+    //   colors={["#45453ef5", "#f85454ff"]}
+    //   style={[
+    //     styles.outerContainer,
+    //     {
+    //       // alignItems: "center",
+    //       // justifyContent: "center",
+    //       opacity: isLoading ? 0.5 : 1,
+    //     },
+    //   ]}
+    // >
+    <Container>
       {currentBook && (
         <View style={styles.content}>
-          <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
-            <Image
-              source={{
-                uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${currentBook.coverKey}`,
-              }}
-              style={{ width: 270, height: 405, marginTop: 10 }}
-              resizeMode="cover"
-            />
+          <View
+            style={{
+              marginHorizontal: 15,
+              marginBottom: 10,
+              // borderColor: "yellow",
+              // borderWidth: 2,
+            }}
+          >
+            <View style={{ alignItems: "center" }}>
+              <Image
+                source={{
+                  uri: `https://books-library-app.s3.eu-north-1.amazonaws.com/${currentBook.coverKey}`,
+                }}
+                style={{
+                  width: 270,
+                  height: 405,
+                  marginTop: 10,
+                  borderRadius: 20,
+
+                  // borderWidth: 2,
+                  // borderColor: "yellow",
+                }}
+                resizeMode="cover"
+              />
+            </View>
             <View style={styles.bookInfo}>
-              <View style={styles.bookInfoLine}>
+              <Text
+                style={{
+                  color: Colors.dark.textPrimary,
+                  fontFamily: "Roboto_700Bold",
+                  fontSize: 25,
+                  textAlign: "center",
+                  // borderColor: "yellow",
+                  // borderWidth: 2,
+                  marginVertical: 10,
+                }}
+                numberOfLines={2}
+              >
+                {currentBook.title}
+              </Text>
+              <Text
+                style={{
+                  color: Colors.dark.textMuted,
+                  fontFamily: "GoogleSans_400Regular",
+                  fontSize: 19,
+                  textAlign: "center",
+                  // borderColor: "yellow",
+                  // borderWidth: 2,
+                  marginBottom: 10,
+                }}
+                numberOfLines={2}
+              >
+                {currentBook.author}
+              </Text>
+              {/* <View style={styles.bookInfoLine}>
                 <Text style={styles.label}>Title:</Text>
                 <Text numberOfLines={2}>{currentBook.title}</Text>
               </View>
@@ -123,7 +172,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
               <View style={styles.bookInfoLine}>
                 <Text style={styles.label}>Published:</Text>
                 <Text>{currentBook.publishedYear}</Text>
-              </View>
+              </View> */}
             </View>
             {!downloaded ? (
               <Pressable
@@ -152,7 +201,8 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
           </View>
         </View>
       )}
-    </LinearGradient>
+    </Container>
+    // </LinearGradient>
   );
 };
 export default BookDetailsScreen;
@@ -192,22 +242,22 @@ const styles = StyleSheet.create({
   },
   downloadButton: {
     marginTop: 10,
-    borderWidth: 3,
-    borderColor: "brown",
+    // borderWidth: 3,
+    // borderColor: "brown",
     borderRadius: 15,
-    backgroundColor: "lightgray",
+    backgroundColor: Colors.dark.accentPrimary,
   },
   readButton: {
     marginTop: 10,
     borderRadius: 15,
-    backgroundColor: "green",
+    backgroundColor: Colors.dark.accentSuccess,
   },
   deleteButton: {
     marginTop: 10,
     borderWidth: 3,
-    borderColor: "black",
+    borderColor: Colors.dark.borderDefault,
     borderRadius: 15,
-    backgroundColor: "red",
+    backgroundColor: Colors.dark.bgCard,
   },
   downloadButtonText: {
     textAlign: "center",
@@ -217,6 +267,8 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     textAlign: "center",
+    fontFamily: "GoogleSans_400Regular",
+    color: Colors.dark.accentDanger,
     fontSize: 17,
     fontWeight: 500,
     marginVertical: 7,

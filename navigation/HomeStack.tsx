@@ -4,14 +4,18 @@ import DiscoverScreen from "../screens/Discover";
 import SettingsScreen from "../screens/Settings";
 import BookDetailsScreen from "../screens/BookDetails";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "../constants/colors";
 
 const HomeStack = createBottomTabNavigator({
   initialRouteName: "Home",
   screenOptions: {
-    headerStyle: { backgroundColor: "tomato" },
     headerTitleAlign: "center",
     headerShown: false,
     animation: "shift",
+    tabBarStyle: {
+      backgroundColor: Colors.dark.bgScreen,
+      borderTopColor: Colors.dark.bgChip,
+    },
   },
   screens: {
     Home: {

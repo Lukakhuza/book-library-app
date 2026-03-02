@@ -12,7 +12,9 @@ export const Container = ({ children }: Props) => {
     <View
       style={{
         flex: 1,
-        backgroundColor: "#242018",
+        // backgroundColor: "#242018",
+        backgroundColor: Colors.dark.bgScreen,
+
         paddingHorizontal: 23,
         paddingTop: insets.top,
       }}

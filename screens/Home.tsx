@@ -31,6 +31,7 @@ import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
 import { Colors } from "../constants/colors";
 import { ProgressBar } from "../components/atoms/ProgressBar";
+import { SubHeading } from "../components/atoms/SubHeading";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {
@@ -58,7 +59,7 @@ const HomeScreen = () => {
     const opacity = useSharedValue(0);
 
     useEffect(() => {
-      opacity.value = withTiming(1, { duration: 2000 });
+      opacity.value = withTiming(1, { duration: 500 });
     }, []);
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -127,28 +128,20 @@ const HomeScreen = () => {
   return (
     <Container>
       <View>
-        <Text
-          style={{
-            textTransform: "uppercase",
-            fontFamily: "Roboto_700Bold",
-            letterSpacing: 2,
-            fontSize: 15,
-            color: Colors.dark.textMuted,
-          }}
-        >
-          Good Evening
-        </Text>
+        <SubHeading text="Good Evening" />
       </View>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
+          marginBottom: 20,
         }}
       >
         <Header text="What will you read?" />
         <ThemeSwitchButton viewStyle={{ marginRight: 5, marginTop: 5 }} />
       </View>
+      <SubHeading text="Continue Reading" />
       {myBooksContent}
     </Container>
   );

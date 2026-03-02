@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import {
   useFonts,
   GoogleSans_700Bold,
@@ -11,12 +11,13 @@ import { Colors } from "../../constants/colors";
 
 type Props = {
   text: string;
+  customStyle?: ViewStyle;
 };
 
 // const isFontLoaded = Font.isLoaded("Georgia");
 // console.log("Georgia loaded:", fontsLoaded);
 
-export const Header = ({ text }: Props) => {
+export const Header = ({ text, customStyle }: Props) => {
   const [fontsLoaded] = useFonts({
     GoogleSans_500Medium,
     GoogleSans_700Bold,
@@ -24,7 +25,7 @@ export const Header = ({ text }: Props) => {
   });
 
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer, customStyle]}>
       <Text style={styles.headerText}>{text}</Text>
     </View>
   );

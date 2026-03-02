@@ -19,6 +19,7 @@ import { LibraryContext } from "../store/LibraryContext";
 import { AppNavigationProp } from "../types/navigation";
 import { Header } from "../components/atoms/Header";
 import { Container } from "../components/atoms/Container";
+import { Colors } from "../constants/colors";
 
 const DiscoverScreen = () => {
   const navigation: AppNavigationProp = useNavigation();
@@ -30,7 +31,7 @@ const DiscoverScreen = () => {
       {/* //   colors={["#d3d86cf5", "#f85454ff"]} */}
       {/* //   style={styles.outerContainer} */}
       {/* // > */}
-      <Header text="Explore Books" />
+      <Header text="Explore Books" customStyle={{ marginBottom: 5 }} />
       <FlatList
         data={books}
         columnWrapperStyle={styles.flatlistColumnWrapperStyle}
@@ -83,19 +84,25 @@ const styles = StyleSheet.create({
   // },
   flatlistColumnWrapperStyle: { gap: 12, justifyContent: "flex-end" },
   flatlistContentContainerStyle: {
-    paddingTop: 20,
-    paddingBottom: 15,
+    paddingTop: 10,
+    paddingBottom: 5,
   },
   flatlistItem: {
-    backgroundColor: "#4b4848ee",
-    borderRadius: 20,
+    // backgroundColor: "#4b4848ee",
+    // borderRadius: 20,
     flex: 1,
     width: "45%",
     alignItems: "center",
     justifyContent: "flex-end",
-    marginBottom: 10,
-    // marginVertical: 10,
+    // marginBottom: 10,
+    // // marginVertical: 10,
     paddingHorizontal: 8,
+    backgroundColor: Colors.dark.bgElevated,
+    borderRadius: 20,
+    // width: width * 0.5,
+    // alignItems: "center",
+    // justifyContent: "flex-end",
+    marginBottom: 20,
   },
   flatlistItemText: {
     textAlign: "center",

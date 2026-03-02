@@ -102,8 +102,6 @@ export const BookItem = ({ book }: any) => {
           <View
             style={{
               marginHorizontal: 16,
-              borderColor: "yellow",
-              borderWidth: 1,
               flex: 1,
             }}
           >
@@ -131,7 +129,20 @@ export const BookItem = ({ book }: any) => {
             >
               {book.item.author}
             </Text>
-            <ProgressBar progress={readingProgress} />
+            <ProgressBar
+              progress={readingProgress}
+              customStyle={{ marginBottom: 5 }}
+            />
+            <View>
+              <Text
+                style={{
+                  color: Colors.dark.textDisabled,
+                  fontFamily: "GoogleSans_500Medium",
+                }}
+              >
+                {`${Math.round(readingProgress * 100)}% - 78 pages left`}
+              </Text>
+            </View>
           </View>
           {/* <View style={{ width: "50%" }}></View> */}
         </View>
