@@ -4,7 +4,7 @@ type Props = {
   text: string;
 };
 
-const SubHeading = ({ text }: Props) => {
+export const SubHeading = ({ text }: Props) => {
   return (
     <View>
       <Text>{text}</Text>

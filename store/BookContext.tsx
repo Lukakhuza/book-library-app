@@ -14,6 +14,7 @@ export const BookContext = createContext<any>({});
 const BookContextProvider = ({ children }: Props) => {
   const { myBooks } = useContext(MyBooksContext);
   const [currentBook, setCurrentBook] = useState<any>(null);
+  const [readingProgress, setReadingProgress] = useState(0.67);
   const [currentBookObject, setCurrentBookObject] = useState(null);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const BookContextProvider = ({ children }: Props) => {
   const value = {
     currentBook,
     currentBookObject,
+    readingProgress,
     updateCurrentBook,
   };
 

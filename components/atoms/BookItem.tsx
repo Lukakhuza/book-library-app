@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import {
   Image,
   Pressable,
@@ -18,10 +19,12 @@ import { AppNavigationProp } from "../../types/navigation";
 import { Colors } from "../../constants/colors";
 import { BookImage } from "./BookImage";
 import { ProgressBar } from "./ProgressBar";
+import { BookContext } from "../../store/BookContext";
 
 export const BookItem = ({ book }: any) => {
   const { width } = Dimensions.get("screen");
   const navigation: AppNavigationProp = useNavigation();
+  const { readingProgress } = useContext(BookContext);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -128,7 +131,7 @@ export const BookItem = ({ book }: any) => {
             >
               {book.item.author}
             </Text>
-            <ProgressBar progress={0.56} />
+            <ProgressBar progress={readingProgress} />
           </View>
           {/* <View style={{ width: "50%" }}></View> */}
         </View>
