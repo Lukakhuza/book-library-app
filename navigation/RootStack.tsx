@@ -1,12 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ReaderScreen from "../screens/ReaderScreen";
-import ModalDummyScreen from "../screens/modal/ModalDummyScreen";
 import HomeStack from "../navigation/HomeStack";
 import BookDetailsScreen from "../screens/BookDetails";
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable } from "react-native";
-import { Colors } from "../constants/colors";
-import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
+import ReaderScreen from "../screens/ReaderScreen";
+import ModalDummyScreen from "../screens/modal/ModalDummyScreen";
 
 const RootStack = createNativeStackNavigator({
   screenOptions: {

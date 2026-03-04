@@ -1,10 +1,10 @@
 import { View, ViewStyle } from "react-native";
-import { Colors } from "../../constants/colors";
+import { Theme } from "../../theme";
 
 type Props = {
   progress: number;
   customStyle?: ViewStyle;
-  theme: any;
+  theme: Theme;
 };
 
 export const ProgressBar = ({ progress, customStyle, theme }: Props) => {

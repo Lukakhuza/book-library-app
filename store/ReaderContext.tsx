@@ -1,22 +1,11 @@
-import {
-  createContext,
-  useState,
-  type ReactNode,
-  useRef,
-  useEffect,
-  RefObject,
-} from "react";
+import { createContext, RefObject, useEffect, useRef, useState } from "react";
 import { TextLayoutLine } from "react-native";
-import { paginateText } from "../services/bookServices";
+import { Props } from "../types/basic";
 import {
-  Size,
   ContainerWidth,
   ReaderContextType,
+  Size,
 } from "../types/readerContextTypes";
-import { Props } from "../types/basic";
-import { Directory, File, Paths } from "expo-file-system";
-import { getXhtmlPath } from "../services/bookServices";
-import { MyBooksContext } from "./MyBooksContext";
 
 export const ReaderContext = createContext<ReaderContextType | any>({
   books: [],

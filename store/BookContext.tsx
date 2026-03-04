@@ -1,13 +1,8 @@
-import {
-  createContext,
-  useEffect,
-  useState,
-  type ReactNode,
-  useContext,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { openBook } from "../services/bookServices";
-import { MyBooksContext } from "./MyBooksContext";
 import { Props } from "../types/basic";
+import { MyBooksContext } from "./MyBooksContext";
+import { Book } from "../types/book";
 
 export const BookContext = createContext<any>({});
 
@@ -29,7 +24,7 @@ const BookContextProvider = ({ children }: Props) => {
     load();
   }, [currentBook]);
 
-  const updateCurrentBook = (book: any) => {
+  const updateCurrentBook = (book: Book) => {
     setCurrentBook(book);
   };
 

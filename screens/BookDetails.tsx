@@ -1,36 +1,30 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useState } from "react";
-import { Directory, Paths } from "expo-file-system";
-import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 // import { ReaderContext } from "../store/ReaderContext";
-import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { Container } from "../components/atoms/Container";
+import { Colors } from "../constants/colors";
 import {
   deleteFromMyBooks,
   downloadBook,
   getXhtmlPath,
   openBook,
 } from "../services/bookServices";
-import { wait } from "../util/helperFunctions";
-import { MyBooksContext } from "../store/MyBooksContext";
 import { BookContext } from "../store/BookContext";
 import { ChapterContext } from "../store/ChapterContext";
-import { RootNavigationProp } from "../types/navigation";
-import { Book, BookRouteProps, OpenBookResult } from "../types/book";
-import { LibraryContext } from "../store/LibraryContext";
-import { Container } from "../components/atoms/Container";
-import { Colors } from "../constants/colors";
-import LoadingOverlay from "../util/LoadingOverlay";
+import { MyBooksContext } from "../store/MyBooksContext";
 import { useTheme } from "../store/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import { Book, BookRouteProps, OpenBookResult } from "../types/book";
+import { RootNavigationProp } from "../types/navigation";
+import LoadingOverlay from "../util/LoadingOverlay";
 // import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [readingStarted, setReadingStarted] = useState(false);
-  const [startedReading, setStartedReading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
   const { updateCurrentBook, currentBook } = useContext(BookContext);
   const { currentChapter } = useContext(ChapterContext);
   const navigation: RootNavigationProp = useNavigation();
@@ -82,8 +76,9 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const handleReadBook = async () => {
     // if (isLoading) return;
     try {
-      setIsLoading(true);
-      setReadingStarted(true);
+      setIsDisabled(true);
+      // setIsLoading(true);
+      // setReadingStarted(true);
       const { opfPath, spineHrefs, zip }: OpenBookResult = await openBook(
         bookData.fileName,
       );
@@ -99,7 +94,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
     }
   };
 
-  if (isLoading || isDeleting || isDownloading || readingStarted) {
+  if (isLoading || isDeleting || isDownloading) {
     if (isDeleting) {
       return <LoadingOverlay message="Deleting Book..." theme={theme} />;
     }
@@ -202,22 +197,6 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
               >
                 {currentBook.author}
               </Text>
-              {/* <View style={styles.bookInfoLine}>
-                <Text style={styles.label}>Title:</Text>
-                <Text numberOfLines={2}>{currentBook.title}</Text>
-              </View>
-              <View style={styles.bookInfoLine}>
-                <Text style={styles.label}>Author:</Text>
-                <Text numberOfLines={2}>{currentBook.author}</Text>
-              </View>
-              <View style={styles.bookInfoLine}>
-                <Text style={styles.label}>Language:</Text>
-                <Text>{currentBook.language}</Text>
-              </View>
-              <View style={styles.bookInfoLine}>
-                <Text style={styles.label}>Published:</Text>
-                <Text>{currentBook.publishedYear}</Text>
-              </View> */}
             </View>
             {!downloaded ? (
               <View>
@@ -235,14 +214,22 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
             ) : (
               <View>
                 <Pressable
-                  disabled={isLoading}
+                  disabled={isDisabled}
                   style={[
                     styles.readButton,
                     { backgroundColor: theme.colors.accentSuccess },
                   ]}
                   onPress={handleReadBook}
                 >
-                  <Text style={styles.downloadButtonText}>Read Book</Text>
+                  {isDisabled ? (
+                    <Text
+                      style={[styles.downloadButtonText, { color: "purple" }]}
+                    >
+                      Loading...
+                    </Text>
+                  ) : (
+                    <Text style={styles.downloadButtonText}>Read Book</Text>
+                  )}
                 </Pressable>
                 <Pressable
                   disabled={isLoading}

@@ -1,10 +1,9 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../screens/Home";
-import DiscoverScreen from "../screens/Discover";
-import SettingsScreen from "../screens/Settings";
-import BookDetailsScreen from "../screens/BookDetails";
 import { Ionicons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Colors } from "../constants/colors";
+import DiscoverScreen from "../screens/Discover";
+import HomeScreen from "../screens/Home";
+import SettingsScreen from "../screens/Settings";
 
 const HomeStack = createBottomTabNavigator({
   initialRouteName: "Home",
@@ -60,8 +59,6 @@ const HomeStack = createBottomTabNavigator({
             />
           );
         },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "white",
       },
     },
   },

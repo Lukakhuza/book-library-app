@@ -1,4 +1,4 @@
-import { lightColors, darkColors } from "./colors";
+import { darkColors, lightColors } from "./colors";
 import { tagStylesDark, tagStylesLight } from "./tagStyles";
 
 export const lightTheme = { colors: lightColors, tagStyles: tagStylesLight };

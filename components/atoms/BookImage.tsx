@@ -1,22 +1,4 @@
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  Dimensions,
-  Button,
-  ImageStyle,
-} from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
-import { useNavigation } from "@react-navigation/native";
-import { AppNavigationProp } from "../../types/navigation";
-import { Colors } from "../../constants/colors";
+import { Image, ImageStyle } from "react-native";
 
 type BookImageProps = {
   imgUri: string;

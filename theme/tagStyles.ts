@@ -1,4 +1,4 @@
-import { lightColors, darkColors } from "./colors";
+import { darkColors, lightColors } from "./colors";
 
 export const tagStylesDark = {
   h1: {

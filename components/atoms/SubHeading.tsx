@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
-import { Colors } from "../../constants/colors";
+import { Theme } from "../../theme";
 
 type Props = {
   text: string;
-  theme: any;
+  theme: Theme;
 };
 
 export const SubHeading = ({ text, theme }: Props) => {

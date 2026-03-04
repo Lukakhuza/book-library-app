@@ -1,10 +1,9 @@
-import { useContext, useEffect } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { Colors } from "../constants/colors";
+import { Theme } from "../theme";
 
 type Props = {
   message: string;
-  theme: any;
+  theme: Theme;
 };
 
 const LoadingOverlay = ({ message, theme }: Props) => {

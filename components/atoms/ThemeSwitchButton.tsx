@@ -1,11 +1,11 @@
-import { View, Text, ViewStyle, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../../constants/colors";
+import { Pressable, Text, ViewStyle } from "react-native";
+import { Theme } from "../../theme";
 
 type CustomStyles = {
   viewStyle?: ViewStyle;
   onPress: () => void;
-  theme: any;
+  theme: Theme;
   isDark: boolean;
 };
 

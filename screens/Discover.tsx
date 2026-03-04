@@ -1,26 +1,13 @@
-import {
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, Text } from "react-native";
 // import { useNavigation } from "@react-navigation/native";
-import {
-  createStaticNavigation,
-  useNavigation,
-} from "@react-navigation/native";
-import { Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
-import { LinearGradient } from "expo-linear-gradient";
 // import { Colors } from "../constants/Colors";
-import { LibraryContext } from "../store/LibraryContext";
-import { AppNavigationProp } from "../types/navigation";
-import { Header } from "../components/atoms/Header";
 import { Container } from "../components/atoms/Container";
-import { Colors } from "../constants/colors";
+import { Header } from "../components/atoms/Header";
+import { LibraryContext } from "../store/LibraryContext";
 import { useTheme } from "../store/ThemeContext";
+import { AppNavigationProp } from "../types/navigation";
 
 const DiscoverScreen = () => {
   const navigation: AppNavigationProp = useNavigation();
@@ -29,10 +16,6 @@ const DiscoverScreen = () => {
 
   return (
     <Container>
-      {/* // <LinearGradient */}
-      {/* //   colors={["#d3d86cf5", "#f85454ff"]} */}
-      {/* //   style={styles.outerContainer} */}
-      {/* // > */}
       <Header
         text="Explore Books"
         customStyle={{ marginBottom: 5 }}
@@ -40,6 +23,8 @@ const DiscoverScreen = () => {
       />
       <FlatList
         data={books}
+        bounces={false}
+        overScrollMode="never"
         columnWrapperStyle={styles.flatlistColumnWrapperStyle}
         contentContainerStyle={styles.flatlistContentContainerStyle}
         renderItem={(book) => {
@@ -56,7 +41,10 @@ const DiscoverScreen = () => {
               <Text
                 ellipsizeMode="tail"
                 numberOfLines={2}
-                style={styles.flatlistItemText}
+                style={[
+                  styles.flatlistItemText,
+                  { color: theme.colors.textPrimary },
+                ]}
               >
                 {book.item.title}
               </Text>
@@ -72,7 +60,6 @@ const DiscoverScreen = () => {
         }}
         numColumns={2}
       />
-      {/* </LinearGradient> */}
     </Container>
   );
 };
@@ -108,6 +95,8 @@ const styles = StyleSheet.create({
     // width: width * 0.5,
     // alignItems: "center",
     // justifyContent: "flex-end",
+    borderColor: "black",
+    borderWidth: 1,
     marginBottom: 20,
   },
   flatlistItemText: {

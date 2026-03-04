@@ -1,28 +1,27 @@
+import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  Dimensions,
-  Button,
-} from "react-native";
+import { Dimensions, Pressable, Text, View } from "react-native";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { useNavigation } from "@react-navigation/native";
-import { AppNavigationProp } from "../../types/navigation";
-import { Colors } from "../../constants/colors";
-import { BookImage } from "./BookImage";
-import { ProgressBar } from "./ProgressBar";
 import { BookContext } from "../../store/BookContext";
 import { useTheme } from "../../store/ThemeContext";
+import { AppNavigationProp } from "../../types/navigation";
+import { BookImage } from "./BookImage";
+import { ProgressBar } from "./ProgressBar";
+import { Book } from "../../types/book";
 
-export const BookItem = ({ book }: any) => {
+type BookData = {
+  book: {
+    index: number;
+    item: Book;
+    separators: unknown;
+  };
+};
+
+export const BookItem = ({ book }: BookData) => {
   const { width } = Dimensions.get("screen");
   const navigation: AppNavigationProp = useNavigation();
   const { readingProgress } = useContext(BookContext);

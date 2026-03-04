@@ -1,13 +1,13 @@
-import { View, StyleSheet } from "react-native";
 import { useContext } from "react";
+import { StatusBar, View } from "react-native";
 import { LibraryContext } from "../../store/LibraryContext";
+import { useTheme } from "../../store/ThemeContext";
 import { Props } from "../../types/basic";
-import { Colors } from "../../constants/colors";
-import { ThemeContext, useTheme } from "../../store/ThemeContext";
 
 export const Container = ({ children }: Props) => {
   const { safeAreaInsets: insets } = useContext(LibraryContext);
   const { theme, isDark, toggleTheme } = useTheme();
+  console.log(theme.colors.bgScreen);
   return (
     <View
       style={{
@@ -17,7 +17,14 @@ export const Container = ({ children }: Props) => {
         paddingTop: insets.top,
       }}
     >
-      {children}
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
+        {children}
+      </View>
     </View>
   );
 };

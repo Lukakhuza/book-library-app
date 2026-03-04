@@ -1,38 +1,31 @@
+import { useNavigation } from "@react-navigation/native";
+import { useContext, useEffect, useState } from "react";
 import {
-  Image,
-  Pressable,
+  Button,
+  Dimensions,
+  FlatList,
   StyleSheet,
   Text,
   View,
-  FlatList,
-  Dimensions,
-  Button,
 } from "react-native";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withSpring,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { useContext, useCallback, useRef, useEffect, useState } from "react";
 import { MyBooksContext } from "../store/MyBooksContext";
-import { LinearGradient } from "expo-linear-gradient";
 // import { Colors } from "../constants/Colors";
 import { AppNavigationProp } from "../types/navigation";
 // const scale = useRef(new Animated.Value(1)).current;
-import * as reanimated from "react-native-reanimated";
+import { Roboto_700Bold, useFonts } from "@expo-google-fonts/roboto";
 import { BookItem } from "../components/atoms/BookItem";
-import { Header } from "../components/atoms/Header";
-import LoadingOverlay from "../util/LoadingOverlay";
-import { LibraryContext } from "../store/LibraryContext";
 import { Container } from "../components/atoms/Container";
-import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
-import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
-import { Colors } from "../constants/colors";
-import { ProgressBar } from "../components/atoms/ProgressBar";
+import { Header } from "../components/atoms/Header";
 import { SubHeading } from "../components/atoms/SubHeading";
+import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
+import { LibraryContext } from "../store/LibraryContext";
 import { useTheme } from "../store/ThemeContext";
+import LoadingOverlay from "../util/LoadingOverlay";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {
@@ -55,7 +48,9 @@ const HomeScreen = () => {
   const { myBooks, isLoading: myBooksLoading } = useContext(MyBooksContext);
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const { safeAreaInsets: insets } = useContext(LibraryContext);
-  const { theme, isDark, toggleTheme } = useTheme();
+  const x = useTheme();
+  console.log(x);
+  const { theme, isDark, toggleTheme }: any = x;
 
   const FadeInView = ({ children }: any) => {
     const opacity = useSharedValue(0);
@@ -118,6 +113,7 @@ const HomeScreen = () => {
       >
         <FlatList
           data={myBooks}
+          bounces={false}
           contentContainerStyle={
             {
               // alignItems: "stretch",

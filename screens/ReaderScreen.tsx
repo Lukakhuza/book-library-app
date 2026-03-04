@@ -370,7 +370,7 @@ const ReaderScreen = () => {
                 <Text
                   key={index}
                   style={[
-                    { opacity: 0, backgroundColor: theme.colors.bgOverlay },
+                    { opacity: 0, backgroundColor: "brown" },
                     theme.tagStyles[item?.tag],
                   ]}
                   onTextLayout={(
@@ -388,8 +388,6 @@ const ReaderScreen = () => {
         {!paginationCompleted && (
           <View
             style={{
-              // backgroundColor: "lightblue",
-              // opacity: 1,
               position: "absolute",
               top: 0,
               left: 0,

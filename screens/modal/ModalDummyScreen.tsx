@@ -1,9 +1,6 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 // import { useNavigation } from "@react-navigation/native";
-import {
-  createStaticNavigation,
-  useNavigation,
-} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Button } from "react-native";
 import { AppNavigationProp } from "../../types/navigation";
 

@@ -1,7 +1,7 @@
 export const lightColors = {
   bgApp: "#F5F0E8",
-  bgScreen: "#FAF7F2",
-  bgCard: "#FFFFFF",
+  bgScreen: "#e9e9e8",
+  bgCard: "#ccc6bc",
   bgElevated: "#FDF9F3",
   bgInput: "#F0EBE1",
   bgChip: "#EDE5D8",

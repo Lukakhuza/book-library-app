@@ -1,16 +1,16 @@
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import {
-  useFonts,
-  GoogleSans_700Bold,
   GoogleSans_500Medium,
+  GoogleSans_700Bold,
+  useFonts,
 } from "@expo-google-fonts/google-sans";
 import { OpenSans_600SemiBold } from "@expo-google-fonts/open-sans";
-import { Colors } from "../../constants/colors";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { Theme } from "../../theme";
 
 type Props = {
   text: string;
   customStyle?: ViewStyle;
-  theme: any;
+  theme: Theme;
 };
 
 // const isFontLoaded = Font.isLoaded("Georgia");

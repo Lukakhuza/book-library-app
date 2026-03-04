@@ -1,14 +1,7 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import { BookContext } from "./BookContext";
-import { getXhtmlPath } from "../services/bookServices";
-import { xmlStringToTextsArray } from "../services/bookServices";
+import { createContext, useContext, useEffect, useState } from "react";
+import { getXhtmlPath, xmlStringToTextsArray } from "../services/bookServices";
 import { Props } from "../types/basic";
+import { BookContext } from "./BookContext";
 
 export const ChapterContext = createContext<any>({});
 

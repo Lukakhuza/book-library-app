@@ -1,6 +1,5 @@
-import { FlatList, Dimensions, ScrollView, Text, View } from "react-native";
-import { Paths, Directory, File } from "expo-file-system";
 import { XMLParser } from "fast-xml-parser";
+import { Dimensions } from "react-native";
 
 export const getDimensions = () => {
   return Dimensions.get("screen");

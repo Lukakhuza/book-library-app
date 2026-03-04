@@ -1,16 +1,9 @@
-import {
-  createContext,
-  useState,
-  type ReactNode,
-  useEffect,
-  useLayoutEffect,
-} from "react";
+import { createContext, useEffect, useLayoutEffect, useState } from "react";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getAllBooks } from "../api/book.api";
 import { Props } from "../types/basic";
 import { Book } from "../types/book";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@react-navigation/native";
 
 type LibraryContextType = {
   books: Book[];

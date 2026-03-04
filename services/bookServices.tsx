@@ -1,13 +1,9 @@
-import { Directory, File, Paths, FileInfo } from "expo-file-system";
+import { Directory, File, Paths } from "expo-file-system";
+import { DomUtils, parseDocument } from "htmlparser2";
+import JSZip from "jszip";
 import { fetchBookSignedUrl, getAllBooks } from "../api/book.api";
-import { resolveHref } from "../util/helperFunctions";
-import { parseHTML } from "linkedom";
-import { XMLParser } from "fast-xml-parser";
-import { parser1, parser2 } from "../util/helperFunctions";
-import JSZip, { forEach } from "jszip";
-import { parseDocument } from "htmlparser2";
-import { DomUtils } from "htmlparser2";
 import { Book, OpenBookResult } from "../types/book";
+import { parser1, resolveHref } from "../util/helperFunctions";
 
 export const downloadBook = async (bookData: Book) => {
   try {
