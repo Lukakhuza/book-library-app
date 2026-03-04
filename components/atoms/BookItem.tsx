@@ -53,46 +53,15 @@ export const BookItem = ({ book }: BookData) => {
         style={({ pressed }) => ({
           backgroundColor: theme.colors.bgElevated,
           borderRadius: 20,
-          // width: width * 0.5,
-          // alignItems: "center",
-          // justifyContent: "flex-end",
           borderColor: "black",
           borderWidth: 1,
           marginBottom: 20,
           paddingHorizontal: 8,
         })}
-
-        //
-
-        //     bgApp:       "#1C1A17",
-        // bgScreen:    "#242018",
-        // bgCard:      "#2E2A24",
-        // bgElevated:  "#3A3228",
-        // bgInput:     "#2E2A24",
-        // bgChip:      "#3D372F",
-        // bgNotch:     "#1C1A17",
-        // bgOverlay:   "rgba(28,26,23,0.95)",
-        // textPrimary:   "#F5EFE4",
-        // textSecondary: "#D8CBAD",
-        // textMuted:     "#9E9585",
-        // textDisabled:  "#6E6558",
-        // accentPrimary: "#D4A96A",
-        // accentDark:    "#B8904F",
-        // accentDanger:  "#C47A7A",
-        // accentSuccess: "#7AC47A",
-        // accentTag:     "#B8904F",
-        // borderDefault: "#3D372F",
-        // borderCard:    "#4A4035",
-        // borderDivider: "#322D27",
-        // readerBg:   "#26221C",
-        // readerText: "#D8CBAD",
       >
         <View
           style={{
             flexDirection: "row",
-            // width: "100%",
-            // flex: 1,
-            // paddingLeft: 30,
             paddingVertical: 15,
             paddingHorizontal: 10,
           }}
@@ -101,7 +70,6 @@ export const BookItem = ({ book }: BookData) => {
             imgUri={`https://books-library-app.s3.eu-north-1.amazonaws.com/${book.item.coverKey}`}
             width={70}
           />
-          {/* <View> */}
           <View
             style={{
               marginHorizontal: 16,
@@ -115,8 +83,6 @@ export const BookItem = ({ book }: BookData) => {
                 fontSize: 20,
                 fontFamily: "GoogleSans_700Bold",
                 color: theme.colors.textPrimary,
-                // borderColor: "orange",
-                // borderWidth: 2,
                 lineHeight: 24,
               }}
             >
@@ -126,8 +92,6 @@ export const BookItem = ({ book }: BookData) => {
               style={{
                 fontFamily: "GoogleSans_500Medium",
                 color: theme.colors.textMuted,
-                // borderColor: "blue",
-                // borderWidth: 2,
               }}
             >
               {book.item.author}
@@ -148,9 +112,7 @@ export const BookItem = ({ book }: BookData) => {
               </Text>
             </View>
           </View>
-          {/* <View style={{ width: "50%" }}></View> */}
         </View>
-        {/* </View> */}
       </Pressable>
     </Animated.View>
   );

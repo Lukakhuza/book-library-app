@@ -260,6 +260,7 @@ export const openBook = async (fileName: string): Promise<OpenBookResult> => {
     const zip = await getZip(epubFile);
     const opfPath = await getOpfPath(zip);
     const opfXml: any = await zip.file(opfPath)?.async("string");
+    console.log(opfXml);
     const parsedPackage = parser1.parse(opfXml);
     const spineHrefs = getSpineHrefs(parsedPackage);
 

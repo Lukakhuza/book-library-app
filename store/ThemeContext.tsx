@@ -4,7 +4,7 @@ import { darkTheme, lightTheme, Theme } from "../theme/index";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { tagStylesDark, tagStylesLight } from "../theme/tagStyles";
 
-type ThemeContextType = {
+export type ThemeContextType = {
   theme: Theme;
   isDark: boolean;
   toggleTheme: () => void;
@@ -88,8 +88,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const toggleTheme = () => setIsDark((prev) => !prev);
 
-  console.log(theme);
-
   return (
     <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>
       {children}
@@ -99,6 +97,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useTheme = () => {
   const ctx = useContext(ThemeContext);
+  console.log(ctx);
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
   return ctx;
 };

@@ -40,9 +40,6 @@ const LibraryContextProvider = ({ children }: Props) => {
     height: 0,
     width: 0,
   });
-  // const theme1 = useTheme();
-
-  // console.log(theme1);
 
   useLayoutEffect(() => {
     const { width, height } = Dimensions.get("screen");

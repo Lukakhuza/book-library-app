@@ -1,36 +1,24 @@
-import { LibraryContext } from "../store/LibraryContext";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Pressable,
-  LayoutChangeEvent,
-  TextLayoutEventData,
-  NativeSyntheticEvent,
-  TextLayoutLine,
-  NativeScrollEvent,
-  TextStyle,
-} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useRef, useState } from "react";
-import { ReaderContext } from "../store/ReaderContext";
-import LoadingOverlay from "../util/LoadingOverlay";
-import { parseHTML } from "linkedom";
-import { asArray, wait } from "../util/helperFunctions";
-import { XMLParser } from "fast-xml-parser";
-import JSZip from "jszip";
-import { resolveHref } from "../util/helperFunctions";
-import { ScrollView } from "react-native";
+import { ThemeContextType } from "../store/ThemeContext";
 import {
-  transformParagraph,
-  xmlStringToTextsArray,
-} from "../services/bookServices";
-import { ChapterContext } from "../store/ChapterContext";
+  FlatList,
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  Text,
+  TextLayoutEventData,
+  TextLayoutLine,
+  View,
+} from "react-native";
+import { transformParagraph } from "../services/bookServices";
 import { BookContext } from "../store/BookContext";
-import { RootNavigationProp } from "../types/navigation";
-import { Colors } from "../constants/colors";
+import { ChapterContext } from "../store/ChapterContext";
+import { LibraryContext } from "../store/LibraryContext";
 import { useTheme } from "../store/ThemeContext";
+import { RootNavigationProp } from "../types/navigation";
+import LoadingOverlay from "../util/LoadingOverlay";
 
 type Tag = "p" | "h1" | "h2" | "h3" | "a";
 
@@ -74,7 +62,7 @@ const ReaderScreen = () => {
   const pageWidthRef = useRef<number>(0);
   const currentIndexRef = useRef<number>(0);
   const navigation: RootNavigationProp = useNavigation();
-  const { theme }: any = useTheme();
+  const { theme }: ThemeContextType = useTheme();
 
   // tagStyles[item?.tag
   useEffect(() => {
@@ -364,8 +352,6 @@ const ReaderScreen = () => {
             }}
           >
             {currentPage.map((item, index) => {
-              // console.log("Test 1", theme.tagStyles[item.tag]);
-
               return (
                 <Text
                   key={index}

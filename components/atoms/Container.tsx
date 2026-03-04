@@ -7,7 +7,6 @@ import { Props } from "../../types/basic";
 export const Container = ({ children }: Props) => {
   const { safeAreaInsets: insets } = useContext(LibraryContext);
   const { theme, isDark, toggleTheme } = useTheme();
-  console.log(theme.colors.bgScreen);
   return (
     <View
       style={{

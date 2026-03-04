@@ -8,7 +8,12 @@ type Props = {
 
 const LoadingOverlay = ({ message, theme }: Props) => {
   return (
-    <View style={styles.rootContainer}>
+    <View
+      style={[
+        styles.rootContainer,
+        { backgroundColor: theme.colors.bgElevated },
+      ]}
+    >
       <Text style={[styles.message, { color: theme.colors.textPrimary }]}>
         {message}
       </Text>

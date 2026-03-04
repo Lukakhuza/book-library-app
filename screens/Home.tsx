@@ -26,6 +26,7 @@ import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 import { LibraryContext } from "../store/LibraryContext";
 import { useTheme } from "../store/ThemeContext";
 import LoadingOverlay from "../util/LoadingOverlay";
+import { Props } from "../types/basic";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {
@@ -48,11 +49,9 @@ const HomeScreen = () => {
   const { myBooks, isLoading: myBooksLoading } = useContext(MyBooksContext);
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const { safeAreaInsets: insets } = useContext(LibraryContext);
-  const x = useTheme();
-  console.log(x);
-  const { theme, isDark, toggleTheme }: any = x;
+  const { theme, isDark, toggleTheme } = useTheme();
 
-  const FadeInView = ({ children }: any) => {
+  const FadeInView = ({ children }: Props) => {
     const opacity = useSharedValue(0);
 
     useEffect(() => {
