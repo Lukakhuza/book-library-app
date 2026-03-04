@@ -1,14 +1,18 @@
 import { useContext, useEffect } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Colors } from "../constants/colors";
 
 type Props = {
   message: string;
+  theme: any;
 };
 
-const LoadingOverlay = ({ message }: Props) => {
+const LoadingOverlay = ({ message, theme }: Props) => {
   return (
     <View style={styles.rootContainer}>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={[styles.message, { color: theme.colors.textPrimary }]}>
+        {message}
+      </Text>
       <ActivityIndicator size="large" />
     </View>
   );

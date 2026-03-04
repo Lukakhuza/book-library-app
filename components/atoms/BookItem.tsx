@@ -20,6 +20,7 @@ import { Colors } from "../../constants/colors";
 import { BookImage } from "./BookImage";
 import { ProgressBar } from "./ProgressBar";
 import { BookContext } from "../../store/BookContext";
+import { useTheme } from "../../store/ThemeContext";
 
 export const BookItem = ({ book }: any) => {
   const { width } = Dimensions.get("screen");
@@ -27,6 +28,7 @@ export const BookItem = ({ book }: any) => {
   const { readingProgress } = useContext(BookContext);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
+  const { theme, isDark, toggleTheme } = useTheme();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -50,11 +52,13 @@ export const BookItem = ({ book }: any) => {
           });
         }}
         style={({ pressed }) => ({
-          backgroundColor: Colors.dark.bgElevated,
+          backgroundColor: theme.colors.bgElevated,
           borderRadius: 20,
           // width: width * 0.5,
           // alignItems: "center",
           // justifyContent: "flex-end",
+          borderColor: "black",
+          borderWidth: 1,
           marginBottom: 20,
           paddingHorizontal: 8,
         })}
@@ -111,7 +115,7 @@ export const BookItem = ({ book }: any) => {
               style={{
                 fontSize: 20,
                 fontFamily: "GoogleSans_700Bold",
-                color: Colors.dark.textPrimary,
+                color: theme.colors.textPrimary,
                 // borderColor: "orange",
                 // borderWidth: 2,
                 lineHeight: 24,
@@ -122,7 +126,7 @@ export const BookItem = ({ book }: any) => {
             <Text
               style={{
                 fontFamily: "GoogleSans_500Medium",
-                color: Colors.dark.textMuted,
+                color: theme.colors.textMuted,
                 // borderColor: "blue",
                 // borderWidth: 2,
               }}
@@ -132,11 +136,12 @@ export const BookItem = ({ book }: any) => {
             <ProgressBar
               progress={readingProgress}
               customStyle={{ marginBottom: 5 }}
+              theme={theme}
             />
             <View>
               <Text
                 style={{
-                  color: Colors.dark.textDisabled,
+                  color: theme.colors.textDisabled,
                   fontFamily: "GoogleSans_500Medium",
                 }}
               >

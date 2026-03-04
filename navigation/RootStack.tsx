@@ -4,7 +4,7 @@ import ModalDummyScreen from "../screens/modal/ModalDummyScreen";
 import HomeStack from "../navigation/HomeStack";
 import BookDetailsScreen from "../screens/BookDetails";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native";
+import { Pressable } from "react-native";
 import { Colors } from "../constants/colors";
 import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 
@@ -23,40 +23,9 @@ const RootStack = createNativeStackNavigator({
         },
         BookDetails: {
           screen: BookDetailsScreen,
-          options: ({ navigation }) => ({
-            // title: "Book Details",
-            headerTitle: () => (
-              <Ionicons
-                name={"sunny-outline"}
-                size={25}
-                color={Colors.dark.accentPrimary}
-              />
-              // <Ionicons name="book-outline" size={22} color="#D4A96A" />
-            ),
-            headerTitleAlign: "center",
-            headerStyle: {
-              backgroundColor: Colors.dark.bgScreen,
-              elevation: 0,
-            },
-            headerShadowVisible: false,
-            headerTintColor: Colors.dark.accentPrimary,
-            headerLeft: () => (
-              <TouchableOpacity onPress={() => navigation.navigate("App")}>
-                <Ionicons
-                  name="home-outline"
-                  size={24}
-                  color={Colors.dark.accentPrimary}
-                />
-              </TouchableOpacity>
-            ),
-            headerRight: () => (
-              <Ionicons
-                name="share-social-outline"
-                size={24}
-                color={Colors.dark.accentPrimary}
-              />
-            ),
-          }),
+          options: {
+            headerShown: false,
+          },
         },
         Reader: {
           screen: ReaderScreen,

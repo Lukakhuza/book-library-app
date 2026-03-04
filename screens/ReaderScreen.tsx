@@ -29,6 +29,8 @@ import {
 import { ChapterContext } from "../store/ChapterContext";
 import { BookContext } from "../store/BookContext";
 import { RootNavigationProp } from "../types/navigation";
+import { Colors } from "../constants/colors";
+import { useTheme } from "../store/ThemeContext";
 
 type Tag = "p" | "h1" | "h2" | "h3" | "a";
 
@@ -72,8 +74,9 @@ const ReaderScreen = () => {
   const pageWidthRef = useRef<number>(0);
   const currentIndexRef = useRef<number>(0);
   const navigation: RootNavigationProp = useNavigation();
-  const isFocused = useIsFocused();
+  const { theme }: any = useTheme();
 
+  // tagStyles[item?.tag
   useEffect(() => {
     if (shouldExitBook) {
       navigation.navigate("BookDetails", { bookData: currentBook });
@@ -294,7 +297,12 @@ const ReaderScreen = () => {
   };
 
   return (
-    <View style={styles.outerContainer}>
+    <View
+      style={[
+        styles.outerContainer,
+        { backgroundColor: theme.colors.readerBg },
+      ]}
+    >
       <View
         style={{
           flex: 1,
@@ -325,7 +333,7 @@ const ReaderScreen = () => {
                 >
                   {page.item.map((item, index) => {
                     return (
-                      <Text key={index} style={tagStyles[item?.tag]}>
+                      <Text key={index} style={theme.tagStyles[item?.tag]}>
                         {item?.text}
                       </Text>
                     );
@@ -356,10 +364,15 @@ const ReaderScreen = () => {
             }}
           >
             {currentPage.map((item, index) => {
+              // console.log("Test 1", theme.tagStyles[item.tag]);
+
               return (
                 <Text
                   key={index}
-                  style={[{ opacity: 0 }, tagStyles[item?.tag]]}
+                  style={[
+                    { opacity: 0, backgroundColor: theme.colors.bgOverlay },
+                    theme.tagStyles[item?.tag],
+                  ]}
                   onTextLayout={(
                     e: NativeSyntheticEvent<TextLayoutEventData>,
                   ) => {
@@ -384,7 +397,7 @@ const ReaderScreen = () => {
               bottom: 0,
             }}
           >
-            <LoadingOverlay message="Loading..." />
+            <LoadingOverlay message="Loading..." theme={theme} />
           </View>
         )}
       </View>
@@ -410,37 +423,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     includeFontPadding: false, // 🔑
   },
-  loadingOverlayContainer: {
-    backgroundColor: "#0dcadb",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
 });
 
-const tagStyles: Record<Tag, TextStyle> = StyleSheet.create({
-  h1: {
-    fontSize: 30,
-    fontWeight: 700,
-    color: "gray",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  h2: {
-    fontSize: 25,
-    fontWeight: 700,
-    color: "red",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  h3: { color: "orange" },
-  a: { color: "brown" },
-  p: {
-    color: "purple",
-    fontSize: 20,
-    textAlign: "justify",
-    marginBottom: 5,
-  },
-});
+// const tagStyles: Record<Tag, TextStyle> = StyleSheet.create({});

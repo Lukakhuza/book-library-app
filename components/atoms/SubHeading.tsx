@@ -3,9 +3,10 @@ import { Colors } from "../../constants/colors";
 
 type Props = {
   text: string;
+  theme: any;
 };
 
-export const SubHeading = ({ text }: Props) => {
+export const SubHeading = ({ text, theme }: Props) => {
   return (
     <View>
       <Text
@@ -14,7 +15,7 @@ export const SubHeading = ({ text }: Props) => {
           fontFamily: "Roboto_700Bold",
           letterSpacing: 2,
           fontSize: 15,
-          color: Colors.dark.textMuted,
+          color: theme.colors.textMuted,
         }}
       >
         {text}

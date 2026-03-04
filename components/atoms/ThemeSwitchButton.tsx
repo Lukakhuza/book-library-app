@@ -1,18 +1,26 @@
-import { View, Text, ViewStyle } from "react-native";
+import { View, Text, ViewStyle, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../constants/colors";
 
 type CustomStyles = {
   viewStyle?: ViewStyle;
+  onPress: () => void;
+  theme: any;
+  isDark: boolean;
 };
 
-export const ThemeSwitchButton = ({ viewStyle }: CustomStyles) => {
+export const ThemeSwitchButton = ({
+  viewStyle,
+  onPress,
+  theme,
+  isDark,
+}: CustomStyles) => {
   return (
-    <View
+    <Pressable
       style={[
         {
           borderColor: "black",
-          backgroundColor: Colors.dark.bgChip,
+          backgroundColor: theme.colors.bgChip,
           borderWidth: 1,
           flexDirection: "row",
           alignItems: "center",
@@ -24,16 +32,30 @@ export const ThemeSwitchButton = ({ viewStyle }: CustomStyles) => {
         },
         viewStyle,
       ]}
+      onPress={onPress}
     >
-      <Ionicons name={"sunny-outline"} size={25} color={"#D4A96A"} />
+      {isDark ? (
+        <Ionicons
+          name={"moon-outline"}
+          size={25}
+          color={theme.colors.accentPrimary}
+        />
+      ) : (
+        <Ionicons
+          name={"sunny-outline"}
+          size={25}
+          color={theme.colors.accentPrimary}
+        />
+      )}
+
       <Text
         style={{
           color: "#D4A96A",
           paddingHorizontal: 10,
         }}
       >
-        Light
+        {isDark ? "Dark" : "Light"}
       </Text>
-    </View>
+    </Pressable>
   );
 };

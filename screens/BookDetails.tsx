@@ -20,16 +20,24 @@ import { Book, BookRouteProps, OpenBookResult } from "../types/book";
 import { LibraryContext } from "../store/LibraryContext";
 import { Container } from "../components/atoms/Container";
 import { Colors } from "../constants/colors";
+import LoadingOverlay from "../util/LoadingOverlay";
+import { useTheme } from "../store/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
 // import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [readingStarted, setReadingStarted] = useState(false);
+  const [startedReading, setStartedReading] = useState(false);
   const { updateCurrentBook, currentBook } = useContext(BookContext);
   const { currentChapter } = useContext(ChapterContext);
   const navigation: RootNavigationProp = useNavigation();
   const { myBooks, addToMyBooks, removeFromMyBooks } =
     useContext(MyBooksContext);
   const { bookData } = route.params;
+  const { theme, toggleTheme, isDark } = useTheme();
 
   useEffect(() => {
     updateCurrentBook(bookData);
@@ -40,39 +48,42 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
   });
 
   const handleDownloadBook = async () => {
-    if (isLoading) return;
+    // if (isLoading) return;
 
     try {
       setIsLoading(true);
+      setIsDownloading(true);
       // Add book to the file system
       await downloadBook(bookData);
       // Update state
       addToMyBooks(bookData);
       navigation.navigate("App");
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleDeleteBook = async () => {
-    if (isLoading) return;
+    // if (isLoading) return;
 
     try {
       setIsLoading(true);
+      setIsDeleting(true);
       // Remove book from the file system.
       await deleteFromMyBooks(bookData.fileName);
       // Update state
-      removeFromMyBooks(bookData.fileName);
       navigation.navigate("App");
+      removeFromMyBooks(bookData.fileName);
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleReadBook = async () => {
-    if (isLoading) return;
+    // if (isLoading) return;
     try {
       setIsLoading(true);
+      setReadingStarted(true);
       const { opfPath, spineHrefs, zip }: OpenBookResult = await openBook(
         bookData.fileName,
       );
@@ -88,19 +99,53 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
     }
   };
 
+  if (isLoading || isDeleting || isDownloading || readingStarted) {
+    if (isDeleting) {
+      return <LoadingOverlay message="Deleting Book..." theme={theme} />;
+    }
+
+    if (isDownloading) {
+      return <LoadingOverlay message="Downloading Book..." theme={theme} />;
+    }
+
+    return <LoadingOverlay message="Loading..." theme={theme} />;
+  }
+
   return (
-    // <LinearGradient
-    //   colors={["#45453ef5", "#f85454ff"]}
-    //   style={[
-    //     styles.outerContainer,
-    //     {
-    //       // alignItems: "center",
-    //       // justifyContent: "center",
-    //       opacity: isLoading ? 0.5 : 1,
-    //     },
-    //   ]}
-    // >
     <Container>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginVertical: 15,
+        }}
+      >
+        <View>
+          <Pressable onPress={() => navigation.navigate("App")}>
+            <Ionicons
+              name="home-outline"
+              size={24}
+              color={Colors.dark.accentPrimary}
+            />
+          </Pressable>
+        </View>
+        <View>
+          <Pressable onPress={toggleTheme}>
+            <Ionicons
+              name={isDark ? "sunny-outline" : "sunny-sharp"}
+              size={25}
+              color={Colors.dark.accentPrimary}
+            />
+          </Pressable>
+        </View>
+        <View>
+          <Ionicons
+            name="share-social-outline"
+            size={24}
+            color={Colors.dark.accentPrimary}
+          />
+        </View>
+      </View>
       {currentBook && (
         <View style={styles.content}>
           <View
@@ -131,7 +176,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
             <View style={styles.bookInfo}>
               <Text
                 style={{
-                  color: Colors.dark.textPrimary,
+                  color: theme.colors.textPrimary,
                   fontFamily: "Roboto_700Bold",
                   fontSize: 25,
                   textAlign: "center",
@@ -145,7 +190,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
               </Text>
               <Text
                 style={{
-                  color: Colors.dark.textMuted,
+                  color: theme.colors.textMuted,
                   fontFamily: "GoogleSans_400Regular",
                   fontSize: 19,
                   textAlign: "center",
@@ -175,34 +220,56 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
               </View> */}
             </View>
             {!downloaded ? (
-              <Pressable
-                disabled={isLoading}
-                style={styles.downloadButton}
-                onPress={handleDownloadBook}
-              >
-                <Text style={styles.downloadButtonText}>Download</Text>
-              </Pressable>
+              <View>
+                <Pressable
+                  disabled={isLoading}
+                  style={[
+                    styles.downloadButton,
+                    { backgroundColor: theme.colors.accentPrimary },
+                  ]}
+                  onPress={handleDownloadBook}
+                >
+                  <Text style={styles.downloadButtonText}>Download</Text>
+                </Pressable>
+              </View>
             ) : (
-              <Pressable
-                disabled={isLoading}
-                style={styles.readButton}
-                onPress={handleReadBook}
-              >
-                <Text style={styles.downloadButtonText}>Read Book</Text>
-              </Pressable>
+              <View>
+                <Pressable
+                  disabled={isLoading}
+                  style={[
+                    styles.readButton,
+                    { backgroundColor: theme.colors.accentSuccess },
+                  ]}
+                  onPress={handleReadBook}
+                >
+                  <Text style={styles.downloadButtonText}>Read Book</Text>
+                </Pressable>
+                <Pressable
+                  disabled={isLoading}
+                  style={[
+                    styles.deleteButton,
+                    {
+                      borderColor: theme.colors.borderDefault,
+                      backgroundColor: theme.colors.bgCard,
+                    },
+                  ]}
+                  onPress={handleDeleteBook}
+                >
+                  <Text
+                    style={[
+                      styles.deleteButtonText,
+                      { color: theme.colors.accentDanger },
+                    ]}
+                  >
+                    Delete from My Books
+                  </Text>
+                </Pressable>
+              </View>
             )}
-            <Pressable
-              disabled={isLoading}
-              style={styles.deleteButton}
-              onPress={handleDeleteBook}
-            >
-              <Text style={styles.deleteButtonText}>Delete from My Books</Text>
-            </Pressable>
           </View>
         </View>
       )}
     </Container>
-    // </LinearGradient>
   );
 };
 export default BookDetailsScreen;
@@ -245,19 +312,15 @@ const styles = StyleSheet.create({
     // borderWidth: 3,
     // borderColor: "brown",
     borderRadius: 15,
-    backgroundColor: Colors.dark.accentPrimary,
   },
   readButton: {
     marginTop: 10,
     borderRadius: 15,
-    backgroundColor: Colors.dark.accentSuccess,
   },
   deleteButton: {
     marginTop: 10,
     borderWidth: 3,
-    borderColor: Colors.dark.borderDefault,
     borderRadius: 15,
-    backgroundColor: Colors.dark.bgCard,
   },
   downloadButtonText: {
     textAlign: "center",
@@ -268,7 +331,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     textAlign: "center",
     fontFamily: "GoogleSans_400Regular",
-    color: Colors.dark.accentDanger,
+
     fontSize: 17,
     fontWeight: 500,
     marginVertical: 7,

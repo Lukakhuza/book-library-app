@@ -11,12 +11,14 @@ import MyBooksContextProvider from "./store/MyBooksContext";
 import LibraryContextProvider from "./store/LibraryContext";
 import { Navigation } from "./navigation/Navigation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Colors } from "./constants/colors";
+import { ThemeProvider } from "./store/ThemeContext";
 
 const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "#ddb52f",
+    background: Colors.dark.bgApp,
     primary: "rgba(10, 13, 222, 1)",
     card: "rgb(120,120,120)",
   },
@@ -27,17 +29,19 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <LibraryContextProvider>
-        <MyBooksContextProvider>
-          <BookContextProvider>
-            <ChapterContextProvider>
-              <ReaderContextProvider>
-                <Navigation theme={scheme === "dark" ? DarkTheme : MyTheme} />
-              </ReaderContextProvider>
-            </ChapterContextProvider>
-          </BookContextProvider>
-        </MyBooksContextProvider>
-      </LibraryContextProvider>
+      <ThemeProvider>
+        <LibraryContextProvider>
+          <MyBooksContextProvider>
+            <BookContextProvider>
+              <ChapterContextProvider>
+                <ReaderContextProvider>
+                  <Navigation />
+                </ReaderContextProvider>
+              </ChapterContextProvider>
+            </BookContextProvider>
+          </MyBooksContextProvider>
+        </LibraryContextProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

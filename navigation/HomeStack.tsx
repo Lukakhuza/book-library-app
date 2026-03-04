@@ -31,8 +31,6 @@ const HomeStack = createBottomTabNavigator({
             />
           );
         },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "white",
       },
     },
     Discover: {
@@ -48,8 +46,6 @@ const HomeStack = createBottomTabNavigator({
             />
           );
         },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "white",
       },
     },
     Settings: {

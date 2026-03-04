@@ -11,16 +11,19 @@ import { LinearGradient } from "expo-linear-gradient";
 // import { Colors } from "../constants/Colors";
 import { HomeStackNavigationProp } from "../types/navigation";
 import { Header } from "../components/atoms/Header";
+import { Colors } from "../constants/colors";
+import { useTheme } from "../store/ThemeContext";
 
 const SettingsScreen = () => {
   const navigation: HomeStackNavigationProp = useNavigation();
+  const { theme } = useTheme();
 
   return (
     <Container>
-      <Header text="Settings" />
-      <Ionicons name="home-outline" size={20} color="blue" />
+      <Header text="Settings" theme={theme} />
       <Button
         title="Go Home"
+        color={theme.colors.bgCard}
         onPress={() => {
           navigation.navigate("Home");
         }}

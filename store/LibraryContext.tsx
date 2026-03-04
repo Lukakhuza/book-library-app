@@ -10,6 +10,7 @@ import { getAllBooks } from "../api/book.api";
 import { Props } from "../types/basic";
 import { Book } from "../types/book";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "@react-navigation/native";
 
 type LibraryContextType = {
   books: Book[];
@@ -46,6 +47,9 @@ const LibraryContextProvider = ({ children }: Props) => {
     height: 0,
     width: 0,
   });
+  // const theme1 = useTheme();
+
+  // console.log(theme1);
 
   useLayoutEffect(() => {
     const { width, height } = Dimensions.get("screen");

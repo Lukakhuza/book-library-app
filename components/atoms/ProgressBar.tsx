@@ -1,18 +1,20 @@
 import { View, ViewStyle } from "react-native";
+import { Colors } from "../../constants/colors";
 
 type Props = {
   progress: number;
   customStyle?: ViewStyle;
+  theme: any;
 };
 
-export const ProgressBar = ({ progress, customStyle }: Props) => {
+export const ProgressBar = ({ progress, customStyle, theme }: Props) => {
   // progress is a value between 0 and 1 (e.g. 0.68 = 68%)
   return (
     <View
       style={[
         {
           height: 4,
-          backgroundColor: "#3D372F", // track color
+          backgroundColor: theme.colors.bgChip,
           borderRadius: 2,
           overflow: "hidden",
         },
@@ -23,7 +25,7 @@ export const ProgressBar = ({ progress, customStyle }: Props) => {
         style={{
           height: "100%",
           width: `${progress * 100}%`,
-          backgroundColor: "#D4A96A", // fill color
+          backgroundColor: theme.colors.accentPrimary,
           borderRadius: 2,
         }}
       />

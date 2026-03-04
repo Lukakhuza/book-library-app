@@ -169,7 +169,6 @@ export const getEpubFile = (directoryName: string, fileName: string) => {
 };
 
 export const getZip = async (epubFile: File) => {
-  console.log("Hiiii", epubFile);
   const encoded = await epubFile.base64();
   const zip = await JSZip.loadAsync(encoded, { base64: true });
   return zip;

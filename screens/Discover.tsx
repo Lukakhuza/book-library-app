@@ -20,10 +20,12 @@ import { AppNavigationProp } from "../types/navigation";
 import { Header } from "../components/atoms/Header";
 import { Container } from "../components/atoms/Container";
 import { Colors } from "../constants/colors";
+import { useTheme } from "../store/ThemeContext";
 
 const DiscoverScreen = () => {
   const navigation: AppNavigationProp = useNavigation();
   const { books } = useContext(LibraryContext);
+  const { theme } = useTheme();
 
   return (
     <Container>
@@ -31,7 +33,11 @@ const DiscoverScreen = () => {
       {/* //   colors={["#d3d86cf5", "#f85454ff"]} */}
       {/* //   style={styles.outerContainer} */}
       {/* // > */}
-      <Header text="Explore Books" customStyle={{ marginBottom: 5 }} />
+      <Header
+        text="Explore Books"
+        customStyle={{ marginBottom: 5 }}
+        theme={theme}
+      />
       <FlatList
         data={books}
         columnWrapperStyle={styles.flatlistColumnWrapperStyle}
@@ -42,7 +48,10 @@ const DiscoverScreen = () => {
               onPress={() => {
                 navigation.navigate("BookDetails", { bookData: book.item });
               }}
-              style={styles.flatlistItem}
+              style={[
+                styles.flatlistItem,
+                { backgroundColor: theme.colors.bgElevated },
+              ]}
             >
               <Text
                 ellipsizeMode="tail"
@@ -88,8 +97,6 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   flatlistItem: {
-    // backgroundColor: "#4b4848ee",
-    // borderRadius: 20,
     flex: 1,
     width: "45%",
     alignItems: "center",
@@ -97,7 +104,6 @@ const styles = StyleSheet.create({
     // marginBottom: 10,
     // // marginVertical: 10,
     paddingHorizontal: 8,
-    backgroundColor: Colors.dark.bgElevated,
     borderRadius: 20,
     // width: width * 0.5,
     // alignItems: "center",

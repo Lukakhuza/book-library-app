@@ -32,6 +32,7 @@ import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
 import { Colors } from "../constants/colors";
 import { ProgressBar } from "../components/atoms/ProgressBar";
 import { SubHeading } from "../components/atoms/SubHeading";
+import { useTheme } from "../store/ThemeContext";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {
@@ -54,6 +55,7 @@ const HomeScreen = () => {
   const { myBooks, isLoading: myBooksLoading } = useContext(MyBooksContext);
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const { safeAreaInsets: insets } = useContext(LibraryContext);
+  const { theme, isDark, toggleTheme } = useTheme();
 
   const FadeInView = ({ children }: any) => {
     const opacity = useSharedValue(0);
@@ -76,7 +78,7 @@ const HomeScreen = () => {
   // );
 
   if (myBooksLoading) {
-    return <LoadingOverlay message="Loading Books..." />;
+    return <LoadingOverlay message="Loading Books..." theme={theme} />;
   }
 
   let myBooksContent;
@@ -85,11 +87,20 @@ const HomeScreen = () => {
     myBooksContent = (
       <View style={styles.content}>
         <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
-          <Text style={styles.noBooksText}>You currently have no books.</Text>
-          <Text style={styles.noBooksText}>Click below to explore:</Text>
+          <Text
+            style={[styles.noBooksText, { color: theme.colors.textPrimary }]}
+          >
+            You currently have no books.
+          </Text>
+          <Text
+            style={[styles.noBooksText, { color: theme.colors.textPrimary }]}
+          >
+            Click below to explore:
+          </Text>
         </View>
         <Button
           title="Discover"
+          color={theme.colors.bgCard}
           onPress={() => {
             navigation.navigate("Discover");
           }}
@@ -128,7 +139,7 @@ const HomeScreen = () => {
   return (
     <Container>
       <View>
-        <SubHeading text="Good Evening" />
+        <SubHeading text="Good Evening" theme={theme} />
       </View>
       <View
         style={{
@@ -138,10 +149,17 @@ const HomeScreen = () => {
           marginBottom: 20,
         }}
       >
-        <Header text="What will you read?" />
-        <ThemeSwitchButton viewStyle={{ marginRight: 5, marginTop: 5 }} />
+        <Header text="What will you read?" theme={theme} />
+        <ThemeSwitchButton
+          viewStyle={{ marginRight: 5, marginTop: 5 }}
+          onPress={() => {
+            toggleTheme();
+          }}
+          theme={theme}
+          isDark={isDark}
+        />
       </View>
-      <SubHeading text="Continue Reading" />
+      <SubHeading text="Continue Reading" theme={theme} />
       {myBooksContent}
     </Container>
   );
