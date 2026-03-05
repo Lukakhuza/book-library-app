@@ -2,18 +2,21 @@ import { Text, View, ViewStyle } from "react-native";
 import SettingsSubsectionIcon from "../atoms/SettingsSubsectionIcon";
 import { Toggle } from "../atoms/Toggle";
 import { Theme } from "../../theme";
+import { Ionicons } from "@expo/vector-icons";
 
 type SettingSubsectionProps = {
   theme: Theme;
   ioniconIdentifier: string;
   label: string;
   style?: ViewStyle;
+  labelColor?: string;
 };
 
-const SettingsSubsection = ({
+const SettingsSubsection2 = ({
   theme,
   ioniconIdentifier,
   label,
+  labelColor,
   style,
 }: SettingSubsectionProps) => {
   return (
@@ -42,11 +45,14 @@ const SettingsSubsection = ({
         }}
       >
         <Text
-          style={{
-            color: theme.colors.accentPrimary,
-            fontFamily: "GoogleSans_700Bold",
-            fontSize: 16,
-          }}
+          style={[
+            {
+              color: theme.colors.accentPrimary,
+              fontFamily: "GoogleSans_700Bold",
+              fontSize: 16,
+            },
+            { color: labelColor },
+          ]}
         >
           {label}
         </Text>
@@ -56,10 +62,14 @@ const SettingsSubsection = ({
           alignItems: "flex-end",
         }}
       >
-        <Toggle />
+        <Ionicons
+          name="chevron-forward-outline"
+          size={30}
+          color={theme.colors.textMuted}
+        />
       </View>
     </View>
   );
 };
 
-export default SettingsSubsection;
+export default SettingsSubsection2;

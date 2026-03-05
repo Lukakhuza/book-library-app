@@ -1,6 +1,6 @@
 // import { useNavigation } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
-import { Button, Pressable, View, Text } from "react-native";
+import { Button, Pressable, View, Text, ScrollView } from "react-native";
 import { Container } from "../components/atoms/Container";
 // import { Colors } from "../constants/Colors";
 import { Header } from "../components/atoms/Header";
@@ -12,6 +12,7 @@ import { Toggle } from "../components/atoms/Toggle";
 import { SubHeading } from "../components/atoms/SubHeading";
 import SettingsSubsectionIcon from "../components/atoms/SettingsSubsectionIcon";
 import SettingsSubsection from "../components/molecules/SettingsSubsection";
+import SettingsSubsection2 from "../components/molecules/SettingsSubsection2";
 
 const SettingsScreen = () => {
   const navigation: HomeStackNavigationProp = useNavigation();
@@ -198,59 +199,147 @@ const SettingsScreen = () => {
           </View>
         </Pressable>
       </View>
-      <SubHeading
-        text="Notifications"
-        theme={theme}
-        style={{ marginLeft: 10, marginBottom: 5 }}
-      />
-      {/* <View> */}
-      <View
-        style={{
-          backgroundColor: theme.colors.bgElevated,
-          height: 200,
-          borderRadius: 20,
-          borderColor: "black",
-          borderWidth: 1,
-          marginBottom: 20,
-          // paddingVertical: 10,
-          // paddingHorizontal: 15,
-          // justifyContent: "space-between",
-          // flexDirection: "row",
-          // alignItems: "center",
-        }}
-      >
-        <SettingsSubsection
-          label="Push Notifications"
-          ioniconIdentifier="notifications"
+      <ScrollView>
+        <SubHeading
+          text="Notifications"
           theme={theme}
+          style={{ marginLeft: 10, marginBottom: 5 }}
+        />
+        {/* <View> */}
+        <View
           style={{
-            borderBottomColor: theme.colors.textMuted,
-            borderBottomWidth: 0.5,
+            backgroundColor: theme.colors.bgElevated,
+            height: 200,
+            borderRadius: 20,
+            borderColor: "black",
+            borderWidth: 1,
+            marginBottom: 20,
+            // paddingVertical: 10,
+            // paddingHorizontal: 15,
+            // justifyContent: "space-between",
+            // flexDirection: "row",
+            // alignItems: "center",
           }}
-        />
-        <SettingsSubsection
-          label="Daily Reading Goal"
-          ioniconIdentifier="reader"
+        >
+          <SettingsSubsection
+            label="Push Notifications"
+            ioniconIdentifier="notifications"
+            theme={theme}
+            style={{
+              borderBottomColor: theme.colors.textMuted,
+              borderBottomWidth: 0.5,
+            }}
+          />
+          <SettingsSubsection
+            label="Daily Reading Goal"
+            ioniconIdentifier="reader"
+            theme={theme}
+            style={{
+              borderBottomColor: theme.colors.textMuted,
+              borderBottomWidth: 0.5,
+            }}
+          />
+          <SettingsSubsection
+            label="Weekly Digest"
+            ioniconIdentifier="calendar"
+            theme={theme}
+          />
+        </View>
+
+        <SubHeading
+          text="Account"
           theme={theme}
+          style={{ marginLeft: 10, marginBottom: 5 }}
+        />
+        <View
           style={{
-            borderBottomColor: theme.colors.textMuted,
-            borderBottomWidth: 0.5,
+            backgroundColor: theme.colors.bgElevated,
+            height: 400,
+            borderRadius: 20,
+            borderColor: "black",
+            borderWidth: 1,
+            marginBottom: 20,
+            // paddingVertical: 10,
+            // paddingHorizontal: 15,
+            // justifyContent: "space-between",
+            // flexDirection: "row",
+            // alignItems: "center",
           }}
-        />
-        <SettingsSubsection
-          label="Weekly Digest"
-          ioniconIdentifier="calendar"
-          theme={theme}
-        />
-      </View>
+        >
+          <SettingsSubsection2
+            label="Subscription"
+            ioniconIdentifier="card-outline"
+            theme={theme}
+            style={{
+              borderBottomColor: theme.colors.textMuted,
+              borderBottomWidth: 0.5,
+            }}
+          />
+          <SettingsSubsection2
+            label="Privacy & Security"
+            ioniconIdentifier="lock-closed"
+            theme={theme}
+            style={{
+              borderBottomColor: theme.colors.textMuted,
+              borderBottomWidth: 0.5,
+            }}
+          />
+          <SettingsSubsection2
+            label="Sync & Backup"
+            ioniconIdentifier="cloud"
+            theme={theme}
+            style={{
+              borderBottomColor: theme.colors.textMuted,
+              borderBottomWidth: 0.5,
+            }}
+          />
+          <SettingsSubsection2
+            label="Rate the App"
+            ioniconIdentifier="star"
+            theme={theme}
+            style={{
+              borderBottomColor: theme.colors.textMuted,
+              borderBottomWidth: 0.5,
+            }}
+          />
+          <SettingsSubsection2
+            label="Help & Support"
+            ioniconIdentifier="help-circle-sharp"
+            theme={theme}
+          />
+        </View>
+
+        <View
+          style={{
+            backgroundColor: theme.colors.bgElevated,
+            height: 80,
+            borderRadius: 20,
+            borderColor: "black",
+            borderWidth: 1,
+            marginBottom: 20,
+            // paddingVertical: 10,
+            // paddingHorizontal: 15,
+            // justifyContent: "space-between",
+            // flexDirection: "row",
+            // alignItems: "center",
+          }}
+        >
+          <SettingsSubsection2
+            label="Log Out"
+            labelColor={theme.colors.accentDanger}
+            ioniconIdentifier="log-out-outline"
+            theme={theme}
+          />
+        </View>
+      </ScrollView>
       {/* </View> */}
       {/* <Button
         title="Go Home"
         color={theme.colors.bgCard}
         onPress={() => {
           navigation.navigate("Home");
-        }}
-      /> */}
+          }}
+          /> */}
     </Container>
   );
 };
