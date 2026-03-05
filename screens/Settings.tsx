@@ -9,6 +9,9 @@ import { HomeStackNavigationProp } from "../types/navigation";
 import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 import { Ionicons } from "@expo/vector-icons";
 import { Toggle } from "../components/atoms/Toggle";
+import { SubHeading } from "../components/atoms/SubHeading";
+import SettingsSubsectionIcon from "../components/atoms/SettingsSubsectionIcon";
+import SettingsSubsection from "../components/molecules/SettingsSubsection";
 
 const SettingsScreen = () => {
   const navigation: HomeStackNavigationProp = useNavigation();
@@ -195,14 +198,59 @@ const SettingsScreen = () => {
           </View>
         </Pressable>
       </View>
-      <Button
+      <SubHeading
+        text="Notifications"
+        theme={theme}
+        style={{ marginLeft: 10, marginBottom: 5 }}
+      />
+      {/* <View> */}
+      <View
+        style={{
+          backgroundColor: theme.colors.bgElevated,
+          height: 200,
+          borderRadius: 20,
+          borderColor: "black",
+          borderWidth: 1,
+          marginBottom: 20,
+          // paddingVertical: 10,
+          // paddingHorizontal: 15,
+          // justifyContent: "space-between",
+          // flexDirection: "row",
+          // alignItems: "center",
+        }}
+      >
+        <SettingsSubsection
+          label="Push Notifications"
+          ioniconIdentifier="notifications"
+          theme={theme}
+          style={{
+            borderBottomColor: theme.colors.textMuted,
+            borderBottomWidth: 0.5,
+          }}
+        />
+        <SettingsSubsection
+          label="Daily Reading Goal"
+          ioniconIdentifier="reader"
+          theme={theme}
+          style={{
+            borderBottomColor: theme.colors.textMuted,
+            borderBottomWidth: 0.5,
+          }}
+        />
+        <SettingsSubsection
+          label="Weekly Digest"
+          ioniconIdentifier="calendar"
+          theme={theme}
+        />
+      </View>
+      {/* </View> */}
+      {/* <Button
         title="Go Home"
         color={theme.colors.bgCard}
         onPress={() => {
           navigation.navigate("Home");
         }}
-      />
-      <Toggle />
+      /> */}
     </Container>
   );
 };

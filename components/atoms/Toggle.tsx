@@ -33,7 +33,11 @@ export const Toggle = () => {
       <View
         style={[
           styles.track,
-          { backgroundColor: isOn ? "#C9A84C" : "#3A3220" },
+          {
+            backgroundColor: isOn ? "#C9A84C" : "#3A3220",
+            borderBlockColor: "black",
+            borderWidth: isOn ? 0 : 0.5,
+          },
         ]}
       >
         <Animated.View style={[styles.knob, { transform: [{ translateX }] }]} />
