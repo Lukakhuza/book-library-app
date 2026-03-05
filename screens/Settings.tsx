@@ -8,48 +8,7 @@ import { useTheme } from "../store/ThemeContext";
 import { HomeStackNavigationProp } from "../types/navigation";
 import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 import { Ionicons } from "@expo/vector-icons";
-
-//
-// import { useNavigation } from "@react-navigation/native";
-// import { useContext } from "react";
-// import { Dimensions, Pressable, Text, View } from "react-native";
-// import Animated, {
-//   useAnimatedStyle,
-//   useSharedValue,
-//   withSpring,
-// } from "react-native-reanimated";
-// import { BookContext } from "../../store/BookContext";
-// import { useTheme } from "../../store/ThemeContext";
-// import { AppNavigationProp } from "../../types/navigation";
-// import { BookImage } from "./BookImage";
-// import { ProgressBar } from "./ProgressBar";
-// import { Book } from "../../types/book";
-
-// type BookData = {
-//   book: {
-//     index: number;
-//     item: Book;
-//     separators: unknown;
-//   };
-// };
-
-// export const BookItem = ({ book }: BookData) => {
-//   const { width } = Dimensions.get("screen");
-//   const navigation: AppNavigationProp = useNavigation();
-//   const { readingProgress } = useContext(BookContext);
-//   const scale = useSharedValue(1);
-//   const opacity = useSharedValue(1);
-//   const { theme, isDark, toggleTheme } = useTheme();
-
-//   const animatedStyle = useAnimatedStyle(() => ({
-//     transform: [{ scale: scale.value }],
-//     opacity: opacity.value,
-//   }));
-
-//   return (
-
-//   );
-// };
+import { Toggle } from "../components/atoms/Toggle";
 
 const SettingsScreen = () => {
   const navigation: HomeStackNavigationProp = useNavigation();
@@ -243,6 +202,7 @@ const SettingsScreen = () => {
           navigation.navigate("Home");
         }}
       />
+      <Toggle />
     </Container>
   );
 };
