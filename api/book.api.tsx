@@ -1,13 +1,16 @@
 import { Book } from "../types/book";
 
 export const fetchBookSignedUrl = async (bookData: Book): Promise<string> => {
-  const response = await fetch("http://10.0.2.2:3000/book/fetch-books", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    "https://zw34pxnykg.execute-api.us-east-1.amazonaws.com/getBook",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bookData),
     },
-    body: JSON.stringify(bookData),
-  });
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch book url: ${response.status}`);
@@ -18,18 +21,22 @@ export const fetchBookSignedUrl = async (bookData: Book): Promise<string> => {
 };
 
 export const getAllBooks = async (): Promise<Book[]> => {
-  const response = await fetch("http://10.0.2.2:3000/book/get-all-books", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    "https://zw34pxnykg.execute-api.us-east-1.amazonaws.com/getAllBooks",
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch books: ${response.status}`);
   }
 
-  const resData: Book[] = await response.json();
+  const resData = await response.json();
+  const books = resData.books;
 
-  return resData;
+  return books;
 };

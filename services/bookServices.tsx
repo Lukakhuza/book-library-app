@@ -8,8 +8,11 @@ import { parser1, resolveHref } from "../util/helperFunctions";
 export const downloadBook = async (bookData: Book) => {
   try {
     // Get signed url
+    console.log("Before Download: ", bookData);
     const signedUrl = await fetchBookSignedUrl(bookData);
     // // Download the epub file and the book metadata into the file system:
+    console.log("After Download", signedUrl);
+    return;
     const bookFile = await getBook(signedUrl, bookData);
     return bookFile;
   } catch (error) {
