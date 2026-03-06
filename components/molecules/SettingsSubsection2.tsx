@@ -47,11 +47,10 @@ const SettingsSubsection2 = ({
         <Text
           style={[
             {
-              color: theme.colors.accentPrimary,
               fontFamily: "GoogleSans_700Bold",
               fontSize: 16,
+              color: labelColor ?? theme.colors.accentPrimary,
             },
-            { color: labelColor },
           ]}
         >
           {label}
