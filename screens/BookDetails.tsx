@@ -38,7 +38,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
   }, [bookData]);
 
   const downloaded = myBooks.some((book: Book) => {
-    return book._id === currentBook?._id;
+    return book?.book_id === currentBook?.book_id;
   });
 
   const handleDownloadBook = async () => {

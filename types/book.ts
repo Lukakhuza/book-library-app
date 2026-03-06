@@ -2,7 +2,7 @@ import JSZip from "jszip";
 
 export type Book = {
   __v: number;
-  _id: string;
+  book_id: string;
   author: string;
   coverKey: string;
   epubKey: string;

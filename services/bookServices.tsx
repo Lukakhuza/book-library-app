@@ -8,11 +8,10 @@ import { parser1, resolveHref } from "../util/helperFunctions";
 export const downloadBook = async (bookData: Book) => {
   try {
     // Get signed url
-    console.log("Before Download: ", bookData);
-    const signedUrl = await fetchBookSignedUrl(bookData);
+    const signedUrlObj: any = await fetchBookSignedUrl(bookData);
+    // const signedUrl = JSON.stringify(signedUrlObj);
+    const signedUrl = signedUrlObj.url;
     // // Download the epub file and the book metadata into the file system:
-    console.log("After Download", signedUrl);
-    return;
     const bookFile = await getBook(signedUrl, bookData);
     return bookFile;
   } catch (error) {
@@ -66,34 +65,19 @@ export const deleteFromMyBooks = async (fileName: string) => {
   }
 };
 
-// type FileInfo = {
-//   contentUri: string;
-//   creationTime: number | null;
-//   exists: boolean;
-//   md5: string | null;
-//   modificationTime: number | null;
-//   size: number;
-//   type: string;
-//   uri: string;
-// };
-
 export const downloadEpubFile = async (signedUrl: string, data: Book) => {
   try {
     const bookData = data;
     const booksDir = new Directory(Paths.document.uri, "books");
-
     if (!booksDir.exists) {
       booksDir.create();
     }
-
     // Create an epub file uri
     const fileUri = booksDir.uri + bookData.fileName;
-
     // Check if there is any info on this fileUri
     const info = new File(fileUri).info();
-    console.log(info);
 
-    // // Check for downloaded file Uri and set it to filePath
+    // Check for downloaded file Uri and set it to filePath
     let downLoadedFileUri: string = "";
     if (info.exists && info.uri) {
       downLoadedFileUri = info.uri;
@@ -257,13 +241,17 @@ export const getXhtmlPath = (
   return xhtmlPath;
 };
 
-export const openBook = async (fileName: string): Promise<OpenBookResult> => {
+export const openBook = async (
+  fileName: string,
+): Promise<OpenBookResult | undefined> => {
   try {
     const epubFile = getEpubFile("books", fileName);
+    if (!epubFile.exists) {
+      return;
+    }
     const zip = await getZip(epubFile);
     const opfPath = await getOpfPath(zip);
     const opfXml: any = await zip.file(opfPath)?.async("string");
-    console.log(opfXml);
     const parsedPackage = parser1.parse(opfXml);
     const spineHrefs = getSpineHrefs(parsedPackage);
 
