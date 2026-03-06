@@ -79,7 +79,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
       setIsDisabled(true);
       // setIsLoading(true);
       // setReadingStarted(true);
-      const { opfPath, spineHrefs, zip }: OpenBookResult = await openBook(
+      const { opfPath, spineHrefs, zip }: any = await openBook(
         bookData.fileName,
       );
       const currentSpineIndex = currentChapter;

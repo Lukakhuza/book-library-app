@@ -20,9 +20,7 @@ export default function App() {
             <BookContextProvider>
               <ChapterContextProvider>
                 <ReaderContextProvider>
-                  {/* <View> */}
                   <Navigation />
-                  {/* </View> */}
                 </ReaderContextProvider>
               </ChapterContextProvider>
             </BookContextProvider>

@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import {
   Button,
   Dimensions,
@@ -50,6 +50,15 @@ const HomeScreen = () => {
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const { safeAreaInsets: insets } = useContext(LibraryContext);
   const { theme, isDark, toggleTheme } = useTheme();
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) return "Good Morning";
+    if (hour >= 12 && hour < 17) return "Good Afternoon";
+    if (hour >= 17 && hour < 21) return "Good Evening";
+    return "Good Night";
+  }, []);
 
   const FadeInView = ({ children }: Props) => {
     const opacity = useSharedValue(0);
@@ -134,7 +143,7 @@ const HomeScreen = () => {
   return (
     <Container>
       <View>
-        <SubHeading text="Good Evening" theme={theme} />
+        <SubHeading text={greeting} theme={theme} />
       </View>
       <View
         style={{
