@@ -1,13 +1,27 @@
-import { Text, View, ViewStyle } from "react-native";
+import { PixelRatio, Text, View, ViewStyle } from "react-native";
+import { useWindowDimensions } from "react-native";
+import { Dimensions } from "react-native";
 import { Theme } from "../../theme";
+import { useScale } from "../../store/ThemeContext";
 
 type Props = {
   text: string;
   theme: Theme;
   style?: ViewStyle;
+  fontScale?: number;
 };
 
-export const SubHeading = ({ text, theme, style }: Props) => {
+export const SubHeading = ({ text, theme, style, fontScale = 1 }: Props) => {
+  // const { width, height } = Dimensions.get("screen");
+  const { width, height } = useWindowDimensions();
+  const physicalWidth = width * PixelRatio.get();
+  const physicalHeight = height * PixelRatio.get();
+  const { fs, ws, hs, ms } = useScale();
+
+  // console.log(PixelRatio.get());
+  // console.log("Physical Width: ", physicalWidth);
+  // console.log("Physical Height: ", physicalHeight);
+
   return (
     <View>
       <Text
@@ -16,7 +30,7 @@ export const SubHeading = ({ text, theme, style }: Props) => {
             textTransform: "uppercase",
             fontFamily: "Roboto_700Bold",
             letterSpacing: 2,
-            fontSize: 15,
+            fontSize: fs(15),
             color: theme.colors.textMuted,
           },
           style,

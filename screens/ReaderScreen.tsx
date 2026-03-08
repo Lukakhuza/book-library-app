@@ -62,7 +62,7 @@ const ReaderScreen = () => {
   const pageWidthRef = useRef<number>(0);
   const currentIndexRef = useRef<number>(0);
   const navigation: RootNavigationProp = useNavigation();
-  const { theme }: ThemeContextType = useTheme();
+  const { theme, fontScale }: ThemeContextType = useTheme();
 
   // tagStyles[item?.tag
   useEffect(() => {

@@ -41,7 +41,11 @@ const SettingsSubsection2 = ({
         style={{
           flex: 1,
           marginLeft: 10,
-          justifyContent: "center",
+          // justifyContent: "flex-end",
+
+          // alignItems: "center",
+          // borderColor: "brown",
+          // borderWidth: 2,
         }}
       >
         <Text
@@ -50,6 +54,7 @@ const SettingsSubsection2 = ({
               fontFamily: "GoogleSans_700Bold",
               fontSize: 16,
               color: labelColor ?? theme.colors.accentPrimary,
+              // textAlign: "center",
             },
           ]}
         >

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, ViewStyle } from "react-native";
+import { Pressable, Text, View, ViewStyle } from "react-native";
 import { Theme } from "../../theme";
+import { useScale } from "../../store/ThemeContext";
 
 type CustomStyles = {
   viewStyle?: ViewStyle;
@@ -15,6 +16,7 @@ export const ThemeSwitchButton = ({
   theme,
   isDark,
 }: CustomStyles) => {
+  const { fs } = useScale();
   return (
     <Pressable
       style={[
@@ -22,13 +24,11 @@ export const ThemeSwitchButton = ({
           borderColor: "black",
           backgroundColor: theme.colors.bgChip,
           borderWidth: 1,
-          flexDirection: "row",
           alignItems: "center",
           borderRadius: 20,
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          // justifyContent: "space-between",
-          width: 95,
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          flexDirection: "row",
         },
         viewStyle,
       ]}
@@ -51,7 +51,12 @@ export const ThemeSwitchButton = ({
       <Text
         style={{
           color: "#D4A96A",
-          paddingHorizontal: 10,
+          // paddingLeft: 10,
+          fontSize: fs(14),
+          marginLeft: 5,
+          // borderColor: "blue",
+
+          // borderWidth: 1,
         }}
       >
         {isDark ? "Dark" : "Light"}

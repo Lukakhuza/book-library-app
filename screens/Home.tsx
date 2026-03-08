@@ -1,11 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
-import { useContext, useEffect, useState, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   Button,
   Dimensions,
   FlatList,
   StyleSheet,
-  Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Animated, {
@@ -21,12 +21,14 @@ import { Roboto_700Bold, useFonts } from "@expo-google-fonts/roboto";
 import { BookItem } from "../components/atoms/BookItem";
 import { Container } from "../components/atoms/Container";
 import { Header } from "../components/atoms/Header";
+import NoBooksText from "../components/atoms/NoBooksText";
 import { SubHeading } from "../components/atoms/SubHeading";
 import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 import { LibraryContext } from "../store/LibraryContext";
-import { useTheme } from "../store/ThemeContext";
-import LoadingOverlay from "../util/LoadingOverlay";
+import { useScale, useTheme } from "../store/ThemeContext";
 import { Props } from "../types/basic";
+import LoadingOverlay from "../util/LoadingOverlay";
+import NoBooks from "../components/molecules/NoBooks";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {
@@ -50,6 +52,7 @@ const HomeScreen = () => {
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const { safeAreaInsets: insets } = useContext(LibraryContext);
   const { theme, isDark, toggleTheme } = useTheme();
+  const { fs, hs, ms, ws } = useScale();
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -88,55 +91,43 @@ const HomeScreen = () => {
 
   if (myBooks?.length === 0) {
     myBooksContent = (
-      <View style={styles.content}>
-        <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
-          <Text
-            style={[styles.noBooksText, { color: theme.colors.textPrimary }]}
-          >
-            You currently have no books.
-          </Text>
-          <Text
-            style={[styles.noBooksText, { color: theme.colors.textPrimary }]}
-          >
-            Click below to explore:
-          </Text>
-        </View>
-        <Button
-          title="Discover"
-          color={theme.colors.bgCard}
-          onPress={() => {
-            navigation.navigate("Discover");
-          }}
-        />
-      </View>
+      <NoBooks
+        theme={theme}
+        onExplore={() => {
+          navigation.navigate("Discover");
+        }}
+      />
     );
   }
 
   if (myBooks?.length > 0) {
     myBooksContent = (
-      <FadeInView
-        style={{
-          flex: 1,
-        }}
-      >
-        <FlatList
-          data={myBooks}
-          bounces={false}
-          contentContainerStyle={
-            {
-              // alignItems: "stretch",
-              // paddingTop: 20,
-              // paddingBottom: 15,
-              // width: "100%",
-              // flex: 1,
-            }
-          }
-          style={{ marginTop: 20 }}
-          renderItem={(book) => {
-            return <BookItem book={book} />;
+      <View>
+        <SubHeading text="Continue Reading" theme={theme} />
+        <FadeInView
+          style={{
+            flex: 1,
           }}
-        />
-      </FadeInView>
+        >
+          <FlatList
+            data={myBooks}
+            bounces={false}
+            contentContainerStyle={
+              {
+                // alignItems: "stretch",
+                // paddingTop: 20,
+                // paddingBottom: 15,
+                // width: "100%",
+                // flex: 1,
+              }
+            }
+            style={{ marginTop: 20 }}
+            renderItem={(book) => {
+              return <BookItem book={book} />;
+            }}
+          />
+        </FadeInView>
+      </View>
     );
   }
 
@@ -151,43 +142,48 @@ const HomeScreen = () => {
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: 20,
+          // borderColor: "red",
+          // borderWidth: 1,
         }}
       >
-        <Header text="What will you read?" theme={theme} />
-        <ThemeSwitchButton
-          viewStyle={{ marginRight: 5, marginTop: 5 }}
-          onPress={() => {
-            toggleTheme();
-          }}
+        <Header
+          text="What will you read?"
           theme={theme}
-          isDark={isDark}
+          customStyle={{
+            // marginRight: 5,
+            // width: 20,
+            maxWidth: 250,
+            // flex: 1,
+            // borderColor: "brown",
+            // borderWidth: 1,
+            // flexGrow: 1,
+            flexShrink: 2,
+          }}
         />
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            // borderColor: "blue",
+            // borderWidth: 2,
+            // width: 120,
+            flexGrow: 1,
+            // flexShrink: 1,
+            // maxWidth: 120,
+          }}
+        >
+          <ThemeSwitchButton
+            onPress={() => {
+              toggleTheme();
+            }}
+            theme={theme}
+            isDark={isDark}
+          />
+        </View>
       </View>
-      <SubHeading text="Continue Reading" theme={theme} />
+
       {myBooksContent}
     </Container>
   );
 };
 export default HomeScreen;
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 20,
-    fontWeight: 800,
-  },
-  headerContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  noBooksText: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: 600,
-    marginVertical: 5,
-  },
-});
