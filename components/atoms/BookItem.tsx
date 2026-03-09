@@ -7,7 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { BookContext } from "../../store/BookContext";
-import { useTheme } from "../../store/ThemeContext";
+import { useScale, useTheme } from "../../store/ThemeContext";
 import { AppNavigationProp } from "../../types/navigation";
 import { BookImage } from "./BookImage";
 import { ProgressBar } from "./ProgressBar";
@@ -28,6 +28,7 @@ export const BookItem = ({ book }: BookData) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   const { theme, isDark, toggleTheme } = useTheme();
+  const { fs, ms } = useScale();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -52,27 +53,36 @@ export const BookItem = ({ book }: BookData) => {
         }}
         style={({ pressed }) => ({
           backgroundColor: theme.colors.bgElevated,
-          borderRadius: 20,
+          borderRadius: ms(20),
           borderColor: "black",
           borderWidth: 1,
-          marginBottom: 20,
-          paddingHorizontal: 8,
+          marginBottom: ms(20),
+          paddingHorizontal: ms(8),
         })}
       >
         <View
           style={{
             flexDirection: "row",
-            paddingVertical: 15,
-            paddingHorizontal: 10,
+            paddingVertical: ms(15),
+            paddingHorizontal: ms(10),
           }}
         >
-          <BookImage
-            imgUri={`https://books-library-app.s3.eu-north-1.amazonaws.com/${book.item.coverKey}`}
-            width={70}
-          />
           <View
             style={{
-              marginHorizontal: 16,
+              alignItems: "center",
+              justifyContent: "center",
+              // borderColor: "blue",
+              // borderWidth: 1,
+            }}
+          >
+            <BookImage
+              imgUri={`https://books-library-app.s3.eu-north-1.amazonaws.com/${book.item.coverKey}`}
+              width={ms(70)}
+            />
+          </View>
+          <View
+            style={{
+              marginHorizontal: ms(16),
               flex: 1,
             }}
           >
@@ -80,10 +90,12 @@ export const BookItem = ({ book }: BookData) => {
               ellipsizeMode="tail"
               numberOfLines={2}
               style={{
-                fontSize: 20,
+                fontSize: fs(20),
                 fontFamily: "GoogleSans_700Bold",
                 color: theme.colors.textPrimary,
-                lineHeight: 24,
+                lineHeight: ms(24),
+                // paddingVertical: ms(20),
+                includeFontPadding: true,
               }}
             >
               {book.item.title}
@@ -92,13 +104,15 @@ export const BookItem = ({ book }: BookData) => {
               style={{
                 fontFamily: "GoogleSans_500Medium",
                 color: theme.colors.textMuted,
+                fontSize: fs(15),
               }}
+              numberOfLines={1}
             >
               {book.item.author}
             </Text>
             <ProgressBar
               progress={readingProgress}
-              customStyle={{ marginBottom: 5 }}
+              customStyle={{ marginBottom: ms(5) }}
               theme={theme}
             />
             <View>
@@ -106,7 +120,9 @@ export const BookItem = ({ book }: BookData) => {
                 style={{
                   color: theme.colors.textDisabled,
                   fontFamily: "GoogleSans_500Medium",
+                  fontSize: fs(13),
                 }}
+                numberOfLines={1}
               >
                 {`${Math.round(readingProgress * 100)}% - 78 pages left`}
               </Text>

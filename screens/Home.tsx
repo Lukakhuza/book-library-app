@@ -63,7 +63,7 @@ const HomeScreen = () => {
     return "Good Night";
   }, []);
 
-  const FadeInView = ({ children }: Props) => {
+  const FadeInView = ({ children, style }: Props) => {
     const opacity = useSharedValue(0);
 
     useEffect(() => {
@@ -74,7 +74,9 @@ const HomeScreen = () => {
       opacity: opacity.value,
     }));
 
-    return <Animated.View style={animatedStyle}>{children}</Animated.View>;
+    return (
+      <Animated.View style={[animatedStyle, style]}>{children}</Animated.View>
+    );
   };
 
   // useFocusEffect(
@@ -104,23 +106,10 @@ const HomeScreen = () => {
     myBooksContent = (
       <View>
         <SubHeading text="Continue Reading" theme={theme} />
-        <FadeInView
-          style={{
-            flex: 1,
-          }}
-        >
+        <FadeInView style={{ marginBottom: ms(180) }}>
           <FlatList
             data={myBooks}
             bounces={false}
-            contentContainerStyle={
-              {
-                // alignItems: "stretch",
-                // paddingTop: 20,
-                // paddingBottom: 15,
-                // width: "100%",
-                // flex: 1,
-              }
-            }
             style={{ marginTop: 20 }}
             renderItem={(book) => {
               return <BookItem book={book} />;

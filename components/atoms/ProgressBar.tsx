@@ -1,5 +1,6 @@
 import { View, ViewStyle } from "react-native";
 import { Theme } from "../../theme";
+import { useScale } from "../../store/ThemeContext";
 
 type Props = {
   progress: number;
@@ -8,11 +9,13 @@ type Props = {
 };
 
 export const ProgressBar = ({ progress, customStyle, theme }: Props) => {
+  const { ms } = useScale();
+
   return (
     <View
       style={[
         {
-          height: 4,
+          height: ms(4),
           backgroundColor: theme.colors.bgChip,
           borderRadius: 2,
           overflow: "hidden",
