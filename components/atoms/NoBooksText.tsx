@@ -1,5 +1,6 @@
 import { View, Text, TextStyle, ViewStyle, StyleSheet } from "react-native";
 import { Theme } from "../../theme";
+import { useScale } from "../../store/ThemeContext";
 
 type NoBooksTextProps = {
   textStyle?: TextStyle | TextStyle[];
@@ -8,12 +9,38 @@ type NoBooksTextProps = {
 };
 
 const NoBooksText = ({ theme }: NoBooksTextProps) => {
+  const { fs, hs, ms, ws } = useScale();
   return (
-    <View style={styles.container}>
-      <Text style={[styles.noBooksText, { color: theme.colors.textPrimary }]}>
+    <View
+      style={[
+        styles.container,
+        { marginHorizontal: ms(15), marginBottom: ms(10) },
+      ]}
+    >
+      <Text
+        style={[
+          styles.noBooksText,
+          {
+            color: theme.colors.textPrimary,
+            fontSize: fs(18),
+            marginVertical: ms(5),
+            marginHorizontal: ms(5),
+          },
+        ]}
+      >
         You currently have no books.
       </Text>
-      <Text style={[styles.noBooksText, { color: theme.colors.textPrimary }]}>
+      <Text
+        style={[
+          styles.noBooksText,
+          {
+            color: theme.colors.textPrimary,
+            fontSize: fs(18),
+            marginVertical: ms(5),
+            marginHorizontal: ms(5),
+          },
+        ]}
+      >
         Click below to explore:
       </Text>
     </View>
@@ -26,13 +53,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 15,
-    marginBottom: 10,
   },
   noBooksText: {
     textAlign: "center",
-    fontSize: 18,
     fontWeight: 600,
-    marginVertical: 5,
   },
 });

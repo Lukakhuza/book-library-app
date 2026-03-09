@@ -29,7 +29,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { width, height, fontScale: fntScale } = useWindowDimensions();
   // Width: 320dp → 430dp
   // Height: 568dp → 932dp
-  let fontScale = 1;
+  let fontScale = 2;
   const baseWidth = 411.42857142857144;
   const baseHeight = 914.2857142857143;
   const physicalWidth = width * PixelRatio.get();
