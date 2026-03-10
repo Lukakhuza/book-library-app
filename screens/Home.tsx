@@ -1,13 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Dimensions, FlatList, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -21,14 +14,13 @@ import { Roboto_700Bold, useFonts } from "@expo-google-fonts/roboto";
 import { BookItem } from "../components/atoms/BookItem";
 import { Container } from "../components/atoms/Container";
 import { Header } from "../components/atoms/Header";
-import NoBooksText from "../components/atoms/NoBooksText";
 import { SubHeading } from "../components/atoms/SubHeading";
 import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
+import NoBooks from "../components/molecules/NoBooks";
 import { LibraryContext } from "../store/LibraryContext";
 import { useScale, useTheme } from "../store/ThemeContext";
 import { Props } from "../types/basic";
 import LoadingOverlay from "../util/LoadingOverlay";
-import NoBooks from "../components/molecules/NoBooks";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {

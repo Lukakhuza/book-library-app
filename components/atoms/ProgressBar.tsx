@@ -1,4 +1,4 @@
-import { View, ViewStyle } from "react-native";
+import { StyleSheet, View, ViewStyle } from "react-native";
 import { Theme } from "../../theme";
 import { useScale } from "../../store/ThemeContext";
 
@@ -10,27 +10,36 @@ type Props = {
 
 export const ProgressBar = ({ progress, customStyle, theme }: Props) => {
   const { ms } = useScale();
+  const { accentPrimary, bgChip } = theme.colors;
 
   return (
     <View
       style={[
+        styles.outer,
         {
           height: ms(4),
-          backgroundColor: theme.colors.bgChip,
-          borderRadius: 2,
-          overflow: "hidden",
+          backgroundColor: bgChip,
         },
         customStyle,
       ]}
     >
       <View
         style={{
-          height: "100%",
           width: `${progress * 100}%`,
-          backgroundColor: theme.colors.accentPrimary,
-          borderRadius: 2,
+          backgroundColor: accentPrimary,
         }}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  outer: {
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  inner: {
+    height: "100%",
+    borderRadius: 2,
+  },
+});

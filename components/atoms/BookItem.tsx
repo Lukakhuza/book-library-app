@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
-import { Dimensions, Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,10 +8,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { BookContext } from "../../store/BookContext";
 import { useScale, useTheme } from "../../store/ThemeContext";
-import { AppNavigationProp } from "../../types/navigation";
-import { BookImage } from "./BookImage";
-import { ProgressBar } from "./ProgressBar";
 import { Book } from "../../types/book";
+import { AppNavigationProp } from "../../types/navigation";
+import BookAuthor from "./BookAuthor";
+import { BookImage } from "./BookImage";
+import BookTitle from "./BookTitle";
+import { ProgressBar } from "./ProgressBar";
+import ProgressText from "./ProgressText";
 
 type BookData = {
   book: {
@@ -22,114 +25,95 @@ type BookData = {
 };
 
 export const BookItem = ({ book }: BookData) => {
-  const { width } = Dimensions.get("screen");
   const navigation: AppNavigationProp = useNavigation();
   const { readingProgress } = useContext(BookContext);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
-  const { theme, isDark, toggleTheme } = useTheme();
-  const { fs, ms } = useScale();
+  const { theme } = useTheme();
+  const { ms } = useScale();
+  const { author, title, coverKey } = book.item;
+  const { bgElevated } = theme.colors;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 
+  const handlePressIn = () => {
+    scale.value = withSpring(1.1);
+    opacity.value = withSpring(0.8);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+    opacity.value = withSpring(1);
+  };
+
+  const handleOnPress = () => {
+    navigation.navigate("BookDetails", {
+      bookData: book.item,
+    });
+  };
+
   return (
     <Animated.View style={[animatedStyle]}>
       <Pressable
-        onPressIn={() => {
-          scale.value = withSpring(1.1);
-          opacity.value = withSpring(0.8);
-        }}
-        onPressOut={() => {
-          scale.value = withSpring(1);
-          opacity.value = withSpring(1);
-        }}
-        onPress={() => {
-          navigation.navigate("BookDetails", {
-            bookData: book.item,
-          });
-        }}
-        style={({ pressed }) => ({
-          backgroundColor: theme.colors.bgElevated,
-          borderRadius: ms(20),
-          borderColor: "black",
-          borderWidth: 1,
-          marginBottom: ms(20),
-          paddingHorizontal: ms(8),
-        })}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handleOnPress}
+        style={[
+          styles.container,
+          {
+            backgroundColor: bgElevated,
+            borderRadius: ms(20),
+            marginBottom: ms(20),
+            paddingHorizontal: ms(8),
+          },
+        ]}
       >
         <View
-          style={{
-            flexDirection: "row",
-            paddingVertical: ms(15),
-            paddingHorizontal: ms(10),
-          }}
+          style={[
+            styles.innerContainer,
+            {
+              paddingVertical: ms(15),
+              paddingHorizontal: ms(10),
+            },
+          ]}
         >
+          <BookImage
+            imgUri={`https://books-library-app.s3.eu-north-1.amazonaws.com/${coverKey}`}
+            width={ms(70)}
+          />
+
           <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              // borderColor: "blue",
-              // borderWidth: 1,
-            }}
+            style={[
+              styles.bookDataContainer,
+              {
+                marginHorizontal: ms(16),
+              },
+            ]}
           >
-            <BookImage
-              imgUri={`https://books-library-app.s3.eu-north-1.amazonaws.com/${book.item.coverKey}`}
-              width={ms(70)}
-            />
-          </View>
-          <View
-            style={{
-              marginHorizontal: ms(16),
-              flex: 1,
-            }}
-          >
-            <Text
-              ellipsizeMode="tail"
-              numberOfLines={2}
-              style={{
-                fontSize: fs(20),
-                fontFamily: "GoogleSans_700Bold",
-                color: theme.colors.textPrimary,
-                lineHeight: ms(24),
-                // paddingVertical: ms(20),
-                includeFontPadding: true,
-              }}
-            >
-              {book.item.title}
-            </Text>
-            <Text
-              style={{
-                fontFamily: "GoogleSans_500Medium",
-                color: theme.colors.textMuted,
-                fontSize: fs(15),
-              }}
-              numberOfLines={1}
-            >
-              {book.item.author}
-            </Text>
+            <BookTitle title={title} theme={theme} />
+            <BookAuthor author={author} theme={theme} />
             <ProgressBar
               progress={readingProgress}
               customStyle={{ marginBottom: ms(5) }}
               theme={theme}
             />
-            <View>
-              <Text
-                style={{
-                  color: theme.colors.textDisabled,
-                  fontFamily: "GoogleSans_500Medium",
-                  fontSize: fs(13),
-                }}
-                numberOfLines={1}
-              >
-                {`${Math.round(readingProgress * 100)}% - 78 pages left`}
-              </Text>
-            </View>
+            <ProgressText theme={theme} readingProgress={readingProgress} />
           </View>
         </View>
       </Pressable>
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { borderColor: "black", borderWidth: 1 },
+  innerContainer: {
+    flexDirection: "row",
+  },
+  bookDataContainer: {
+    flex: 1,
+  },
+});
