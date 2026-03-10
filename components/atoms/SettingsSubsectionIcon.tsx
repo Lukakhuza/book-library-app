@@ -1,11 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { View } from "react-native";
+import { Theme } from "../../theme";
+import { IoniconName } from "../../types/basic";
 
-const SettingsSubsectionIcon = ({ ioniconIdentifier, theme }: any) => {
+type Props = {
+  ioniconIdentifier: IoniconName;
+  theme: Theme;
+};
+
+const SettingsSubsectionIcon = ({ ioniconIdentifier, theme }: Props) => {
   return (
     <View
       style={{
-        // flex: 1,
         padding: 5,
         borderColor: "black",
         borderWidth: 0.5,

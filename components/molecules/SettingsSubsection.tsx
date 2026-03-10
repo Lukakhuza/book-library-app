@@ -3,10 +3,11 @@ import SettingsSubsectionIcon from "../atoms/SettingsSubsectionIcon";
 import { Toggle } from "../atoms/Toggle";
 import { Theme } from "../../theme";
 import { Ionicons } from "@expo/vector-icons";
+import { IoniconName } from "../../types/basic";
 
 type SettingSubsectionProps = {
   theme: Theme;
-  ioniconIdentifier: string;
+  ioniconIdentifier: IoniconName;
   label: string;
   labelColor?: string;
   style?: ViewStyle;

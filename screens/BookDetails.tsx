@@ -2,9 +2,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 // import { ReaderContext } from "../store/ReaderContext";
-import { Ionicons } from "@expo/vector-icons";
 import { Container } from "../components/atoms/Container";
-import { Colors } from "../constants/colors";
+import PressableIcon from "../components/atoms/PressableIcon";
 import {
   deleteFromMyBooks,
   downloadBook,
@@ -15,10 +14,9 @@ import { BookContext } from "../store/BookContext";
 import { ChapterContext } from "../store/ChapterContext";
 import { MyBooksContext } from "../store/MyBooksContext";
 import { useTheme } from "../store/ThemeContext";
-import { Book, BookRouteProps, OpenBookResult } from "../types/book";
+import { Book, BookRouteProps } from "../types/book";
 import { RootNavigationProp } from "../types/navigation";
 import LoadingOverlay from "../util/LoadingOverlay";
-// import { Colors } from "../constants/Colors";
 
 const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +30,8 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
     useContext(MyBooksContext);
   const { bookData } = route.params;
   const { theme, toggleTheme, isDark } = useTheme();
+
+  const goHome = () => navigation.navigate("App");
 
   useEffect(() => {
     updateCurrentBook(bookData);
@@ -115,31 +115,20 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
           marginVertical: 15,
         }}
       >
-        <View>
-          <Pressable onPress={() => navigation.navigate("App")}>
-            <Ionicons
-              name="home-outline"
-              size={24}
-              color={Colors.dark.accentPrimary}
-            />
-          </Pressable>
-        </View>
-        <View>
-          <Pressable onPress={toggleTheme}>
-            <Ionicons
-              name={isDark ? "sunny-outline" : "sunny-sharp"}
-              size={25}
-              color={Colors.dark.accentPrimary}
-            />
-          </Pressable>
-        </View>
-        <View>
-          <Ionicons
-            name="share-social-outline"
-            size={24}
-            color={Colors.dark.accentPrimary}
-          />
-        </View>
+        <PressableIcon
+          theme={theme}
+          onPress={goHome}
+          ioniconIdentifier={isDark ? "home-outline" : "home"}
+        />
+        <PressableIcon
+          theme={theme}
+          onPress={toggleTheme}
+          ioniconIdentifier={isDark ? "sunny-outline" : "sunny-sharp"}
+        />
+        <PressableIcon
+          theme={theme}
+          ioniconIdentifier={isDark ? "share-social-outline" : "share-social"}
+        />
       </View>
       {currentBook && (
         <View style={styles.content}>
@@ -147,8 +136,6 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
             style={{
               marginHorizontal: 15,
               marginBottom: 10,
-              // borderColor: "yellow",
-              // borderWidth: 2,
             }}
           >
             <View style={{ alignItems: "center" }}>
@@ -161,9 +148,6 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
                   height: 405,
                   marginTop: 10,
                   borderRadius: 20,
-
-                  // borderWidth: 2,
-                  // borderColor: "yellow",
                 }}
                 resizeMode="cover"
               />
@@ -175,8 +159,6 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
                   fontFamily: "Roboto_700Bold",
                   fontSize: 25,
                   textAlign: "center",
-                  // borderColor: "yellow",
-                  // borderWidth: 2,
                   marginVertical: 10,
                 }}
                 numberOfLines={2}
@@ -189,8 +171,6 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
                   fontFamily: "GoogleSans_400Regular",
                   fontSize: 19,
                   textAlign: "center",
-                  // borderColor: "yellow",
-                  // borderWidth: 2,
                   marginBottom: 10,
                 }}
                 numberOfLines={2}
