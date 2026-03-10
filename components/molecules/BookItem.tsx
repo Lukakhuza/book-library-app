@@ -10,11 +10,11 @@ import { BookContext } from "../../store/BookContext";
 import { useScale, useTheme } from "../../store/ThemeContext";
 import { Book } from "../../types/book";
 import { AppNavigationProp } from "../../types/navigation";
-import BookAuthor from "./BookAuthor";
-import { BookImage } from "./BookImage";
-import BookTitle from "./BookTitle";
-import { ProgressBar } from "./ProgressBar";
-import ProgressText from "./ProgressText";
+import BookAuthor from "../atoms/BookAuthor";
+import { BookImage } from "../atoms/BookImage";
+import BookTitle from "../atoms/BookTitle";
+import { ProgressBar } from "../atoms/ProgressBar";
+import ProgressText from "../atoms/ProgressText";
 
 type BookData = {
   book: {
@@ -29,10 +29,10 @@ export const BookItem = ({ book }: BookData) => {
   const { readingProgress } = useContext(BookContext);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
-  const { theme } = useTheme();
   const { ms } = useScale();
-  const { author, title, coverKey } = book.item;
+  const { theme } = useTheme();
   const { bgElevated } = theme.colors;
+  const { author, title, coverKey } = book.item;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

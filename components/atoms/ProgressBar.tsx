@@ -24,22 +24,19 @@ export const ProgressBar = ({ progress, customStyle, theme }: Props) => {
       ]}
     >
       <View
-        style={{
-          width: `${progress * 100}%`,
-          backgroundColor: accentPrimary,
-        }}
+        style={[
+          styles.inner,
+          {
+            width: `${progress * 100}%`,
+            backgroundColor: accentPrimary,
+          },
+        ]}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  outer: {
-    borderRadius: 2,
-    overflow: "hidden",
-  },
-  inner: {
-    height: "100%",
-    borderRadius: 2,
-  },
+  outer: { borderRadius: 2, overflow: "hidden" },
+  inner: { height: "100%", borderRadius: 2 },
 });

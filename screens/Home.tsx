@@ -11,7 +11,7 @@ import { MyBooksContext } from "../store/MyBooksContext";
 import { AppNavigationProp } from "../types/navigation";
 // const scale = useRef(new Animated.Value(1)).current;
 import { Roboto_700Bold, useFonts } from "@expo-google-fonts/roboto";
-import { BookItem } from "../components/atoms/BookItem";
+import { BookItem } from "../components/molecules/BookItem";
 import { Container } from "../components/atoms/Container";
 import { Header } from "../components/atoms/Header";
 import { SubHeading } from "../components/atoms/SubHeading";
@@ -162,7 +162,6 @@ const HomeScreen = () => {
           />
         </View>
       </View>
-
       {myBooksContent}
     </Container>
   );

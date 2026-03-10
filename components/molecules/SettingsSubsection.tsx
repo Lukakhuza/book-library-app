@@ -2,20 +2,39 @@ import { Text, View, ViewStyle } from "react-native";
 import SettingsSubsectionIcon from "../atoms/SettingsSubsectionIcon";
 import { Toggle } from "../atoms/Toggle";
 import { Theme } from "../../theme";
+import { Ionicons } from "@expo/vector-icons";
 
 type SettingSubsectionProps = {
   theme: Theme;
   ioniconIdentifier: string;
   label: string;
+  labelColor?: string;
   style?: ViewStyle;
+  controllerType: "toggle" | "arrow";
 };
 
 const SettingsSubsection = ({
   theme,
   ioniconIdentifier,
   label,
+  labelColor,
   style,
+  controllerType,
 }: SettingSubsectionProps) => {
+  let controller;
+
+  if (controllerType === "arrow") {
+    controller = (
+      <Ionicons
+        name="chevron-forward-outline"
+        size={30}
+        color={theme.colors.textMuted}
+      />
+    );
+  } else if (controllerType === "toggle") {
+    controller = <Toggle theme={theme} />;
+  }
+
   return (
     <View
       style={[
@@ -43,7 +62,7 @@ const SettingsSubsection = ({
       >
         <Text
           style={{
-            color: theme.colors.accentPrimary,
+            color: labelColor ?? theme.colors.accentPrimary,
             fontFamily: "GoogleSans_700Bold",
             fontSize: 16,
           }}
@@ -56,7 +75,7 @@ const SettingsSubsection = ({
           alignItems: "flex-end",
         }}
       >
-        <Toggle />
+        {controller}
       </View>
     </View>
   );

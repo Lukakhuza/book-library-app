@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useScale } from "../../store/ThemeContext";
 import { Theme } from "../../theme";
 

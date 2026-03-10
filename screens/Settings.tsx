@@ -1,18 +1,13 @@
-// import { useNavigation } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
-import { Button, Pressable, View, Text, ScrollView } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { Container } from "../components/atoms/Container";
-// import { Colors } from "../constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { Header } from "../components/atoms/Header";
+import { SubHeading } from "../components/atoms/SubHeading";
+import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
+import SettingsSubsection from "../components/molecules/SettingsSubsection";
 import { useTheme } from "../store/ThemeContext";
 import { HomeStackNavigationProp } from "../types/navigation";
-import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
-import { Ionicons } from "@expo/vector-icons";
-import { Toggle } from "../components/atoms/Toggle";
-import { SubHeading } from "../components/atoms/SubHeading";
-import SettingsSubsectionIcon from "../components/atoms/SettingsSubsectionIcon";
-import SettingsSubsection from "../components/molecules/SettingsSubsection";
-import SettingsSubsection2 from "../components/molecules/SettingsSubsection2";
 
 const SettingsScreen = () => {
   const navigation: HomeStackNavigationProp = useNavigation();
@@ -24,15 +19,12 @@ const SettingsScreen = () => {
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          // borderColor: "brown",
           alignItems: "flex-start",
-          // borderWidth: 2,
           marginVertical: 5,
         }}
       >
         <Header text="Settings" theme={theme} />
         <ThemeSwitchButton
-          // viewStyle={{ marginRight: 5, marginTop: 5 }}
           onPress={() => {
             toggleTheme();
           }}
@@ -57,8 +49,6 @@ const SettingsScreen = () => {
         >
           <View
             style={{
-              // borderColor: "blue",
-              // borderWidth: 2,
               flex: 3,
               alignItems: "center",
             }}
@@ -69,7 +59,6 @@ const SettingsScreen = () => {
                 borderRadius: 100,
                 width: 70,
                 height: 70,
-                // flex: 1,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -87,8 +76,6 @@ const SettingsScreen = () => {
           </View>
           <View
             style={{
-              // borderColor: "blue",
-              // borderWidth: 2,
               flex: 7,
               marginVertical: 10,
             }}
@@ -170,8 +157,6 @@ const SettingsScreen = () => {
           </View>
           <View
             style={{
-              // borderColor: "blue",
-              // borderWidth: 2,
               flex: 2,
               alignItems: "center",
             }}
@@ -186,8 +171,6 @@ const SettingsScreen = () => {
                 height: 40,
                 borderWidth: 0.5,
                 paddingLeft: 3,
-                // paddingVertical: 10,
-                // paddingRight: 5,
               }}
             >
               <Ionicons
@@ -205,7 +188,6 @@ const SettingsScreen = () => {
           theme={theme}
           style={{ marginLeft: 10, marginBottom: 5 }}
         />
-        {/* <View> */}
         <View
           style={{
             backgroundColor: theme.colors.bgElevated,
@@ -214,11 +196,6 @@ const SettingsScreen = () => {
             borderColor: "black",
             borderWidth: 1,
             marginBottom: 20,
-            // paddingVertical: 10,
-            // paddingHorizontal: 15,
-            // justifyContent: "space-between",
-            // flexDirection: "row",
-            // alignItems: "center",
           }}
         >
           <SettingsSubsection
@@ -229,6 +206,7 @@ const SettingsScreen = () => {
               borderBottomColor: theme.colors.textMuted,
               borderBottomWidth: 0.5,
             }}
+            controllerType="toggle"
           />
           <SettingsSubsection
             label="Daily Reading Goal"
@@ -238,11 +216,13 @@ const SettingsScreen = () => {
               borderBottomColor: theme.colors.textMuted,
               borderBottomWidth: 0.5,
             }}
+            controllerType="toggle"
           />
           <SettingsSubsection
             label="Weekly Digest"
             ioniconIdentifier="calendar"
             theme={theme}
+            controllerType="toggle"
           />
         </View>
 
@@ -259,14 +239,9 @@ const SettingsScreen = () => {
             borderColor: "black",
             borderWidth: 1,
             marginBottom: 20,
-            // paddingVertical: 10,
-            // paddingHorizontal: 15,
-            // justifyContent: "space-between",
-            // flexDirection: "row",
-            // alignItems: "center",
           }}
         >
-          <SettingsSubsection2
+          <SettingsSubsection
             label="Subscription"
             ioniconIdentifier="card-outline"
             theme={theme}
@@ -274,8 +249,9 @@ const SettingsScreen = () => {
               borderBottomColor: theme.colors.textMuted,
               borderBottomWidth: 0.5,
             }}
+            controllerType="arrow"
           />
-          <SettingsSubsection2
+          <SettingsSubsection
             label="Privacy & Security"
             ioniconIdentifier="lock-closed"
             theme={theme}
@@ -283,8 +259,9 @@ const SettingsScreen = () => {
               borderBottomColor: theme.colors.textMuted,
               borderBottomWidth: 0.5,
             }}
+            controllerType="arrow"
           />
-          <SettingsSubsection2
+          <SettingsSubsection
             label="Sync & Backup"
             ioniconIdentifier="cloud"
             theme={theme}
@@ -292,8 +269,9 @@ const SettingsScreen = () => {
               borderBottomColor: theme.colors.textMuted,
               borderBottomWidth: 0.5,
             }}
+            controllerType="arrow"
           />
-          <SettingsSubsection2
+          <SettingsSubsection
             label="Rate the App"
             ioniconIdentifier="star"
             theme={theme}
@@ -301,11 +279,13 @@ const SettingsScreen = () => {
               borderBottomColor: theme.colors.textMuted,
               borderBottomWidth: 0.5,
             }}
+            controllerType="arrow"
           />
-          <SettingsSubsection2
+          <SettingsSubsection
             label="Help & Support"
             ioniconIdentifier="help-circle-sharp"
             theme={theme}
+            controllerType="arrow"
           />
         </View>
 
@@ -317,29 +297,17 @@ const SettingsScreen = () => {
             borderColor: "black",
             borderWidth: 1,
             marginBottom: 20,
-            // paddingVertical: 10,
-            // paddingHorizontal: 15,
-            // justifyContent: "space-between",
-            // flexDirection: "row",
-            // alignItems: "center",
           }}
         >
-          <SettingsSubsection2
+          <SettingsSubsection
             label="Log Out"
             labelColor={theme.colors.accentDanger}
             ioniconIdentifier="log-out-outline"
             theme={theme}
+            controllerType="arrow"
           />
         </View>
       </ScrollView>
-      {/* </View> */}
-      {/* <Button
-        title="Go Home"
-        color={theme.colors.bgCard}
-        onPress={() => {
-          navigation.navigate("Home");
-          }}
-          /> */}
     </Container>
   );
 };

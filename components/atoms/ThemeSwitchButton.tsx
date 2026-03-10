@@ -16,13 +16,15 @@ export const ThemeSwitchButton = ({
   theme,
   isDark,
 }: CustomStyles) => {
-  const { fs } = useScale();
+  const { fs, ms } = useScale();
+  const { bgChip, accentPrimary } = theme.colors;
+
   return (
     <Pressable
       style={[
         {
           borderColor: "black",
-          backgroundColor: theme.colors.bgChip,
+          backgroundColor: bgChip,
           borderWidth: 1,
           alignItems: "center",
           borderRadius: 20,
@@ -35,28 +37,16 @@ export const ThemeSwitchButton = ({
       onPress={onPress}
     >
       {isDark ? (
-        <Ionicons
-          name={"moon-outline"}
-          size={25}
-          color={theme.colors.accentPrimary}
-        />
+        <Ionicons name={"moon-outline"} size={25} color={accentPrimary} />
       ) : (
-        <Ionicons
-          name={"sunny-outline"}
-          size={25}
-          color={theme.colors.accentPrimary}
-        />
+        <Ionicons name={"sunny-outline"} size={25} color={accentPrimary} />
       )}
 
       <Text
         style={{
-          color: "#D4A96A",
-          // paddingLeft: 10,
+          color: accentPrimary,
           fontSize: fs(14),
-          marginLeft: 5,
-          // borderColor: "blue",
-
-          // borderWidth: 1,
+          marginLeft: ms(5),
         }}
       >
         {isDark ? "Dark" : "Light"}

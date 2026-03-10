@@ -18,10 +18,6 @@ export const SubHeading = ({ text, theme, style, fontScale = 1 }: Props) => {
   const physicalHeight = height * PixelRatio.get();
   const { fs, ws, hs, ms } = useScale();
 
-  // console.log(PixelRatio.get());
-  // console.log("Physical Width: ", physicalWidth);
-  // console.log("Physical Height: ", physicalHeight);
-
   return (
     <View>
       <Text

@@ -1,43 +1,44 @@
-import { Button, View, StyleSheet, Pressable, Text } from "react-native";
-import NoBooksText from "../atoms/NoBooksText";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useScale } from "../../store/ThemeContext";
+import NoBooksText from "./NoBooksText";
+import { Theme } from "../../theme";
 
-const NoBooks = ({ theme, onExplore }: any) => {
+type Props = {
+  theme: Theme;
+  onExplore: () => void;
+};
+
+const NoBooks = ({ theme, onExplore }: Props) => {
   const { fs, ms } = useScale();
+  const { bgCard, accentPrimary } = theme.colors;
+
   return (
     <View style={styles.container}>
       <NoBooksText theme={theme} />
       <View>
         <Pressable
-          style={{
-            // width: 200,
-            backgroundColor: theme.colors.bgCard,
-            // height: 50,
-            // backgroundColor: "blue",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: ms(15),
-            borderWidth: ms(2),
-            paddingHorizontal: ms(10),
-            paddingVertical: ms(5),
-          }}
+          style={[
+            styles.button,
+            {
+              backgroundColor: bgCard,
+              borderRadius: ms(15),
+              borderWidth: ms(2),
+              paddingHorizontal: ms(10),
+              paddingVertical: ms(5),
+            },
+          ]}
           onPress={onExplore}
         >
           <Text
             style={{
               fontSize: fs(15),
               textTransform: "uppercase",
-              color: theme.colors.accentPrimary,
+              color: accentPrimary,
             }}
           >
             Explore
           </Text>
         </Pressable>
-        {/* <Button
-          title="Explore"
-          color={theme.colors.bgCard}
-          onPress={onExplore}
-        /> */}
       </View>
     </View>
   );
@@ -50,7 +51,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    // borderColor: "brown",
-    // borderWidth: 2,
+  },
+  button: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

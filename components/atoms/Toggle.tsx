@@ -1,15 +1,16 @@
 import { useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-  Pressable,
-} from "react-native";
+import { Animated, Pressable, StyleSheet, View } from "react-native";
+import { Theme } from "../../theme";
 
-export const Toggle = () => {
+type Props = {
+  theme: Theme;
+};
+
+export const Toggle = ({ theme }: Props) => {
   const [isOn, setIsOn] = useState(true);
   const translateX = useState(new Animated.Value(isOn ? 22 : 2))[0];
+
+  const { accentPrimary, bgElevated } = theme.colors;
 
   const toggle = () => {
     const toValue = isOn ? 2 : 22;
@@ -34,9 +35,9 @@ export const Toggle = () => {
         style={[
           styles.track,
           {
-            backgroundColor: isOn ? "#C9A84C" : "#3A3220",
+            backgroundColor: isOn ? accentPrimary : bgElevated,
             borderBlockColor: "black",
-            borderWidth: isOn ? 0 : 0.5,
+            borderWidth: isOn ? 0.5 : 1,
           },
         ]}
       >
