@@ -39,13 +39,8 @@ type LeftoverText = {
 
 const ReaderScreen = () => {
   const { screenDimensions } = useContext(LibraryContext);
-  const {
-    textsArray,
-    currentChapter,
-    nextChapter,
-    previousChapter,
-    updateCurrentChapter,
-  } = useContext(ChapterContext);
+  const { textsArray, nextChapter, previousChapter, updateCurrentChapter } =
+    useContext(ChapterContext);
   const { shouldExitBook, resetShouldExitBook } = useContext(ChapterContext);
   const { currentBook } = useContext(BookContext);
   const iRef = useRef(0);
@@ -62,7 +57,7 @@ const ReaderScreen = () => {
   const pageWidthRef = useRef<number>(0);
   const currentIndexRef = useRef<number>(0);
   const navigation: RootNavigationProp = useNavigation();
-  const { theme, fontScale }: ThemeContextType = useTheme();
+  const { theme }: ThemeContextType = useTheme();
 
   // tagStyles[item?.tag
   useEffect(() => {

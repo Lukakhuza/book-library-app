@@ -40,7 +40,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const hs = (size: number) => Math.round((size * height) / baseHeight);
   const fs = (size: number) => Math.round(size * fontScale);
 
-  // console.log(fs(15));
   const scale = {
     ms: ms,
     ws: ws,

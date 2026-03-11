@@ -14,7 +14,7 @@ import { BookContext } from "../store/BookContext";
 import { ChapterContext } from "../store/ChapterContext";
 import { MyBooksContext } from "../store/MyBooksContext";
 import { useTheme } from "../store/ThemeContext";
-import { Book, BookRouteProps } from "../types/book";
+import { Book, BookRouteProps, OpenBookResult } from "../types/book";
 import { RootNavigationProp } from "../types/navigation";
 import LoadingOverlay from "../util/LoadingOverlay";
 
@@ -79,9 +79,11 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
       setIsDisabled(true);
       // setIsLoading(true);
       // setReadingStarted(true);
-      const { opfPath, spineHrefs, zip }: any = await openBook(
+      const result: OpenBookResult | undefined = await openBook(
         bookData.fileName,
       );
+      if (!result) return;
+      const { opfPath, spineHrefs, zip } = result;
       const currentSpineIndex = currentChapter;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
       const xhtmlString: string | undefined = await zip

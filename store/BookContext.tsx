@@ -8,14 +8,14 @@ export const BookContext = createContext<any>({});
 
 const BookContextProvider = ({ children }: Props) => {
   const { myBooks } = useContext(MyBooksContext);
-  const [currentBook, setCurrentBook] = useState<any>(null);
+  const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const [readingProgress, setReadingProgress] = useState(0.67);
   const [currentBookObject, setCurrentBookObject] = useState(null);
 
   useEffect(() => {
     if (!currentBook) return;
     // check if currentBook exists in myBooks, if not return
-    const exists = myBooks.some((book) => book._id === currentBook._id);
+    const exists = myBooks.some((book) => book.book_id === currentBook.book_id);
     if (!exists) return;
     const load = async () => {
       const bookObjectData: any = await openBook(currentBook.fileName);

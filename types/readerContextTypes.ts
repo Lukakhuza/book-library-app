@@ -48,7 +48,6 @@ export type ReaderContextType = {
   screenDimensions: ScreenDimensions;
   bookImageUri: string | null;
   chapter: Chapter;
-  textsArray: [];
   pages: [];
   readerDimensions: ReaderDimensions;
   textLayouts: TextLayoutLine[];

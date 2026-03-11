@@ -41,3 +41,23 @@ export const getAllBooks = async (): Promise<Book[]> => {
 
   return books;
 };
+
+export type ParsedPackage = {
+  package: {
+    manifest: {
+      item: {
+        "@_href": string;
+        "@_id": string;
+        "@_media-type": string;
+        "@_properties"?: string;
+      }[];
+    };
+    spine: {
+      itemref: {
+        "@_idref": string;
+        "@_linear": string;
+      }[];
+      "@_toc"?: string;
+    };
+  };
+};

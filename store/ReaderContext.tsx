@@ -63,7 +63,7 @@ export const ReaderContext = createContext<ReaderContextType | any>({
   updatePages: (pages: any) => {},
   checkLayoutReady: () => {},
   updateBookImageUri: () => {},
-  updateSpine: () => {},
+  // updateSpine: () => {},
 });
 
 const ReaderContextProvider = ({ children }: Props) => {
@@ -101,11 +101,9 @@ const ReaderContextProvider = ({ children }: Props) => {
     lineHeight: 25,
     fontWeight: 600,
   });
-  const [readerIsReady, setReaderIsReady] = useState(false);
   const [bookImageUri, setBookImageUri] = useState();
-  const [spine, setSpine] = useState(null);
+  // const [spine, setSpine] = useState(null);
   const [bookObjectData, setBookObjectData] = useState<any>(null);
-  const [textsArray, setTextsArray] = useState([]);
   // Store screen dimensions in screenDimensions state.
 
   const textLayoutsRef = useRef<any>([]);
@@ -127,23 +125,6 @@ const ReaderContextProvider = ({ children }: Props) => {
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const didPaginateRef = useRef<boolean>(false);
-
-  // const checkLayoutReady = () => {
-  //   if (!didPaginateRef) return;
-  //   const ready = Object.values(layoutReadyRef.current).every(Boolean);
-  //   if (!ready) return;
-  //   didPaginateRef.current = true;
-  //   const lineProperties: any = paginateText(
-  //     textLayouts,
-  //     readerDimensions,
-  //     properties,
-  //   );
-  //   setLineProps(lineProperties);
-  //   // setPages(pages);
-  //   // setReaderIsReady(true);
-  // };
-
   useEffect(() => {
     if (!textLayouts) return;
     layoutReadyRef.current.contentSize = true;
@@ -162,9 +143,9 @@ const ReaderContextProvider = ({ children }: Props) => {
     setPages(pages);
   };
 
-  const updateSpine = (spine: any) => {
-    setSpine(spine);
-  };
+  // const updateSpine = (spine: any) => {
+  //   setSpine(spine);
+  // };
 
   const updateBookImageUri = (bookImageUri: string | any) => {
     setBookImageUri(bookImageUri);
@@ -183,8 +164,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     readerDimensions,
     screenDimensions,
     textLayouts,
-    readerIsReady,
-    textsArray,
     contentSizeRef,
     layoutReadyRef,
     containerWidthRef,
@@ -193,8 +172,6 @@ const ReaderContextProvider = ({ children }: Props) => {
     updateReaderDimensions,
     updateTextLayouts,
     updatePages,
-    updateSpine,
-    // checkLayoutReady,
     updateBookImageUri,
     updateBookObjectData,
   };

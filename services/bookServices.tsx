@@ -2,8 +2,9 @@ import { Directory, File, Paths } from "expo-file-system";
 import { DomUtils, parseDocument } from "htmlparser2";
 import JSZip from "jszip";
 import { fetchBookSignedUrl } from "../api/book.api";
-import { Book, OpenBookResult } from "../types/book";
+import { Book, DomArray, DomElement, OpenBookResult } from "../types/book";
 import { parser1, resolveHref } from "../util/helperFunctions";
+import { ParsedPackage } from "../api/book.api";
 
 export const downloadBook = async (bookData: Book) => {
   try {
@@ -153,7 +154,7 @@ export const getOpfPath = async (zip: JSZip) => {
   return opfPath;
 };
 
-export const getSpineHrefs = (parsedPackage: any) => {
+export const getSpineHrefs = (parsedPackage: ParsedPackage) => {
   type ManifestItem = {
     href: string;
     mediaType: string;
@@ -231,9 +232,10 @@ export const openBook = async (
       return;
     }
     const zip = await getZip(epubFile);
-    const opfPath = await getOpfPath(zip);
-    const opfXml: any = await zip.file(opfPath)?.async("string");
-    const parsedPackage = parser1.parse(opfXml);
+    const opfPath: string = await getOpfPath(zip);
+    const opfXml: string | undefined = await zip.file(opfPath)?.async("string");
+    if (!opfXml) return;
+    const parsedPackage: ParsedPackage = parser1.parse(opfXml);
     const spineHrefs = getSpineHrefs(parsedPackage);
 
     const data = {
@@ -241,6 +243,7 @@ export const openBook = async (
       spineHrefs: spineHrefs,
       zip: zip,
     };
+
     return data;
   } catch (error) {
     console.log(error);
@@ -248,78 +251,8 @@ export const openBook = async (
   }
 };
 
-export const paginateText = (
-  textLayouts: any,
-  readerDimensions: any,
-  properties: any,
-) => {
-  try {
-    const lineProperties = {
-      ascender: textLayouts.current[1].lines[0].ascender,
-      capHeight: textLayouts.current[1].lines[0].capHeight,
-      descender: textLayouts.current[1].lines[0].descender,
-      height: textLayouts.current[1].lines[0].height,
-      text: textLayouts.current[1].lines[0]?.text,
-      width: textLayouts.current[1].lines[0].width,
-      x: textLayouts.current[1].lines[0].x,
-      xHeight: textLayouts.current[1].lines[0].xHeight,
-      y: textLayouts.current[1].lines[0].y,
-    };
-
-    const availableHeight =
-      readerDimensions.height - properties.verticalPadding;
-
-    let currentPageHeightUsed = 0;
-    const pages: string[][] = [];
-    let currentPage: any = [];
-    let currentText = "";
-    let currentTag = "";
-    let data = {
-      text: "",
-      tag: "",
-    };
-
-    for (let i = 0; i < textLayouts?.current?.length; i++) {
-      currentTag = textLayouts.current[i].tag;
-      for (let j = 0; j < textLayouts?.current[i]?.lines?.length; j++) {
-        if (
-          currentPageHeightUsed + textLayouts?.current[i]?.lines[j]?.height <=
-          availableHeight
-        ) {
-          currentText += " " + textLayouts.current[i].lines[j]?.text?.trim();
-
-          currentPageHeightUsed += textLayouts.current[i].lines[j].height;
-        } else {
-          data = {
-            text: currentText?.trim(),
-            tag: currentTag,
-          };
-          currentPage.push(data);
-          pages.push(currentPage);
-          currentText = "";
-          currentPage = [];
-          currentPageHeightUsed = 0;
-          currentText += " " + textLayouts.current[i].lines[j]?.text?.trim();
-          currentPageHeightUsed += textLayouts.current[i].lines[j].height;
-        }
-      }
-      data = {
-        text: currentText?.trim(),
-        tag: currentTag,
-      };
-      currentPage.push(data);
-      currentText = "";
-    }
-    pages.push(currentPage);
-
-    return pages;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 export const transformParagraph = (
-  paragraphArray: any,
+  paragraphArray: string[],
   currentIndex: number,
 ) => {
   const text = paragraphArray[currentIndex];
@@ -336,9 +269,9 @@ export const transformParagraph = (
   ];
 };
 
-export const xmlStringToTextsArray = async (xhtmlString: any) => {
+export const xmlStringToTextsArray = async (xhtmlString: string) => {
   const doc = parseDocument(xhtmlString, { xmlMode: true });
-  const allText: any = DomUtils.findAll(
+  const allText: DomArray = DomUtils.findAll(
     (el) =>
       el.type === "tag" &&
       (el.name === "p" ||

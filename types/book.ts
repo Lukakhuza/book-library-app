@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { ElementType } from "htmlparser2";
 
 export type Book = {
   __v: number;
@@ -28,3 +29,17 @@ export type OpenBookResult = {
   spineHrefs: string[];
   zip: JSZip;
 };
+
+export interface DomElement {
+  type: any;
+  name?: string;
+  attribs: Record<string, string>;
+  children: DomElement[];
+  parent?: DomElement | null;
+  next?: DomElement | null;
+  prev?: DomElement | null;
+  startIndex?: number | null;
+  endIndex?: number | null;
+}
+
+export type DomArray = DomElement[];
