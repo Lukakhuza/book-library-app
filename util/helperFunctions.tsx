@@ -14,6 +14,7 @@ export const resolveHref = (opfPath: string, href: string) => {
 };
 
 export const asArray = (value: any) => {
+  console.log("Value: ", value);
   if (Array.isArray(value)) return value;
   if (value == null) return [];
   return [value];

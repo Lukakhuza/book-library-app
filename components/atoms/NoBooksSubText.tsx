@@ -1,7 +1,13 @@
 import { StyleSheet, Text } from "react-native";
 import { useScale } from "../../store/ThemeContext";
+import { Theme } from "../../theme";
 
-const NoBookSubText = ({ theme, text }: any) => {
+type Props = {
+  theme: Theme;
+  text: string;
+};
+
+const NoBookSubText = ({ theme, text }: Props) => {
   const { fs, ms } = useScale();
   const { textPrimary } = theme.colors;
   return (

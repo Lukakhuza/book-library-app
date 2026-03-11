@@ -16,8 +16,9 @@ export const fetchBookSignedUrl = async (bookData: Book): Promise<string> => {
     throw new Error(`Failed to fetch book url: ${response.status}`);
   }
 
-  const resData: string = await response.json();
-  return resData;
+  const resData = await response.json();
+
+  return resData.url;
 };
 
 export const getAllBooks = async (): Promise<Book[]> => {

@@ -1,36 +1,17 @@
 import { Directory, File, Paths } from "expo-file-system";
 import { DomUtils, parseDocument } from "htmlparser2";
 import JSZip from "jszip";
-import { fetchBookSignedUrl, getAllBooks } from "../api/book.api";
+import { fetchBookSignedUrl } from "../api/book.api";
 import { Book, OpenBookResult } from "../types/book";
 import { parser1, resolveHref } from "../util/helperFunctions";
 
 export const downloadBook = async (bookData: Book) => {
   try {
     // Get signed url
-    const signedUrlObj: any = await fetchBookSignedUrl(bookData);
-    // const signedUrl = JSON.stringify(signedUrlObj);
-    const signedUrl = signedUrlObj.url;
+    const signedUrl: string = await fetchBookSignedUrl(bookData);
     // // Download the epub file and the book metadata into the file system:
     const bookFile = await getBook(signedUrl, bookData);
     return bookFile;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const getDownloadedBooks = async () => {
-  try {
-    const allBooks = await getAllBooks();
-
-    const booksDir = new Directory(Paths.document.uri, "books");
-    const booksList = booksDir.list();
-
-    // const downloadedSet = new Set(booksList.map((book) => book.fileName));
-
-    // const downloadedBooks = allBooks.filter((book) => {
-    //   return true;
-    // });
   } catch (error) {
     console.log(error);
   }
