@@ -6,34 +6,26 @@ import {
   ReaderContextType,
   Size,
 } from "../types/readerContextTypes";
+import { OpenBookResult } from "../types/book";
 
-export const ReaderContext = createContext<ReaderContextType | any>({
-  books: [],
-  downloadedBooks: [],
+export const ReaderContext = createContext<ReaderContextType>({
   screenDimensions: {
     height: 0,
     width: 0,
   },
-  bookImageUri: "",
-  chapter: {
-    title: "",
-    body: [],
-  },
-  pages: [],
   readerDimensions: {
     height: 0,
     width: 0,
   },
   textLayouts: [],
-  readerIsReady: false,
-  bookObjectData: {},
+  bookObjectData: null,
   properties: {
     verticalPadding: 18.6190490722656,
     h2: {
       fontSize: 25,
-      fontWeight: 700,
+      fontWeight: "700" as const,
       color: "red",
-      textAlign: "center",
+      textAlign: "center" as const,
     },
     p: {
       color: "purple",
@@ -43,7 +35,7 @@ export const ReaderContext = createContext<ReaderContextType | any>({
     horizontalPadding: 20,
     fontSize: 20,
     lineHeight: 25,
-    fontWeight: 600,
+    fontWeight: "600" as const,
   },
   contentSizeRef: { current: { width: 0, height: 0 } },
   containerWidthRef: { current: { width: 0 } },
@@ -56,14 +48,7 @@ export const ReaderContext = createContext<ReaderContextType | any>({
     },
   },
   debounceRef: { current: null },
-  textLayoutsRef: { current: [] },
   updateReaderDimensions: (width: number, height: number) => {},
-  updateBookObjectData: (bookObjectData: object) => {},
-  updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => {},
-  updatePages: (pages: any) => {},
-  checkLayoutReady: () => {},
-  updateBookImageUri: () => {},
-  // updateSpine: () => {},
 });
 
 const ReaderContextProvider = ({ children }: Props) => {
@@ -71,42 +56,36 @@ const ReaderContextProvider = ({ children }: Props) => {
     height: 0,
     width: 0,
   });
-  const [pages, setPages]: any = useState([]);
   const [textLayouts, setTextLayouts] = useState<TextLayoutLine[]>([]);
   const [readerDimensions, setReaderDimensions] = useState({
     height: 0,
     width: 0,
   });
-  const [chapter, setChapter]: any = useState({
-    title: "",
-    body: [],
-  });
   const [properties, setProperties] = useState({
     verticalPadding: 18.6190490722656,
     h2: {
       fontSize: 25,
-      fontWeight: 700,
+      fontWeight: "700" as const,
       color: "red",
-      textAlign: "center",
+      textAlign: "center" as const,
     },
     p: {
       color: "purple",
       fontSize: 20,
-      textAlign: "justify",
+      textAlign: "justify" as const,
     },
     paddingTop: 10,
     paddingBottom: 10,
     horizontalPadding: 20,
     fontSize: 20,
     lineHeight: 25,
-    fontWeight: 600,
+    fontWeight: "600" as const,
   });
-  const [bookImageUri, setBookImageUri] = useState();
   // const [spine, setSpine] = useState(null);
-  const [bookObjectData, setBookObjectData] = useState<any>(null);
+  const [bookObjectData, setBookObjectData] = useState<OpenBookResult | null>(
+    null,
+  );
   // Store screen dimensions in screenDimensions state.
-
-  const textLayoutsRef = useRef<any>([]);
 
   // Checklist to make sure everything is ready before pagination logic is run:
   const layoutReadyRef = useRef({
@@ -135,32 +114,9 @@ const ReaderContextProvider = ({ children }: Props) => {
     setReaderDimensions({ width: width, height: height });
   };
 
-  const updateTextLayouts = (textLayoutsRef: any) => {
-    setTextLayouts(textLayoutsRef);
-  };
-
-  const updatePages = (pages: any) => {
-    setPages(pages);
-  };
-
-  // const updateSpine = (spine: any) => {
-  //   setSpine(spine);
-  // };
-
-  const updateBookImageUri = (bookImageUri: string | any) => {
-    setBookImageUri(bookImageUri);
-  };
-
-  const updateBookObjectData = (bookObjectData: any) => {
-    setBookObjectData(bookObjectData);
-  };
-
   const value = {
     bookObjectData,
     properties,
-    bookImageUri,
-    chapter,
-    pages,
     readerDimensions,
     screenDimensions,
     textLayouts,
@@ -168,12 +124,7 @@ const ReaderContextProvider = ({ children }: Props) => {
     layoutReadyRef,
     containerWidthRef,
     debounceRef,
-    textLayoutsRef,
     updateReaderDimensions,
-    updateTextLayouts,
-    updatePages,
-    updateBookImageUri,
-    updateBookObjectData,
   };
 
   return (

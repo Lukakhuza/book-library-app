@@ -19,23 +19,7 @@ import { LibraryContext } from "../store/LibraryContext";
 import { useTheme } from "../store/ThemeContext";
 import { RootNavigationProp } from "../types/navigation";
 import LoadingOverlay from "../util/LoadingOverlay";
-
-type Tag = "p" | "h1" | "h2" | "h3" | "a";
-
-type PageItem = {
-  meta: Record<string, unknown> | string;
-  text: string;
-  tag: Tag;
-};
-
-type Page = PageItem[];
-type Pages = Page[];
-
-type LeftoverText = {
-  meta: Record<string, unknown> | string;
-  text: string;
-  tag: Tag;
-} | null;
+import { PageItem, Pages, LeftoverText } from "../types/book";
 
 const ReaderScreen = () => {
   const { screenDimensions } = useContext(LibraryContext);
@@ -62,6 +46,7 @@ const ReaderScreen = () => {
   // tagStyles[item?.tag
   useEffect(() => {
     if (shouldExitBook) {
+      if (!currentBook) return;
       navigation.navigate("BookDetails", { bookData: currentBook });
       resetShouldExitBook();
       updateCurrentChapter(0);
@@ -391,9 +376,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    textAlign: "center",
+    textAlign: "center" as const,
     fontSize: 20,
-    fontWeight: 600,
+    fontWeight: "600" as const,
   },
   flatlistItem: {
     overflow: "hidden",

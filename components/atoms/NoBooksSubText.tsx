@@ -31,7 +31,7 @@ export default NoBookSubText;
 
 const styles = StyleSheet.create({
   textStyle: {
-    textAlign: "center",
-    fontWeight: 600,
+    textAlign: "center" as const,
+    fontWeight: "600" as const,
   },
 });

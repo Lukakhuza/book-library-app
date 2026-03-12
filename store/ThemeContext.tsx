@@ -7,7 +7,12 @@ import { tagStylesDark, tagStylesLight } from "../theme/tagStyles";
 export type ThemeContextType = {
   theme: Theme;
   isDark: boolean;
-  scale: any;
+  scale: {
+    ms: (size: number) => number;
+    ws: (size: number) => number;
+    hs: (size: number) => number;
+    fs: (size: number) => number;
+  };
   toggleTheme: () => void;
 };
 

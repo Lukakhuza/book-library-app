@@ -13,12 +13,6 @@ export const resolveHref = (opfPath: string, href: string) => {
   return baseDir + href;
 };
 
-export const asArray = (value: any) => {
-  if (Array.isArray(value)) return value;
-  if (value == null) return [];
-  return [value];
-};
-
 export const parser1 = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "@_",

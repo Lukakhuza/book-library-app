@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   outerContainer: { flex: 1, paddingHorizontal: 15 },
   // header: {
   //   fontSize: 20,
-  //   fontWeight: 800,
+  //   fontWeight: "800" as const,
   // },
   // headerContainer: {
   //   marginTop: 20,
@@ -100,9 +100,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   flatlistItemText: {
-    textAlign: "center",
+    textAlign: "center" as const,
     color: "white",
-    fontWeight: 500,
+    fontWeight: "500" as const,
   },
   flatlistItemImage: { width: 90, height: 135, marginTop: 10 },
 });

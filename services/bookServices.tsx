@@ -2,9 +2,11 @@ import { Directory, File, Paths } from "expo-file-system";
 import { DomUtils, parseDocument } from "htmlparser2";
 import JSZip from "jszip";
 import { fetchBookSignedUrl } from "../api/book.api";
-import { Book, DomArray, DomElement, OpenBookResult } from "../types/book";
+import { Book, DomArray, OpenBookResult } from "../types/book";
 import { parser1, resolveHref } from "../util/helperFunctions";
 import { ParsedPackage } from "../api/book.api";
+import { PageItem } from "../types/book";
+import { Element } from "domhandler";
 
 export const downloadBook = async (bookData: Book) => {
   try {
@@ -282,7 +284,7 @@ export const xmlStringToTextsArray = async (xhtmlString: string) => {
     doc.children,
   );
 
-  const texts = allText.map((el: any) => ({
+  const texts = allText.map((el: Element) => ({
     tag: el.name,
     text: DomUtils.textContent(el)
       ?.trim()
@@ -293,6 +295,7 @@ export const xmlStringToTextsArray = async (xhtmlString: string) => {
     meta: el.attribs ?? {},
   }));
 
-  const array: any = Array.from(texts);
+  const array = Array.from(texts) as PageItem[];
+
   return array;
 };

@@ -2,11 +2,11 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { getXhtmlPath, xmlStringToTextsArray } from "../services/bookServices";
 import { Props } from "../types/basic";
 import { BookContext } from "./BookContext";
-import { Book } from "../types/book";
+import { Book, OpenBookResult, PageItem } from "../types/book";
 
 type ChapterContextType = {
   currentChapter: number;
-  textsArray: string[];
+  textsArray: PageItem[];
   shouldExitBook: boolean;
   nextChapter: () => void;
   previousChapter: () => void;
@@ -26,16 +26,19 @@ export const ChapterContext = createContext<ChapterContextType>({
 
 const ChapterContextProvider = ({ children }: Props) => {
   const [currentChapter, setCurrentChapter] = useState(0);
-  const [textsArray, setTextsArray] = useState([]);
+  const [textsArray, setTextsArray] = useState<PageItem[]>([]);
   const { currentBook, currentBookObject } = useContext(BookContext);
   const [shouldExitBook, setShouldExitBook] = useState(false);
 
   useEffect(() => {
     if (!currentBookObject) return;
     const load = async () => {
-      const { opfPath, spineHrefs, zip }: any = currentBookObject;
+      const { opfPath, spineHrefs, zip }: OpenBookResult = currentBookObject;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentChapter);
-      const xhtmlString: string = await zip.file(xhtmlPath)?.async("string");
+      const xhtmlString: string | undefined = await zip
+        .file(xhtmlPath)
+        ?.async("string");
+      if (!xhtmlString) return;
       const array = await xmlStringToTextsArray(xhtmlString);
       setTextsArray(array);
     };
@@ -43,6 +46,7 @@ const ChapterContextProvider = ({ children }: Props) => {
   }, [currentBookObject, currentChapter]);
 
   const nextChapter = () => {
+    if (!currentBookObject) return;
     if (currentChapter < currentBookObject.spineHrefs.length - 1) {
       setCurrentChapter((prev) => prev + 1);
     } else {

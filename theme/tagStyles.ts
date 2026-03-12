@@ -3,16 +3,16 @@ import { darkColors, lightColors } from "./colors";
 export const tagStylesDark = {
   h1: {
     fontSize: 30,
-    fontWeight: 700,
+    fontWeight: "700" as const,
     color: darkColors.textPrimary,
-    textAlign: "center",
+    textAlign: "center" as const,
     marginBottom: 5,
   },
   h2: {
     fontSize: 25,
-    fontWeight: 700,
+    fontWeight: "700" as const,
     color: darkColors.textSecondary,
-    textAlign: "center",
+    textAlign: "center" as const,
     marginBottom: 5,
   },
   h3: { color: darkColors.textMuted },
@@ -20,7 +20,7 @@ export const tagStylesDark = {
   p: {
     color: darkColors.readerText,
     fontSize: 20,
-    textAlign: "justify",
+    textAlign: "justify" as const,
     marginBottom: 5,
   },
 };
@@ -28,16 +28,16 @@ export const tagStylesDark = {
 export const tagStylesLight = {
   h1: {
     fontSize: 30,
-    fontWeight: 700,
+    fontWeight: "700" as const,
     color: lightColors.textPrimary,
-    textAlign: "center",
+    textAlign: "center" as const,
     marginBottom: 5,
   },
   h2: {
     fontSize: 25,
-    fontWeight: 700,
+    fontWeight: "700" as const,
     color: lightColors.textSecondary,
-    textAlign: "center",
+    textAlign: "center" as const,
     marginBottom: 5,
   },
   h3: { color: lightColors.textMuted },
@@ -45,7 +45,7 @@ export const tagStylesLight = {
   p: {
     color: lightColors.readerText,
     fontSize: 20,
-    textAlign: "justify",
+    textAlign: "justify" as const,
     marginBottom: 5,
   },
 };

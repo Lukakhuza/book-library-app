@@ -160,7 +160,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
                   color: theme.colors.textPrimary,
                   fontFamily: "Roboto_700Bold",
                   fontSize: 25,
-                  textAlign: "center",
+                  textAlign: "center" as const,
                   marginVertical: 10,
                 }}
                 numberOfLines={2}
@@ -172,7 +172,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
                   color: theme.colors.textMuted,
                   fontFamily: "GoogleSans_400Regular",
                   fontSize: 19,
-                  textAlign: "center",
+                  textAlign: "center" as const,
                   marginBottom: 10,
                 }}
                 numberOfLines={2}
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   outerContainer: { flex: 1 },
   header: {
     fontSize: 20,
-    fontWeight: 800,
+    fontWeight: "800" as const,
   },
   headerContainer: {
     alignItems: "center",
@@ -258,13 +258,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   noBooksText: {
-    textAlign: "center",
+    textAlign: "center" as const,
     fontSize: 18,
-    fontWeight: 600,
+    fontWeight: "600" as const,
     marginVertical: 5,
   },
   label: {
-    fontWeight: 900,
+    fontWeight: "900" as const,
     marginRight: 25,
   },
   bookInfo: {
@@ -292,17 +292,17 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   downloadButtonText: {
-    textAlign: "center",
+    textAlign: "center" as const,
     fontSize: 17,
-    fontWeight: 500,
+    fontWeight: "500" as const,
     marginVertical: 7,
   },
   deleteButtonText: {
-    textAlign: "center",
+    textAlign: "center" as const,
     fontFamily: "GoogleSans_400Regular",
 
     fontSize: 17,
-    fontWeight: 500,
+    fontWeight: "500" as const,
     marginVertical: 7,
   },
 });

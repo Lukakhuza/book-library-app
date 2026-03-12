@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { ElementType } from "htmlparser2";
+import { Element } from "domhandler";
 
 export type Book = {
   __v: number;
@@ -12,6 +13,23 @@ export type Book = {
   publishedYear: string;
   title: string;
 };
+
+export type Tag = "p" | "h1" | "h2" | "h3" | "a";
+
+export type PageItem = {
+  meta: Record<string, unknown> | string;
+  text: string;
+  tag: Tag;
+};
+
+export type Page = PageItem[];
+export type Pages = Page[];
+
+export type LeftoverText = {
+  meta: Record<string, unknown> | string;
+  text: string;
+  tag: Tag;
+} | null;
 
 export type BookRouteProps = {
   route: {
@@ -30,16 +48,4 @@ export type OpenBookResult = {
   zip: JSZip;
 };
 
-export interface DomElement {
-  type: any;
-  name?: string;
-  attribs: Record<string, string>;
-  children: DomElement[];
-  parent?: DomElement | null;
-  next?: DomElement | null;
-  prev?: DomElement | null;
-  startIndex?: number | null;
-  endIndex?: number | null;
-}
-
-export type DomArray = DomElement[];
+export type DomArray = Element[];

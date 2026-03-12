@@ -2,15 +2,48 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { openBook } from "../services/bookServices";
 import { Props } from "../types/basic";
 import { MyBooksContext } from "./MyBooksContext";
-import { Book } from "../types/book";
+import { Book, OpenBookResult } from "../types/book";
 
-export const BookContext = createContext<any>({});
+// type ChapterContextType = {
+//   currentChapter: number;
+//   textsArray: string[];
+//   shouldExitBook: boolean;
+//   nextChapter: () => void;
+//   previousChapter: () => void;
+//   resetShouldExitBook: () => void;
+//   updateCurrentChapter: (chapterIndex: number) => void;
+// };
+
+type BookContextType = {
+  currentBook: Book | null;
+  currentBookObject: OpenBookResult | null;
+  readingProgress: number;
+  updateCurrentBook: (book: Book) => void;
+};
+
+// export const ChapterContext = createContext<ChapterContextType>({
+//   currentChapter: 0,
+//   textsArray: [],
+//   shouldExitBook: false,
+//   nextChapter: () => {},
+//   previousChapter: () => {},
+//   resetShouldExitBook: () => {},
+//   updateCurrentChapter: (chapterIndex: number) => {},
+// });
+
+export const BookContext = createContext<BookContextType>({
+  currentBook: null,
+  currentBookObject: null,
+  readingProgress: 0.67,
+  updateCurrentBook: (book: Book) => {},
+});
 
 const BookContextProvider = ({ children }: Props) => {
   const { myBooks } = useContext(MyBooksContext);
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const [readingProgress, setReadingProgress] = useState(0.67);
-  const [currentBookObject, setCurrentBookObject] = useState(null);
+  const [currentBookObject, setCurrentBookObject] =
+    useState<OpenBookResult | null>(null);
 
   useEffect(() => {
     if (!currentBook) return;
@@ -18,7 +51,10 @@ const BookContextProvider = ({ children }: Props) => {
     const exists = myBooks.some((book) => book.book_id === currentBook.book_id);
     if (!exists) return;
     const load = async () => {
-      const bookObjectData: any = await openBook(currentBook.fileName);
+      const bookObjectData: OpenBookResult | undefined = await openBook(
+        currentBook.fileName,
+      );
+      if (!bookObjectData) return;
       setCurrentBookObject(bookObjectData);
     };
     load();

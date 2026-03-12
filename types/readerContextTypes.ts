@@ -1,6 +1,6 @@
 import { RefObject } from "react";
-import { TextLayoutLine } from "react-native";
-import { Book } from "./book";
+import { TextLayoutLine, TextStyle } from "react-native";
+import { Book, OpenBookResult } from "./book";
 
 export type ScreenDimensions = {
   height: number;
@@ -24,7 +24,9 @@ export type Properties = {
   horizontalPadding: number;
   fontSize: number;
   lineHeight: number;
-  fontWeight: number;
+  h2: TextStyle;
+  p: TextStyle;
+  fontWeight: TextStyle["fontWeight"];
 };
 
 export type Size = {
@@ -44,24 +46,14 @@ export type LayoutChecklist = {
 };
 
 export type ReaderContextType = {
-  books: Book[];
+  bookObjectData: OpenBookResult | null;
   screenDimensions: ScreenDimensions;
-  bookImageUri: string | null;
-  chapter: Chapter;
-  pages: [];
   readerDimensions: ReaderDimensions;
   textLayouts: TextLayoutLine[];
-  readerIsReady: boolean;
   properties: Properties;
   contentSizeRef: RefObject<Size>;
   containerWidthRef: RefObject<ContainerWidth>;
   layoutReadyRef: RefObject<LayoutChecklist>;
   debounceRef: RefObject<NodeJS.Timeout | null>;
-  textLayoutsRef: RefObject<TextLayoutLine[]>;
   updateReaderDimensions: (width: number, height: number) => void;
-  updateBookObjectData: (bookObjectData: object) => void;
-  updateTextLayouts: (textLayoutsRef: RefObject<TextLayoutLine[]>) => void;
-  updatePages: (pages: string[]) => void;
-  checkLayoutReady: () => void;
-  updateBookImageUri: (bookImageUri: string | null) => void;
 };
