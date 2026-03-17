@@ -4,32 +4,12 @@ import { Props } from "../types/basic";
 import { MyBooksContext } from "./MyBooksContext";
 import { Book, OpenBookResult } from "../types/book";
 
-// type ChapterContextType = {
-//   currentChapter: number;
-//   textsArray: string[];
-//   shouldExitBook: boolean;
-//   nextChapter: () => void;
-//   previousChapter: () => void;
-//   resetShouldExitBook: () => void;
-//   updateCurrentChapter: (chapterIndex: number) => void;
-// };
-
 type BookContextType = {
   currentBook: Book | null;
   currentBookObject: OpenBookResult | null;
   readingProgress: number;
   updateCurrentBook: (book: Book) => void;
 };
-
-// export const ChapterContext = createContext<ChapterContextType>({
-//   currentChapter: 0,
-//   textsArray: [],
-//   shouldExitBook: false,
-//   nextChapter: () => {},
-//   previousChapter: () => {},
-//   resetShouldExitBook: () => {},
-//   updateCurrentChapter: (chapterIndex: number) => {},
-// });
 
 export const BookContext = createContext<BookContextType>({
   currentBook: null,

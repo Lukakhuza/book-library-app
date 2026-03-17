@@ -14,6 +14,7 @@
     "@expo-google-fonts/roboto": "^0.4.3",
     "@expo/vector-icons": "^14.1.0",
     "@ndvi3t/epubjs-rn": "^0.4.2",
+    "@react-native/metro-config": "^0.84.1",
     "@react-navigation/bottom-tabs": "^7.9.0",
     "@react-navigation/elements": "^2.9.3",
     "@react-navigation/native": "^7.1.33",

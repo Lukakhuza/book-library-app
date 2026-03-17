@@ -1,6 +1,6 @@
 import { RefObject } from "react";
 import { TextLayoutLine, TextStyle } from "react-native";
-import { Book, OpenBookResult } from "./book";
+import { OpenBookResult } from "./book";
 
 export type ScreenDimensions = {
   height: number;

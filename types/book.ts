@@ -1,6 +1,5 @@
-import JSZip from "jszip";
-import { ElementType } from "htmlparser2";
 import { Element } from "domhandler";
+import JSZip from "jszip";
 
 export type Book = {
   __v: number;

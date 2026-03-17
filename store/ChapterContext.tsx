@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getXhtmlPath, xmlStringToTextsArray } from "../services/bookServices";
 import { Props } from "../types/basic";
+import { OpenBookResult, PageItem } from "../types/book";
 import { BookContext } from "./BookContext";
-import { Book, OpenBookResult, PageItem } from "../types/book";
 
 type ChapterContextType = {
   currentChapter: number;
