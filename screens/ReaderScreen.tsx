@@ -27,7 +27,15 @@ const ReaderScreen = () => {
     useContext(ChapterContext);
   const { shouldExitBook, resetShouldExitBook } = useContext(ChapterContext);
   const { currentBook } = useContext(BookContext);
-  const iRef = useRef(0);
+  const renderCount = useRef(0);
+  const [pageContentsFinalized, setPageContentsFinalized] = useState(false);
+  const [lastParagraphIndex, setLastParagraphIndex] = useState<null | number>(
+    null,
+  );
+  const [fitCheckDone, setFitCheckDone] = useState(false);
+  const [contentsFitOnPage, setContentsFitOnPage] = useState<null | boolean>(
+    null,
+  );
   const [paginationCompleted, setPaginationCompleted] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageItem[]>([]);
   const [pagesArray, setPagesArray] = useState<Pages>([]);
@@ -36,165 +44,213 @@ const ReaderScreen = () => {
   const lastParagraphArray = useRef<string[]>([]);
   const lastParagraphData = useRef<PageItem>({ meta: "", tag: "p", text: "" });
   const textSeparationTriggered = useRef<boolean>(false);
+  const testIndex = useRef<number>(0);
   const currentIndex = useRef<number>(0);
   const leftoverText = useRef<LeftoverText>(null);
   const pageWidthRef = useRef<number>(0);
   const currentIndexRef = useRef<number>(0);
   const navigation: RootNavigationProp = useNavigation();
   const { theme }: ThemeContextType = useTheme();
+  const MIN_VALID_HEIGHT = 1;
 
   // tagStyles[item?.tag
-  useEffect(() => {
-    if (shouldExitBook) {
-      if (!currentBook) return;
-      navigation.navigate("BookDetails", { bookData: currentBook });
-      resetShouldExitBook();
-      updateCurrentChapter(0);
-    }
-  }, [shouldExitBook]);
+  // useEffect(() => {
+  //   if (shouldExitBook) {
+  //     if (!currentBook) return;
+  //     navigation.navigate("BookDetails", { bookData: currentBook });
+  //     resetShouldExitBook();
+  //     updateCurrentChapter(0);
+  //   }
+  // }, [shouldExitBook]);
 
+  // Figure out whether contents of textsArray fit on a single page (check fit). Accordingly set the contentsFitOnPage variable to true or false;
+  // useEffect(() => {
+  //   if (fitCheckDone) return;
+  //   if (currReaderHeight === 0) return;
+  //   if (currentPage.length === 0) {
+  //     setCurrentPage(textsArray);
+  //   } else {
+  //     if (currReaderHeight <= 800) {
+  //       setFitCheckDone(true);
+  //       setContentsFitOnPage(true);
+  //     } else {
+  //       setFitCheckDone(true);
+  //       setContentsFitOnPage(false);
+  //     }
+  //   }
+  // }, [currReaderHeight, fitCheckDone]);
+
+  // // Find the index of last paragraph
+  // useEffect(() => {
+  //   if (!fitCheckDone) return;
+  //   if (lastParagraphIndexFound) return;
+  //   // CONTINUE FROM HERE
+  //   const idx = renderCount.current;
+  //   setCurrentPage((prev) => [...prev, textsArray[idx]]);
+  //   renderCount.current = idx + 1;
+  //   setCurrentPage(textsArray.slice(0, testIndex.current));
+  // }, [lastParagraphIndexFound, currReaderHeight, fitCheckDone]);
+
+  // Find out how much of the chapter fits on the page. If entire chapter fits on the page, set lastParagraph Index to -1. Otherwise, set it to the index of the last paragraph where the cutoff should happen.
   useEffect(() => {
-    // If textsArray doesn't contain chapter data, return.
-    if (shouldExitBook) return;
-    if (textsArray?.length === 0) return;
-    // Ignore initial currReaderHeight of 0.
     if (currReaderHeight === 0) return;
-
-    if (
-      iRef.current > textsArray?.length - 1 &&
-      lastParagraphData.current.text === ""
-    ) {
-      if (currReaderHeight <= 800 && !leftoverText?.current?.text) {
-        // After paragraphs have been added to the last currentPage, add this currentPage data to pagesArray.
-        setPagesArray((prev) => [...prev, currentPage]);
-        // After all chapter data has been added to pagesArray, set PaginationCompleted to true so that FlatList can be rendered.
-        setPaginationCompleted(true);
-        return;
-      }
+    if (lastParagraphIndex !== null) return;
+    if (currReaderHeight > 800) {
+      const index = renderCount.current - 1;
+      setLastParagraphIndex(index);
+      return;
     }
-
-    // Keep adding data to current page until reader height is exceeded.
-    if (currReaderHeight <= 800) {
-      // If there is a leftover text from previous page, add that to the beginning of current page.
-      if (leftoverText.current) {
-        const currLeftover = leftoverText.current;
-        setCurrentPage((prev) =>
-          currLeftover?.text?.trim() === "" ? prev : [...prev, currLeftover],
-        );
-        leftoverText.current = null;
-        // If there is no leftover text, simply add current paragraph to current page and update index:
-      } else if (textSeparationTriggered?.current === false) {
-        const idx = iRef.current;
-        setCurrentPage((prev) => [...prev, textsArray[idx]]);
-        iRef.current = idx + 1;
-        // If there is a lastParagraph array:
-      } else {
-        // If last paragraph separation is already in the last stage and there is a an empty string separating
-        // separating part that remains on current page and part that overflows to the next, then do:
-        if (lastParagraphArray.current.includes("")) {
-          // Add extra whitespace at the end for proper justification:
-          const updatedCurrentPage = currentPage.map((item, index) =>
-            index === currentPage.length - 1
-              ? { ...item, text: item?.text + emptySpaceForJustification }
-              : item,
-          );
-
-          // add updated current page to pages array:
-          setPagesArray((prev) => [...prev, updatedCurrentPage]);
-
-          // Get the index of where last paragraph was split, so that we can gather
-          // the remaining part for the following page:
-          const separationIndex = lastParagraphArray.current.indexOf("");
-
-          let result = "";
-          if (separationIndex !== -1) {
-            result = lastParagraphArray.current
-              .slice(separationIndex)
-              .join(" ")
-              ?.trim();
-          }
-
-          // Update leftover text for next page:
-          leftoverText.current = {
-            meta: lastParagraphData.current.meta,
-            tag: lastParagraphData.current.tag,
-            text: result,
-          };
-          lastParagraphData.current = { meta: "", tag: "p", text: "" };
-          // Reset all variables that were specific to current page:
-          lastParagraphArray.current = [];
-          textSeparationTriggered.current = false;
-          currentIndex.current = 0;
-          setCurrentPage([]);
-          // Remaining text of the current paragraph would be added to the beginning of next page.
-        } else {
-          // if after adding the last paragraph candidate text, the currReaderHeight is still less than
-          // available height, then take the second half of the last paragraph array, split it in half
-          // and add the first half of newly split string to the previous string.
-          currentIndex.current += 1;
-          const idx1 = currentIndex.current;
-          updateLastParagraph(
-            idx1,
-            lastParagraphArray.current,
-            lastParagraphData.current,
-            "a",
-          );
-          textSeparationTriggered.current = true;
-        }
-      }
-    } else {
-      // If there is an overflow of last paragraph, create lastParagraph array
-      // based on current last paragraph and splitIndex.
-      if (leftoverText.current) {
-        lastParagraphArray.current = [leftoverText.current.text];
-      } else if (lastParagraphArray.current.length === 0) {
-        const lastParagraph = currentPage[currentPage?.length - 1];
-        lastParagraphData.current = lastParagraph;
-        const arr = [lastParagraph?.text];
-        const idx3 = 0;
-        updateLastParagraph(idx3, arr, lastParagraph, "b");
-      } else {
-        if (lastParagraphArray.current.includes("")) {
-          // Save current page to pages array and reset everything.
-          const updatedCurrentPage = currentPage.map((item, index) =>
-            index === currentPage.length - 1
-              ? { ...item, text: item?.text + emptySpaceForJustification }
-              : item,
-          );
-
-          setPagesArray((prev) => [...prev, updatedCurrentPage]);
-
-          const separationIndex = lastParagraphArray.current.indexOf("");
-
-          let result = "";
-          if (separationIndex !== -1) {
-            result = lastParagraphArray.current
-              .slice(separationIndex)
-              .join(" ")
-              ?.trim();
-          }
-
-          leftoverText.current = {
-            meta: lastParagraphData.current.meta,
-            tag: lastParagraphData.current.tag,
-            text: result,
-          };
-          lastParagraphArray.current = [];
-          textSeparationTriggered.current = false;
-          currentIndex.current = 0;
-          setCurrentPage([]);
-        } else {
-          updateLastParagraph(
-            currentIndex.current,
-            lastParagraphArray.current,
-            lastParagraphData.current,
-            "c",
-          );
-        }
-      }
-      textSeparationTriggered.current = true;
+    const idx = renderCount.current;
+    setCurrentPage((prev) => [...prev, textsArray[idx]]);
+    renderCount.current = idx + 1;
+    if (renderCount.current === textsArray.length) {
+      setLastParagraphIndex(-1);
     }
-  }, [textsArray, currReaderHeight, textLayout]);
+  }, [currReaderHeight]);
+
+  useEffect(() => {
+    if (lastParagraphIndex === null) return;
+    console.log(textsArray[lastParagraphIndex]);
+  }, [lastParagraphIndex]);
+
+  // useEffect(() => {
+  // if (shouldExitBook) return;
+  // if (textsArray?.length === 0) return;
+  // // Ignore initial currReaderHeight of 0.
+  // if (currReaderHeight === 0) return;
+  // Keep adding data to the screen until either the chapter end is reached or the screen height is exceeded:
+  // const idx = renderCount.current;
+  // setCurrentPage((prev) => [...prev, textsArray[idx]]);
+  // renderCount.current = idx + 1;
+  // Does entire content of textsArray fit on the page?
+  // if (currentPage.length > 0 && currReaderHeight < 800)
+  // setCurrentPage(textsArray);
+  // if (
+  //   renderCount.current > textsArray?.length - 1 &&
+  //   lastParagraphData.current.text === ""
+  // ) {
+  //   if (currReaderHeight <= 800 && !leftoverText?.current?.text) {
+  //     // After paragraphs have been added to the last currentPage, add this currentPage data to pagesArray.
+  //     setPagesArray((prev) => [...prev, currentPage]);
+  //     // After all chapter data has been added to pagesArray, set PaginationCompleted to true so that FlatList can be rendered.
+  //     setPaginationCompleted(true);
+  //     return;
+  //   }
+  // }
+  // Keep adding data to current page until reader height is exceeded.
+  // if (currReaderHeight <= 800) {
+  //   // If there is a leftover text from previous page, add that to the beginning of current page.
+  //   if (leftoverText.current) {
+  //     const currLeftover = leftoverText.current;
+  //     setCurrentPage((prev) =>
+  //       currLeftover?.text?.trim() === "" ? prev : [...prev, currLeftover],
+  //     );
+  //     leftoverText.current = null;
+  //     // If there is no leftover text, simply add current paragraph to current page and update index:
+  //   } else if (textSeparationTriggered?.current === false) {
+  //     const idx = renderCount.current;
+  //     setCurrentPage((prev) => [...prev, textsArray[idx]]);
+  //     renderCount.current = idx + 1;
+  //     // If there is a lastParagraph array:
+  //   } else {
+  //     // If last paragraph separation is already in the last stage and there is a an empty string separating
+  //     // separating part that remains on current page and part that overflows to the next, then do:
+  //     if (lastParagraphArray.current.includes("")) {
+  //       // Add extra whitespace at the end for proper justification:
+  //       const updatedCurrentPage = currentPage.map((item, index) =>
+  //         index === currentPage.length - 1
+  //           ? { ...item, text: item?.text + emptySpaceForJustification }
+  //           : item,
+  //       );
+  //       // add updated current page to pages array:
+  //       setPagesArray((prev) => [...prev, updatedCurrentPage]);
+  //       // Get the index of where last paragraph was split, so that we can gather
+  //       // the remaining part for the following page:
+  //       const separationIndex = lastParagraphArray.current.indexOf("");
+  //       let result = "";
+  //       if (separationIndex !== -1) {
+  //         result = lastParagraphArray.current
+  //           .slice(separationIndex)
+  //           .join(" ")
+  //           ?.trim();
+  //       }
+  //       // Update leftover text for next page:
+  //       leftoverText.current = {
+  //         meta: lastParagraphData.current.meta,
+  //         tag: lastParagraphData.current.tag,
+  //         text: result,
+  //       };
+  //       lastParagraphData.current = { meta: "", tag: "p", text: "" };
+  //       // Reset all variables that were specific to current page:
+  //       lastParagraphArray.current = [];
+  //       textSeparationTriggered.current = false;
+  //       currentIndex.current = 0;
+  //       setCurrentPage([]);
+  //       // Remaining text of the current paragraph would be added to the beginning of next page.
+  //     } else {
+  //       // if after adding the last paragraph candidate text, the currReaderHeight is still less than
+  //       // available height, then take the second half of the last paragraph array, split it in half
+  //       // and add the first half of newly split string to the previous string.
+  //       currentIndex.current += 1;
+  //       const idx1 = currentIndex.current;
+  //       updateLastParagraph(
+  //         idx1,
+  //         lastParagraphArray.current,
+  //         lastParagraphData.current,
+  //         "a",
+  //       );
+  //       textSeparationTriggered.current = true;
+  //     }
+  //   }
+  // } else {
+  //   // If there is an overflow of last paragraph, create lastParagraph array
+  //   // based on current last paragraph and splitIndex.
+  //   if (leftoverText.current) {
+  //     lastParagraphArray.current = [leftoverText.current.text];
+  //   } else if (lastParagraphArray.current.length === 0) {
+  //     const lastParagraph = currentPage[currentPage?.length - 1];
+  //     lastParagraphData.current = lastParagraph;
+  //     const arr = [lastParagraph?.text];
+  //     const idx3 = 0;
+  //     updateLastParagraph(idx3, arr, lastParagraph, "b");
+  //   } else {
+  //     if (lastParagraphArray.current.includes("")) {
+  //       // Save current page to pages array and reset everything.
+  //       const updatedCurrentPage = currentPage.map((item, index) =>
+  //         index === currentPage.length - 1
+  //           ? { ...item, text: item?.text + emptySpaceForJustification }
+  //           : item,
+  //       );
+  //       setPagesArray((prev) => [...prev, updatedCurrentPage]);
+  //       const separationIndex = lastParagraphArray.current.indexOf("");
+  //       let result = "";
+  //       if (separationIndex !== -1) {
+  //         result = lastParagraphArray.current
+  //           .slice(separationIndex)
+  //           .join(" ")
+  //           ?.trim();
+  //       }
+  //       leftoverText.current = {
+  //         meta: lastParagraphData.current.meta,
+  //         tag: lastParagraphData.current.tag,
+  //         text: result,
+  //       };
+  //       lastParagraphArray.current = [];
+  //       textSeparationTriggered.current = false;
+  //       currentIndex.current = 0;
+  //       setCurrentPage([]);
+  //     } else {
+  //       updateLastParagraph(
+  //         currentIndex.current,
+  //         lastParagraphArray.current,
+  //         lastParagraphData.current,
+  //         "c",
+  //       );
+  //     }
+  //   }
+  //   textSeparationTriggered.current = true;
+  // }
+  // }, [textsArray, currReaderHeight, textLayout]);
 
   const emptySpaceForJustification = "\u202F".repeat(75);
 
@@ -248,7 +304,7 @@ const ReaderScreen = () => {
     const vx = e.nativeEvent.velocity?.x ?? 0;
 
     if (currentIndexRef.current === pagesArray.length - 1 && vx < 0.5) {
-      iRef.current = 0;
+      renderCount.current = 0;
       setPaginationCompleted(false);
       setPagesArray([]);
       setCurrentPage([]);
@@ -256,7 +312,7 @@ const ReaderScreen = () => {
     }
 
     if (currentIndexRef.current === 0 && vx > 0.5) {
-      iRef.current = 0;
+      renderCount.current = 0;
       setPaginationCompleted(false);
       setPagesArray([]);
       setCurrentPage([]);
@@ -336,7 +392,7 @@ const ReaderScreen = () => {
                 <Text
                   key={index}
                   style={[
-                    { opacity: 0, backgroundColor: "brown" },
+                    { opacity: 1, backgroundColor: "#d3385f" },
                     theme.tagStyles[item?.tag],
                   ]}
                   onTextLayout={(
@@ -351,19 +407,20 @@ const ReaderScreen = () => {
             })}
           </View>
         )}
-        {!paginationCompleted && (
+        {
+          // !paginationCompleted &&
           <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
+          // style={{
+          //   position: "absolute",
+          //   top: 0,
+          //   left: 0,
+          //   right: 0,
+          //   bottom: 0,
+          // }}
           >
-            <LoadingOverlay message="Loading..." theme={theme} />
+            {/* <LoadingOverlay message="Loading..." theme={theme} /> */}
           </View>
-        )}
+        }
       </View>
     </View>
   );

@@ -12,6 +12,7 @@ export const downloadBook = async (bookData: Book) => {
   try {
     // Get signed url
     const signedUrl: string = await fetchBookSignedUrl(bookData);
+
     // // Download the epub file and the book metadata into the file system:
     const bookFile = await getBook(signedUrl, bookData);
     return bookFile;
@@ -49,7 +50,10 @@ export const deleteFromMyBooks = async (fileName: string) => {
   }
 };
 
-export const downloadEpubFile = async (signedUrl: string, data: Book) => {
+export const downloadEpubFile: (
+  signedUrl: string,
+  data: Book,
+) => Promise<File | undefined> = async (signedUrl: string, data: Book) => {
   try {
     const bookData = data;
     const booksDir = new Directory(Paths.document.uri, "books");
@@ -230,6 +234,7 @@ export const openBook = async (
 ): Promise<OpenBookResult | undefined> => {
   try {
     const epubFile = getEpubFile("books", fileName);
+    console.log("Test 1", epubFile);
     if (!epubFile.exists) {
       return;
     }
@@ -248,7 +253,7 @@ export const openBook = async (
 
     return data;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 };

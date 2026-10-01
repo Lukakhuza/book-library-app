@@ -82,13 +82,16 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
       const result: OpenBookResult | undefined = await openBook(
         bookData.fileName,
       );
+
       if (!result) return;
+
       const { opfPath, spineHrefs, zip } = result;
       const currentSpineIndex = currentChapter;
       const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
       const xhtmlString: string | undefined = await zip
         .file(xhtmlPath)
         ?.async("string");
+
       if (!xhtmlString) return;
       navigation.navigate("Reader", { chapterData: xhtmlString });
     } finally {

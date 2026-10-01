@@ -34,7 +34,7 @@ const getMyBooks = async (books: Book[], dirSpecifier: string) => {
 
 export const MyBooksContext = createContext<MyBooksContextType>({
   myBooks: [],
-  isLoading: true,
+  isLoading: false,
   addToMyBooks: (book: Book) => {},
   removeFromMyBooks: (fileName: string) => {},
   updateMyBooks: (books: Book[]) => {},

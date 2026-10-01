@@ -25,7 +25,7 @@ export const ChapterContext = createContext<ChapterContextType>({
 });
 
 const ChapterContextProvider = ({ children }: Props) => {
-  const [currentChapter, setCurrentChapter] = useState(0);
+  const [currentChapter, setCurrentChapter] = useState(1);
   const [textsArray, setTextsArray] = useState<PageItem[]>([]);
   const { currentBook, currentBookObject } = useContext(BookContext);
   const [shouldExitBook, setShouldExitBook] = useState(false);
@@ -38,6 +38,7 @@ const ChapterContextProvider = ({ children }: Props) => {
       const xhtmlString: string | undefined = await zip
         .file(xhtmlPath)
         ?.async("string");
+
       if (!xhtmlString) return;
       const array = await xmlStringToTextsArray(xhtmlString);
       setTextsArray(array);
