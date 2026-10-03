@@ -1,4 +1,4 @@
-import { Directory, File, Paths } from "expo-file-system";
+import * as x from "expo-file-system";
 import { DomUtils, parseDocument } from "htmlparser2";
 import JSZip from "jszip";
 import { fetchBookSignedUrl } from "../api/book.api";
@@ -9,6 +9,7 @@ import { PageItem } from "../types/book";
 import { Element } from "domhandler";
 
 export const downloadBook = async (bookData: Book) => {
+  console.log(Object.keys(x));
   try {
     // Get signed url
     const signedUrl: string = await fetchBookSignedUrl(bookData);
@@ -56,6 +57,8 @@ export const downloadEpubFile: (
 ) => Promise<File | undefined> = async (signedUrl: string, data: Book) => {
   try {
     const bookData = data;
+    console.log(bookData);
+    console.log("Test 2: ", Paths);
     const booksDir = new Directory(Paths.document.uri, "books");
     if (!booksDir.exists) {
       booksDir.create();

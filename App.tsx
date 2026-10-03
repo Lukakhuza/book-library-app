@@ -5,6 +5,7 @@ import ChapterContextProvider from "./store/ChapterContext";
 import LibraryContextProvider from "./store/LibraryContext";
 import MyBooksContextProvider from "./store/MyBooksContext";
 import ReaderContextProvider from "./store/ReaderContext";
+import { ReaderProvider } from "@epubjs-react-native/core";
 import { ThemeProvider } from "./store/ThemeContext";
 
 export default function App() {
@@ -16,7 +17,9 @@ export default function App() {
             <BookContextProvider>
               <ChapterContextProvider>
                 <ReaderContextProvider>
-                  <Navigation />
+                  <ReaderProvider>
+                    <Navigation />
+                  </ReaderProvider>
                 </ReaderContextProvider>
               </ChapterContextProvider>
             </BookContextProvider>
