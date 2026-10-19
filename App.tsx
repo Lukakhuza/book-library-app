@@ -9,6 +9,7 @@ import { ThemeProvider } from "./store/ThemeContext";
 import AuthContextProvider from "./store/AuthContext";
 import UserDataContextProvider from "./store/UserDataContext";
 import { PaperProvider, Provider } from "react-native-paper";
+import AppContent from "./components/organisms/AppContent";
 
 export default function App() {
   return (
@@ -22,7 +23,7 @@ export default function App() {
                   <ReaderContextProvider>
                     <ReaderProvider>
                       <PaperProvider>
-                        <Navigation />
+                        <AppContent />
                       </PaperProvider>
                     </ReaderProvider>
                   </ReaderContextProvider>
