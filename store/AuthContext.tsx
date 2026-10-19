@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Props } from "../types/basic";
 import { deleteItemAsync, getItemAsync, setItemAsync } from "expo-secure-store";
+import * as x from "jwt-decode";
+import { isTokenExpired } from "../util/helperFunctions";
 
 type AuthContextType = {
   token: string | null;
@@ -11,7 +13,6 @@ type AuthContextType = {
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
-
 const AuthContextProvider = ({ children }: Props) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,12 @@ const AuthContextProvider = ({ children }: Props) => {
     const load = async () => {
       try {
         const stored = await getItemAsync("accessToken");
-        setToken(stored);
+        if (stored && !isTokenExpired(stored)) {
+          setToken(stored);
+        } else {
+          if (stored) await deleteItemAsync("accessToken");
+          setToken(null);
+        }
       } catch (error) {
         setToken(null);
       } finally {

@@ -1,5 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { Dimensions } from "react-native";
+import { jwtDecode } from "jwt-decode";
 
 export const getDimensions = () => {
   return Dimensions.get("screen");
@@ -22,3 +23,12 @@ export const parser2 = new XMLParser({
   ignoreAttributes: false,
   trimValues: true,
 });
+
+export const isTokenExpired = (token: string) => {
+  try {
+    const { exp } = jwtDecode<{ exp?: number }>(token);
+    return !exp || exp * 1000 <= Date.now();
+  } catch (error) {
+    return true;
+  }
+};

@@ -115,6 +115,7 @@ const LoginScreen = () => {
                 right={
                   <TextInput.Icon
                     icon={showPassword ? "eye-off" : "eye"}
+                    disabled={isSubmitting}
                     onPress={() => setShowPassword((prev) => !prev)}
                   />
                 }
