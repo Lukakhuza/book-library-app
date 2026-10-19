@@ -4,9 +4,10 @@ import { Colors } from "../constants/colors";
 import DiscoverScreen from "../screens/Discover";
 import HomeScreen from "../screens/Home";
 import SettingsScreen from "../screens/Settings";
+import { useIsAuthenticated, useIsSignedOut } from "../store/AuthContext";
+import LoginScreen from "../screens/LoginScreen";
 
-const HomeStack = createBottomTabNavigator({
-  initialRouteName: "Home",
+const Tabs = createBottomTabNavigator({
   screenOptions: {
     headerTitleAlign: "center",
     headerShown: false,
@@ -19,12 +20,29 @@ const HomeStack = createBottomTabNavigator({
   screens: {
     Home: {
       screen: HomeScreen,
+      if: useIsAuthenticated,
       options: {
         title: "Home",
         tabBarIcon: ({ color, size, focused }) => {
           return (
             <Ionicons
               name={focused ? "home" : "home-outline"}
+              size={size}
+              color={color}
+            />
+          );
+        },
+      },
+    },
+    Login: {
+      screen: LoginScreen,
+      if: useIsSignedOut,
+      options: {
+        title: "Log In",
+        tabBarIcon: ({ color, size, focused }) => {
+          return (
+            <Ionicons
+              name={focused ? "enter" : "enter-outline"}
               size={size}
               color={color}
             />
@@ -49,6 +67,7 @@ const HomeStack = createBottomTabNavigator({
     },
     Settings: {
       screen: SettingsScreen,
+      if: useIsAuthenticated,
       options: {
         tabBarIcon: ({ color, size, focused }) => {
           return (
@@ -64,4 +83,4 @@ const HomeStack = createBottomTabNavigator({
   },
 });
 
-export default HomeStack;
+export default Tabs;

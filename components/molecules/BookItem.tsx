@@ -22,9 +22,16 @@ type BookData = {
     item: Book;
     separators: unknown;
   };
+  bookState: {
+    book_id: string;
+    cfi: string;
+    location: number;
+    progress: number;
+    updated_at: number;
+  };
 };
 
-export const BookItem = ({ book }: BookData) => {
+export const BookItem = ({ book, bookState }: BookData) => {
   const navigation: AppNavigationProp = useNavigation();
   const { readingProgress } = useContext(BookContext);
   const scale = useSharedValue(1);
@@ -50,6 +57,7 @@ export const BookItem = ({ book }: BookData) => {
   };
 
   const handleOnPress = () => {
+    console.log("BOOK: ", book.item);
     navigation.navigate("BookDetails", {
       bookData: book.item,
     });
@@ -96,11 +104,11 @@ export const BookItem = ({ book }: BookData) => {
             <BookTitle title={title} theme={theme} />
             <BookAuthor author={author} theme={theme} />
             <ProgressBar
-              progress={readingProgress}
+              progress={bookState.progress}
               customStyle={{ marginBottom: ms(5) }}
               theme={theme}
             />
-            <ProgressText theme={theme} readingProgress={readingProgress} />
+            <ProgressText theme={theme} readingProgress={bookState.progress} />
           </View>
         </View>
       </Pressable>

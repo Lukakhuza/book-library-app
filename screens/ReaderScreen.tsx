@@ -1,427 +1,102 @@
-import { useNavigation } from "@react-navigation/native";
-import { useContext, useEffect, useRef, useState } from "react";
-import { ThemeContextType } from "../store/ThemeContext";
-import {
-  FlatList,
-  LayoutChangeEvent,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  StyleSheet,
-  Text,
-  TextLayoutEventData,
-  TextLayoutLine,
-  View,
-} from "react-native";
-import { transformParagraph } from "../services/bookServices";
+import { Reader, useReader } from "@epubjs-react-native/core";
+import { useFileSystem } from "@epubjs-react-native/expo-file-system";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { debounce } from "lodash";
+import { useCallback, useContext, useMemo, useRef } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { BookContext } from "../store/BookContext";
-import { ChapterContext } from "../store/ChapterContext";
-import { LibraryContext } from "../store/LibraryContext";
-import { useTheme } from "../store/ThemeContext";
-import { RootNavigationProp } from "../types/navigation";
+import { MyBooksContext } from "../store/MyBooksContext";
+import { darkTheme } from "../theme";
+import { BookState } from "../types/book";
 import LoadingOverlay from "../util/LoadingOverlay";
-import { PageItem, Pages, LeftoverText } from "../types/book";
+import { RootStackProp } from "../types/navigation";
 
 const ReaderScreen = () => {
-  const { screenDimensions } = useContext(LibraryContext);
-  const { textsArray, nextChapter, previousChapter, updateCurrentChapter } =
-    useContext(ChapterContext);
-  const { shouldExitBook, resetShouldExitBook } = useContext(ChapterContext);
-  const { currentBook } = useContext(BookContext);
-  const renderCount = useRef(0);
-  const [pageContentsFinalized, setPageContentsFinalized] = useState(false);
-  const [lastParagraphIndex, setLastParagraphIndex] = useState<null | number>(
-    null,
+  const navigation = useNavigation<RootStackProp>();
+  const { myBooksState, updateMyBooksState } = useContext(MyBooksContext);
+  const { currentBookObject, currentBook } = useContext(BookContext);
+  const { goNext, goPrevious, currentLocation } = useReader();
+  const currentLoc = useRef({
+    cfi: "",
+    location: 0,
+    progress: 0,
+  });
+
+  const handleLocationChange = useMemo(
+    () =>
+      debounce(async (currentLocation: any) => {
+        const { cfi, location, percentage: progress } = currentLocation.start;
+        currentLoc.current = {
+          cfi,
+          location,
+          progress,
+        };
+        console.log(currentLoc.current);
+      }, 3000),
+    [],
   );
-  const [fitCheckDone, setFitCheckDone] = useState(false);
-  const [contentsFitOnPage, setContentsFitOnPage] = useState<null | boolean>(
-    null,
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        const { cfi, location, progress } = currentLoc.current;
+        const bookState: BookState = {
+          cfi: cfi,
+          location: location,
+          progress: progress,
+          updated_at: Date.now(),
+        };
+        updateMyBooksState(currentBook!.book_id, bookState);
+      };
+    }, [currentBook]),
   );
-  const [paginationCompleted, setPaginationCompleted] = useState(false);
-  const [currentPage, setCurrentPage] = useState<PageItem[]>([]);
-  const [pagesArray, setPagesArray] = useState<Pages>([]);
-  const [currReaderHeight, setCurrReaderHeight] = useState(0);
-  const [textLayout, setTextLayout] = useState<TextLayoutLine[]>([]);
-  const lastParagraphArray = useRef<string[]>([]);
-  const lastParagraphData = useRef<PageItem>({ meta: "", tag: "p", text: "" });
-  const textSeparationTriggered = useRef<boolean>(false);
-  const testIndex = useRef<number>(0);
-  const currentIndex = useRef<number>(0);
-  const leftoverText = useRef<LeftoverText>(null);
-  const pageWidthRef = useRef<number>(0);
-  const currentIndexRef = useRef<number>(0);
-  const navigation: RootNavigationProp = useNavigation();
-  const { theme }: ThemeContextType = useTheme();
-  const MIN_VALID_HEIGHT = 1;
 
-  // tagStyles[item?.tag
-  // useEffect(() => {
-  //   if (shouldExitBook) {
-  //     if (!currentBook) return;
-  //     navigation.navigate("BookDetails", { bookData: currentBook });
-  //     resetShouldExitBook();
-  //     updateCurrentChapter(0);
-  //   }
-  // }, [shouldExitBook]);
-
-  // Figure out whether contents of textsArray fit on a single page (check fit). Accordingly set the contentsFitOnPage variable to true or false;
-  // useEffect(() => {
-  //   if (fitCheckDone) return;
-  //   if (currReaderHeight === 0) return;
-  //   if (currentPage.length === 0) {
-  //     setCurrentPage(textsArray);
-  //   } else {
-  //     if (currReaderHeight <= 800) {
-  //       setFitCheckDone(true);
-  //       setContentsFitOnPage(true);
-  //     } else {
-  //       setFitCheckDone(true);
-  //       setContentsFitOnPage(false);
-  //     }
-  //   }
-  // }, [currReaderHeight, fitCheckDone]);
-
-  // // Find the index of last paragraph
-  // useEffect(() => {
-  //   if (!fitCheckDone) return;
-  //   if (lastParagraphIndexFound) return;
-  //   // CONTINUE FROM HERE
-  //   const idx = renderCount.current;
-  //   setCurrentPage((prev) => [...prev, textsArray[idx]]);
-  //   renderCount.current = idx + 1;
-  //   setCurrentPage(textsArray.slice(0, testIndex.current));
-  // }, [lastParagraphIndexFound, currReaderHeight, fitCheckDone]);
-
-  // Find out how much of the chapter fits on the page. If entire chapter fits on the page, set lastParagraph Index to -1. Otherwise, set it to the index of the last paragraph where the cutoff should happen.
-  useEffect(() => {
-    if (currReaderHeight === 0) return;
-    if (lastParagraphIndex !== null) return;
-    if (currReaderHeight > 800) {
-      const index = renderCount.current - 1;
-      setLastParagraphIndex(index);
-      return;
-    }
-    const idx = renderCount.current;
-    setCurrentPage((prev) => [...prev, textsArray[idx]]);
-    renderCount.current = idx + 1;
-    if (renderCount.current === textsArray.length) {
-      setLastParagraphIndex(-1);
-    }
-  }, [currReaderHeight]);
-
-  useEffect(() => {
-    if (lastParagraphIndex === null) return;
-    console.log(textsArray[lastParagraphIndex]);
-  }, [lastParagraphIndex]);
-
-  // useEffect(() => {
-  // if (shouldExitBook) return;
-  // if (textsArray?.length === 0) return;
-  // // Ignore initial currReaderHeight of 0.
-  // if (currReaderHeight === 0) return;
-  // Keep adding data to the screen until either the chapter end is reached or the screen height is exceeded:
-  // const idx = renderCount.current;
-  // setCurrentPage((prev) => [...prev, textsArray[idx]]);
-  // renderCount.current = idx + 1;
-  // Does entire content of textsArray fit on the page?
-  // if (currentPage.length > 0 && currReaderHeight < 800)
-  // setCurrentPage(textsArray);
-  // if (
-  //   renderCount.current > textsArray?.length - 1 &&
-  //   lastParagraphData.current.text === ""
-  // ) {
-  //   if (currReaderHeight <= 800 && !leftoverText?.current?.text) {
-  //     // After paragraphs have been added to the last currentPage, add this currentPage data to pagesArray.
-  //     setPagesArray((prev) => [...prev, currentPage]);
-  //     // After all chapter data has been added to pagesArray, set PaginationCompleted to true so that FlatList can be rendered.
-  //     setPaginationCompleted(true);
-  //     return;
-  //   }
-  // }
-  // Keep adding data to current page until reader height is exceeded.
-  // if (currReaderHeight <= 800) {
-  //   // If there is a leftover text from previous page, add that to the beginning of current page.
-  //   if (leftoverText.current) {
-  //     const currLeftover = leftoverText.current;
-  //     setCurrentPage((prev) =>
-  //       currLeftover?.text?.trim() === "" ? prev : [...prev, currLeftover],
-  //     );
-  //     leftoverText.current = null;
-  //     // If there is no leftover text, simply add current paragraph to current page and update index:
-  //   } else if (textSeparationTriggered?.current === false) {
-  //     const idx = renderCount.current;
-  //     setCurrentPage((prev) => [...prev, textsArray[idx]]);
-  //     renderCount.current = idx + 1;
-  //     // If there is a lastParagraph array:
-  //   } else {
-  //     // If last paragraph separation is already in the last stage and there is a an empty string separating
-  //     // separating part that remains on current page and part that overflows to the next, then do:
-  //     if (lastParagraphArray.current.includes("")) {
-  //       // Add extra whitespace at the end for proper justification:
-  //       const updatedCurrentPage = currentPage.map((item, index) =>
-  //         index === currentPage.length - 1
-  //           ? { ...item, text: item?.text + emptySpaceForJustification }
-  //           : item,
-  //       );
-  //       // add updated current page to pages array:
-  //       setPagesArray((prev) => [...prev, updatedCurrentPage]);
-  //       // Get the index of where last paragraph was split, so that we can gather
-  //       // the remaining part for the following page:
-  //       const separationIndex = lastParagraphArray.current.indexOf("");
-  //       let result = "";
-  //       if (separationIndex !== -1) {
-  //         result = lastParagraphArray.current
-  //           .slice(separationIndex)
-  //           .join(" ")
-  //           ?.trim();
-  //       }
-  //       // Update leftover text for next page:
-  //       leftoverText.current = {
-  //         meta: lastParagraphData.current.meta,
-  //         tag: lastParagraphData.current.tag,
-  //         text: result,
-  //       };
-  //       lastParagraphData.current = { meta: "", tag: "p", text: "" };
-  //       // Reset all variables that were specific to current page:
-  //       lastParagraphArray.current = [];
-  //       textSeparationTriggered.current = false;
-  //       currentIndex.current = 0;
-  //       setCurrentPage([]);
-  //       // Remaining text of the current paragraph would be added to the beginning of next page.
-  //     } else {
-  //       // if after adding the last paragraph candidate text, the currReaderHeight is still less than
-  //       // available height, then take the second half of the last paragraph array, split it in half
-  //       // and add the first half of newly split string to the previous string.
-  //       currentIndex.current += 1;
-  //       const idx1 = currentIndex.current;
-  //       updateLastParagraph(
-  //         idx1,
-  //         lastParagraphArray.current,
-  //         lastParagraphData.current,
-  //         "a",
-  //       );
-  //       textSeparationTriggered.current = true;
-  //     }
-  //   }
-  // } else {
-  //   // If there is an overflow of last paragraph, create lastParagraph array
-  //   // based on current last paragraph and splitIndex.
-  //   if (leftoverText.current) {
-  //     lastParagraphArray.current = [leftoverText.current.text];
-  //   } else if (lastParagraphArray.current.length === 0) {
-  //     const lastParagraph = currentPage[currentPage?.length - 1];
-  //     lastParagraphData.current = lastParagraph;
-  //     const arr = [lastParagraph?.text];
-  //     const idx3 = 0;
-  //     updateLastParagraph(idx3, arr, lastParagraph, "b");
-  //   } else {
-  //     if (lastParagraphArray.current.includes("")) {
-  //       // Save current page to pages array and reset everything.
-  //       const updatedCurrentPage = currentPage.map((item, index) =>
-  //         index === currentPage.length - 1
-  //           ? { ...item, text: item?.text + emptySpaceForJustification }
-  //           : item,
-  //       );
-  //       setPagesArray((prev) => [...prev, updatedCurrentPage]);
-  //       const separationIndex = lastParagraphArray.current.indexOf("");
-  //       let result = "";
-  //       if (separationIndex !== -1) {
-  //         result = lastParagraphArray.current
-  //           .slice(separationIndex)
-  //           .join(" ")
-  //           ?.trim();
-  //       }
-  //       leftoverText.current = {
-  //         meta: lastParagraphData.current.meta,
-  //         tag: lastParagraphData.current.tag,
-  //         text: result,
-  //       };
-  //       lastParagraphArray.current = [];
-  //       textSeparationTriggered.current = false;
-  //       currentIndex.current = 0;
-  //       setCurrentPage([]);
-  //     } else {
-  //       updateLastParagraph(
-  //         currentIndex.current,
-  //         lastParagraphArray.current,
-  //         lastParagraphData.current,
-  //         "c",
-  //       );
-  //     }
-  //   }
-  //   textSeparationTriggered.current = true;
-  // }
-  // }, [textsArray, currReaderHeight, textLayout]);
-
-  const emptySpaceForJustification = "\u202F".repeat(75);
-
-  const updateLastParagraph = (
-    idx: number,
-    array: string[],
-    lastParagraphData: PageItem,
-    selection: string,
-  ) => {
-    const transformedLastParagraphArray1 = transformParagraph(array, idx);
-    lastParagraphArray.current = transformedLastParagraphArray1;
-    let text = "";
-    if (selection === "a") {
-      text = transformedLastParagraphArray1.slice(0, idx + 1).join(" ");
-    } else if (selection === "b") {
-      text = transformedLastParagraphArray1[idx];
-    } else if (selection === "c") {
-      text = transformedLastParagraphArray1.slice(0, idx + 1).join(" ");
-    }
-    const item = {
-      meta: lastParagraphData?.meta,
-      tag: lastParagraphData?.tag,
-      text: text,
-    };
-
-    if (selection === "a") {
-      setCurrentPage((prev) => {
-        return [...prev?.slice(0, prev?.length - 1), item];
-      });
-    } else if (selection === "b" || selection === "c") {
-      setCurrentPage((prev) => {
-        const withoutLast = prev?.slice(0, prev?.length - 1);
-
-        if (item?.text?.trim() === "") {
-          return withoutLast;
-        }
-
-        return [...withoutLast, item];
-      });
-    }
-  };
-
-  const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const pageWidth = pageWidthRef.current;
-    if (!pageWidth) return;
-    const x = e.nativeEvent.contentOffset.x;
-    currentIndexRef.current = Math.round(x / pageWidth);
-  };
-
-  const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const vx = e.nativeEvent.velocity?.x ?? 0;
-
-    if (currentIndexRef.current === pagesArray.length - 1 && vx < 0.5) {
-      renderCount.current = 0;
-      setPaginationCompleted(false);
-      setPagesArray([]);
-      setCurrentPage([]);
-      nextChapter();
-    }
-
-    if (currentIndexRef.current === 0 && vx > 0.5) {
-      renderCount.current = 0;
-      setPaginationCompleted(false);
-      setPagesArray([]);
-      setCurrentPage([]);
-      previousChapter();
-    }
-  };
+  if (!currentBookObject)
+    return <LoadingOverlay theme={darkTheme} message="Loading..." />;
 
   return (
-    <View
-      style={[
-        styles.outerContainer,
-        { backgroundColor: theme.colors.readerBg },
-      ]}
-    >
+    <View>
       <View
         style={{
-          flex: 1,
-          marginVertical: 30,
+          backgroundColor: "lightblue",
+          height: "20%",
+          marginTop: 50,
+          flexDirection: "row",
+          justifyContent: "space-between",
         }}
       >
-        {paginationCompleted && (
-          <FlatList
-            data={pagesArray}
-            onLayout={(e: LayoutChangeEvent) => {
-              pageWidthRef.current = e.nativeEvent.layout.width;
-            }}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(_, i) => i.toString()}
-            renderItem={(page) => {
-              return (
-                <View
-                  style={{
-                    paddingHorizontal: 20,
-                    // borderColor: "blue",
-                    // borderWidth: 1,
-                    marginTop: 30,
-                    width: screenDimensions?.width,
-                  }}
-                  key={page?.index}
-                >
-                  {page.item.map((item, index) => {
-                    return (
-                      <Text key={index} style={theme.tagStyles[item?.tag]}>
-                        {item?.text}
-                      </Text>
-                    );
-                  })}
-                </View>
-              );
-            }}
-            scrollEnabled={true}
-            removeClippedSubviews={false}
-            initialNumToRender={pagesArray?.length ?? 0}
-            maxToRenderPerBatch={pagesArray?.length ?? 0}
-            windowSize={100}
-            overScrollMode="always"
-            onMomentumScrollEnd={onMomentumScrollEnd}
-            onScrollEndDrag={onScrollEndDrag}
-          />
-        )}
-        {!paginationCompleted && (
-          <View
-            style={{
-              paddingHorizontal: 20,
-              minHeight: 1,
-              marginTop: 30,
-            }}
-            onLayout={(e: LayoutChangeEvent) => {
-              const { height } = e.nativeEvent.layout;
-              setCurrReaderHeight(height);
-            }}
-          >
-            {currentPage.map((item, index) => {
-              return (
-                <Text
-                  key={index}
-                  style={[
-                    { opacity: 1, backgroundColor: "#d3385f" },
-                    theme.tagStyles[item?.tag],
-                  ]}
-                  onTextLayout={(
-                    e: NativeSyntheticEvent<TextLayoutEventData>,
-                  ) => {
-                    setTextLayout(e.nativeEvent.lines);
-                  }}
-                >
-                  {item?.text}
-                </Text>
-              );
-            })}
-          </View>
-        )}
-        {
-          // !paginationCompleted &&
-          <View
-          // style={{
-          //   position: "absolute",
-          //   top: 0,
-          //   left: 0,
-          //   right: 0,
-          //   bottom: 0,
-          // }}
-          >
-            {/* <LoadingOverlay message="Loading..." theme={theme} /> */}
-          </View>
-        }
+        <Pressable onPress={() => goPrevious()}>
+          <Text>Previous Page</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            if (currentBook) {
+              navigation.navigate("BookDetails", {
+                bookData: currentBook,
+              });
+            } else {
+              navigation.navigate("Tabs", { screen: "Home" });
+            }
+          }}
+        >
+          <Text>My Books</Text>
+        </Pressable>
+        <Pressable onPress={() => goNext()}>
+          <Text>Next Page</Text>
+        </Pressable>
       </View>
+      <Reader
+        src={currentBookObject}
+        fileSystem={useFileSystem}
+        initialLocation={
+          myBooksState.get(currentBook!.book_id)?.cfi || undefined
+        }
+        width={"100%"}
+        height={700}
+        onLocationChange={(_total: number, currentLocation: any) => {
+          handleLocationChange(currentLocation);
+        }}
+      />
     </View>
   );
 };

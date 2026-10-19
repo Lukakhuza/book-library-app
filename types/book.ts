@@ -24,12 +24,6 @@ export type PageItem = {
 export type Page = PageItem[];
 export type Pages = Page[];
 
-export type LeftoverText = {
-  meta: Record<string, unknown> | string;
-  text: string;
-  tag: Tag;
-} | null;
-
 export type BookRouteProps = {
   route: {
     key: string;
@@ -48,3 +42,22 @@ export type OpenBookResult = {
 };
 
 export type DomArray = Element[];
+
+export type BookState = {
+  book_id?: string;
+  cfi: string;
+  location: number;
+  progress: number;
+  updated_at: number;
+};
+
+export type MyBooksContextType = {
+  myBooks: Book[];
+  myBooksReady: boolean;
+  myBooksState: Map<string, BookState>;
+  isLoading: boolean;
+  addToMyBooks: (book: Book) => void;
+  removeFromMyBooks: (fileName: string) => void;
+  updateMyBooks: (books: Book[]) => void;
+  updateMyBooksState: (bookId: string, bookState: BookState) => void;
+};

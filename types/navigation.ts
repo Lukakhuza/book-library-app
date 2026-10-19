@@ -1,27 +1,34 @@
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { CompositeNavigationProp } from "@react-navigation/native";
+import {
+  CompositeNavigationProp,
+  StaticParamList,
+} from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import RootStack from "../navigation/RootStack";
+import { NavigatorScreenParams } from "@react-navigation/native";
+import Tabs from "../navigation/Tabs";
 import { Book } from "./book";
 
-export type RootStackParamList = {
-  App: undefined;
+type RootStackParamList = {
+  SignUp: undefined;
   BookDetails: { bookData: Book };
-  Reader: { chapterData: string };
-  MyModal: undefined;
+  Tabs:
+    | NavigatorScreenParams<{
+        Home: undefined;
+        Discover: undefined;
+        Settings: undefined;
+      }>
+    | undefined;
+  Reader: undefined;
 };
 
-export type HomeStackParamList = {
-  Home: undefined;
-  Discover: undefined;
-  Settings: undefined;
-};
+export type TabsParamList = StaticParamList<typeof Tabs>;
 
-export type HomeStackNavigationProp =
-  BottomTabNavigationProp<HomeStackParamList>;
+export type TabsNavigationProp = BottomTabNavigationProp<TabsParamList>;
 
-export type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+export type RootStackProp = NativeStackNavigationProp<RootStackParamList>;
 
 export type AppNavigationProp = CompositeNavigationProp<
-  HomeStackNavigationProp,
-  RootNavigationProp
+  TabsNavigationProp,
+  RootStackProp
 >;

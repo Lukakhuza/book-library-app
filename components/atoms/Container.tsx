@@ -4,17 +4,20 @@ import { LibraryContext } from "../../store/LibraryContext";
 import { useTheme } from "../../store/ThemeContext";
 import { Props } from "../../types/basic";
 
-export const Container = ({ children }: Props) => {
+export const Container = ({ children, style }: Props) => {
   const { safeAreaInsets: insets } = useContext(LibraryContext);
   const { theme, isDark } = useTheme();
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.colors.bgScreen,
-        paddingHorizontal: 23,
-        paddingTop: insets.top,
-      }}
+      style={[
+        {
+          flex: 1,
+          backgroundColor: theme.colors.bgScreen,
+          paddingHorizontal: 23,
+          paddingTop: insets.top,
+        },
+        style,
+      ]}
     >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View

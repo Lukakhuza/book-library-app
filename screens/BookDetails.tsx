@@ -7,15 +7,13 @@ import PressableIcon from "../components/atoms/PressableIcon";
 import {
   deleteFromMyBooks,
   downloadBook,
-  getXhtmlPath,
   openBook,
 } from "../services/bookServices";
 import { BookContext } from "../store/BookContext";
-import { ChapterContext } from "../store/ChapterContext";
 import { MyBooksContext } from "../store/MyBooksContext";
 import { useTheme } from "../store/ThemeContext";
-import { Book, BookRouteProps, OpenBookResult } from "../types/book";
-import { RootNavigationProp } from "../types/navigation";
+import { Book, BookRouteProps } from "../types/book";
+import { RootStackProp } from "../types/navigation";
 import LoadingOverlay from "../util/LoadingOverlay";
 
 const BookDetailsScreen = ({ route }: BookRouteProps) => {
@@ -24,14 +22,13 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const { updateCurrentBook, currentBook } = useContext(BookContext);
-  const { currentChapter } = useContext(ChapterContext);
-  const navigation: RootNavigationProp = useNavigation();
+  const navigation: RootStackProp = useNavigation();
   const { myBooks, addToMyBooks, removeFromMyBooks } =
     useContext(MyBooksContext);
   const { bookData } = route.params;
   const { theme, toggleTheme, isDark } = useTheme();
 
-  const goHome = () => navigation.navigate("App");
+  const goHome = () => navigation.navigate("Tabs", { screen: "Home" });
 
   useEffect(() => {
     updateCurrentBook(bookData);
@@ -51,7 +48,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
       await downloadBook(bookData);
       // Update state
       addToMyBooks(bookData);
-      navigation.navigate("App");
+      navigation.navigate("Tabs");
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +63,7 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
       // Remove book from the file system.
       await deleteFromMyBooks(bookData.fileName);
       // Update state
-      navigation.navigate("App");
+      navigation.navigate("Tabs");
       removeFromMyBooks(bookData.fileName);
     } finally {
       setIsLoading(false);
@@ -79,21 +76,8 @@ const BookDetailsScreen = ({ route }: BookRouteProps) => {
       setIsDisabled(true);
       // setIsLoading(true);
       // setReadingStarted(true);
-      const result: OpenBookResult | undefined = await openBook(
-        bookData.fileName,
-      );
-
-      if (!result) return;
-
-      const { opfPath, spineHrefs, zip } = result;
-      const currentSpineIndex = currentChapter;
-      const xhtmlPath = getXhtmlPath(opfPath, spineHrefs, currentSpineIndex);
-      const xhtmlString: string | undefined = await zip
-        .file(xhtmlPath)
-        ?.async("string");
-
-      if (!xhtmlString) return;
-      navigation.navigate("Reader", { chapterData: xhtmlString });
+      const epub = (await openBook(bookData.fileName)) as string;
+      navigation.navigate("Reader");
     } finally {
       // setIsLoading(false);
     }

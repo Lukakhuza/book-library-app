@@ -7,10 +7,8 @@ import { SubHeading } from "../components/atoms/SubHeading";
 import { ThemeSwitchButton } from "../components/atoms/ThemeSwitchButton";
 import SettingsSubsection from "../components/molecules/SettingsSubsection";
 import { useTheme } from "../store/ThemeContext";
-import { HomeStackNavigationProp } from "../types/navigation";
 
 const SettingsScreen = () => {
-  const navigation: HomeStackNavigationProp = useNavigation();
   const { theme, isDark, toggleTheme } = useTheme();
 
   return (
@@ -89,7 +87,7 @@ const SettingsScreen = () => {
                     color: theme.colors.textPrimary,
                   }}
                 >
-                  Avid Reader
+                  Shalve Steph
                 </Text>
               </View>
               <View>
@@ -100,7 +98,7 @@ const SettingsScreen = () => {
                     fontSize: 15,
                   }}
                 >
-                  reader@gmail.com
+                  shalvasteph@gmail.com
                 </Text>
               </View>
               <View style={{ flexDirection: "row" }}>

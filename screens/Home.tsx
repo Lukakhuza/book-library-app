@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Dimensions, FlatList, View } from "react-native";
+import { Button, Dimensions, FlatList, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -21,6 +21,7 @@ import { LibraryContext } from "../store/LibraryContext";
 import { useScale, useTheme } from "../store/ThemeContext";
 import { Props } from "../types/basic";
 import LoadingOverlay from "../util/LoadingOverlay";
+import { AuthContext } from "../store/AuthContext";
 
 // const handlePressIn = () => {
 //   Animated.spring(scale, {
@@ -37,10 +38,16 @@ import LoadingOverlay from "../util/LoadingOverlay";
 // };
 
 const HomeScreen = () => {
+  const { signOut } = useContext(AuthContext);
   const [isPressed, setIsPressed] = useState(false);
   const { width } = Dimensions.get("screen");
   const navigation: AppNavigationProp = useNavigation();
-  const { myBooks, isLoading: myBooksLoading } = useContext(MyBooksContext);
+  const {
+    myBooks,
+    myBooksReady,
+    myBooksState,
+    isLoading: myBooksLoading,
+  } = useContext(MyBooksContext);
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const { safeAreaInsets: insets } = useContext(LibraryContext);
   const { theme, isDark, toggleTheme } = useTheme();
@@ -94,7 +101,7 @@ const HomeScreen = () => {
     );
   }
 
-  if (myBooks?.length > 0) {
+  if (myBooks?.length > 0 && myBooksReady) {
     myBooksContent = (
       <View>
         <SubHeading text="Continue Reading" theme={theme} />
@@ -104,7 +111,19 @@ const HomeScreen = () => {
             bounces={false}
             style={{ marginTop: 20 }}
             renderItem={(book) => {
-              return <BookItem book={book} />;
+              const bkState = myBooksState.get(book.item.book_id);
+              return (
+                <BookItem
+                  book={book}
+                  bookState={{
+                    book_id: book.item.book_id,
+                    cfi: bkState?.cfi,
+                    location: bkState?.location,
+                    progress: bkState?.progress,
+                    updated_at: bkState?.updated_at,
+                  }}
+                />
+              );
             }}
           />
         </FadeInView>
@@ -162,6 +181,7 @@ const HomeScreen = () => {
           />
         </View>
       </View>
+      <Button title="Sign Out" onPress={signOut} />
       {myBooksContent}
     </Container>
   );

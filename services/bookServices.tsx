@@ -1,15 +1,20 @@
-import * as x from "expo-file-system";
-import { DomUtils, parseDocument } from "htmlparser2";
-import JSZip from "jszip";
-import { fetchBookSignedUrl } from "../api/book.api";
-import { Book, DomArray, OpenBookResult } from "../types/book";
-import { parser1, resolveHref } from "../util/helperFunctions";
-import { ParsedPackage } from "../api/book.api";
-import { PageItem } from "../types/book";
 import { Element } from "domhandler";
+import {
+  deleteAsync,
+  documentDirectory,
+  downloadAsync,
+  FileSystemDownloadResult,
+  getInfoAsync,
+  makeDirectoryAsync,
+  readAsStringAsync,
+  readDirectoryAsync,
+  writeAsStringAsync,
+} from "expo-file-system";
+import { DomUtils, parseDocument } from "htmlparser2";
+import { fetchBookSignedUrl } from "../api/book.api";
+import { Book, DomArray, PageItem } from "../types/book";
 
 export const downloadBook = async (bookData: Book) => {
-  console.log(Object.keys(x));
   try {
     // Get signed url
     const signedUrl: string = await fetchBookSignedUrl(bookData);
@@ -26,24 +31,19 @@ export const deleteFromMyBooks = async (fileName: string) => {
   try {
     // Generate epub file uri
     const epubFileName = fileName;
-    const booksDir = new Directory(Paths.document.uri, "books");
-    const bookUri = booksDir.uri + epubFileName;
+    const booksDir = documentDirectory + "books";
+    const bookUri = booksDir + epubFileName;
 
     // Delete Epub File
-    const epubFile: File = new File(bookUri);
-    epubFile.delete();
+    await deleteAsync(bookUri, { idempotent: true });
 
     // Generate json file uri
     const jsonFileName = fileName.replace(/\.epub$/i, ".json");
-    const booksMetadataDir = new Directory(
-      Paths.document.uri,
-      "books-metadata",
-    );
-    const bookMetadataUri = booksMetadataDir.uri + jsonFileName;
+    const booksMetadataDir = documentDirectory + "books-metadata";
+    const bookMetadataUri = booksMetadataDir + jsonFileName;
 
     // Delete json file
-    const jsonFile: File = new File(bookMetadataUri);
-    jsonFile.delete();
+    await deleteAsync(bookMetadataUri, { idempotent: true });
 
     return;
   } catch (error) {
@@ -54,33 +54,29 @@ export const deleteFromMyBooks = async (fileName: string) => {
 export const downloadEpubFile: (
   signedUrl: string,
   data: Book,
-) => Promise<File | undefined> = async (signedUrl: string, data: Book) => {
+) => Promise<FileSystemDownloadResult | undefined> = async (
+  signedUrl: string,
+  data: Book,
+) => {
   try {
     const bookData = data;
-    console.log(bookData);
-    console.log("Test 2: ", Paths);
-    const booksDir = new Directory(Paths.document.uri, "books");
-    if (!booksDir.exists) {
-      booksDir.create();
+    // Create a directory uri
+    const dirUri = documentDirectory + "books/";
+    // Find out if there is an existing direction at this uri.
+    const dirInfo = await getInfoAsync(dirUri);
+    // if there is no directory, create one. If there is a directory, skip the creation step.
+    if (!dirInfo.exists || !dirInfo.isDirectory) {
+      await makeDirectoryAsync(dirUri, { intermediates: true });
     }
     // Create an epub file uri
-    const fileUri = booksDir.uri + bookData.fileName;
-    // Check if there is any info on this fileUri
-    const info = new File(fileUri).info();
-
-    // Check for downloaded file Uri and set it to filePath
-    let downLoadedFileUri: string = "";
-    if (info.exists && info.uri) {
-      downLoadedFileUri = info.uri;
-    } else {
-      const downloadedFile = await File.downloadFileAsync(signedUrl, booksDir, {
-        idempotent: true,
-      });
-      downLoadedFileUri = downloadedFile.uri;
+    const fileUri = dirUri + bookData.fileName;
+    // Check if there is any file at this fileUri.
+    const fileInfo = await getInfoAsync(fileUri);
+    // If there is no file at this fileUri, download the file and save it at the uri.
+    if (!fileInfo.exists) {
+      const file = await downloadAsync(signedUrl, fileUri);
+      return file;
     }
-    const file: File = new File(downLoadedFileUri);
-
-    return file;
   } catch (error) {
     console.log(error);
   }
@@ -95,23 +91,22 @@ export const saveDataToJsonFile = async (
       bookData: bookData,
       epubFileUri: epubFileUri,
     };
-    const booksMetadataDir = new Directory(
-      Paths.document.uri,
-      "books-metadata",
-    );
 
-    // If books metadata directory doesn't exist, create it:
-    if (!booksMetadataDir.exists) {
-      booksMetadataDir.create();
+    const dirUri = documentDirectory + "books-metadata/";
+
+    const dirInfo = await getInfoAsync(dirUri);
+
+    if (!dirInfo.exists || !dirInfo.isDirectory) {
+      await makeDirectoryAsync(dirUri, { intermediates: true });
     }
 
     // Create a json file uri
     const jsonFileName = bookData.fileName.replace(/\.epub$/i, ".json");
-    const jsonFileUri = booksMetadataDir.uri + jsonFileName;
-    const file = new File(jsonFileUri);
+    const jsonFileUri = dirUri + jsonFileName;
+    // const file = new File(jsonFileUri);
     const stringifiedBookData = JSON.stringify(enhancedBookData);
-    file.write(stringifiedBookData);
-    const newFile = await new File(jsonFileUri).text();
+    await writeAsStringAsync(jsonFileUri, stringifiedBookData);
+    const newFile = await readAsStringAsync(jsonFileUri);
     return newFile;
   } catch (error) {
     console.log(error);
@@ -122,8 +117,10 @@ export const getBook = async (signedUrl: string, bookData: Book) => {
   try {
     const epubFile = await downloadEpubFile(signedUrl, bookData);
     if (!epubFile) return;
-    const jsonFile = await saveDataToJsonFile(epubFile.uri, bookData);
-
+    const jsonFile: string | undefined = await saveDataToJsonFile(
+      epubFile.uri,
+      bookData,
+    );
     const bookFile = {
       epub: epubFile,
       json: jsonFile,
@@ -135,126 +132,19 @@ export const getBook = async (signedUrl: string, bookData: Book) => {
   }
 };
 
-export const getEpubFile = (directoryName: string, fileName: string) => {
-  const booksDir = new Directory(Paths.document.uri, "books");
-  const bookUri = booksDir.uri + fileName;
-  const epubFile = new File(bookUri);
-  return epubFile;
-};
-
-export const getZip = async (epubFile: File) => {
-  const encoded = await epubFile.base64();
-  const zip = await JSZip.loadAsync(encoded, { base64: true });
-  return zip;
-};
-
-export const getOpfPath = async (zip: JSZip) => {
-  const containerXmlFile = await zip
-    .file("META-INF/container.xml")
-    ?.async("text");
-
-  if (!containerXmlFile) return;
-  const parsed = parser1.parse(containerXmlFile);
-
-  const rootfiles = parsed.container.rootfiles.rootfile;
-  const rootfile = Array.isArray(rootfiles) ? rootfiles[0] : rootfiles;
-
-  const opfPath = rootfile["@_full-path"];
-  return opfPath;
-};
-
-export const getSpineHrefs = (parsedPackage: ParsedPackage) => {
-  type ManifestItem = {
-    href: string;
-    mediaType: string;
-    properties?: string;
-  };
-
-  const items = parsedPackage.package?.manifest?.item;
-
-  if (!items) {
-    throw new Error("OPF manifest missing");
-  }
-
-  const manifestItems = Array.isArray(items) ? items : [items];
-  const manifestMap = new Map<string, ManifestItem>();
-
-  for (const item of manifestItems) {
-    const id = item["@_id"];
-    const href = item["@_href"];
-    const mediaType = item["@_media-type"];
-    const properties = item["@_properties"];
-
-    if (!id || !href || !mediaType) continue;
-
-    manifestMap.set(id, {
-      href,
-      mediaType,
-      properties,
-    });
-  }
-
-  const itemrefs = parsedPackage?.package?.spine?.itemref;
-
-  if (!itemrefs) {
-    throw new Error("OPF spine missing");
-  }
-
-  const spineItems = Array.isArray(itemrefs) ? itemrefs : [itemrefs];
-  const spineHrefs: string[] = [];
-  for (const itemref of spineItems) {
-    const idref = itemref["@_idref"];
-    const linear = itemref["@_linear"];
-
-    if (!idref) continue;
-    if (linear === "no") continue;
-
-    const manifestItem = manifestMap.get(idref);
-    if (!manifestItem) continue;
-
-    // Skip nav / TOC
-    if (manifestItem.properties?.includes("nav")) continue;
-
-    // Only render XHTML
-    if (manifestItem?.mediaType !== "application/xhtml+xml") continue;
-
-    spineHrefs.push(manifestItem.href);
-  }
-  return spineHrefs;
-};
-
-export const getXhtmlPath = (
-  opfPath: string,
-  spineHrefs: string[],
-  currentSpineIndex: number,
-) => {
-  const xhtmlPath = resolveHref(opfPath, spineHrefs[currentSpineIndex]);
-  return xhtmlPath;
+export const getEpubFile = async (directoryName: string, fileName: string) => {
+  const dir = await readDirectoryAsync(documentDirectory + "books/");
+  const booksDir = documentDirectory + "books/";
+  const bookUri = booksDir + fileName;
+  return bookUri;
 };
 
 export const openBook = async (
   fileName: string,
-): Promise<OpenBookResult | undefined> => {
+): Promise<string | undefined> => {
   try {
-    const epubFile = getEpubFile("books", fileName);
-    console.log("Test 1", epubFile);
-    if (!epubFile.exists) {
-      return;
-    }
-    const zip = await getZip(epubFile);
-    const opfPath: string = await getOpfPath(zip);
-    const opfXml: string | undefined = await zip.file(opfPath)?.async("string");
-    if (!opfXml) return;
-    const parsedPackage: ParsedPackage = parser1.parse(opfXml);
-    const spineHrefs = getSpineHrefs(parsedPackage);
-
-    const data = {
-      opfPath: opfPath,
-      spineHrefs: spineHrefs,
-      zip: zip,
-    };
-
-    return data;
+    const epubFile = await getEpubFile("books", fileName);
+    return epubFile;
   } catch (error) {
     // console.log(error);
     throw error;
@@ -307,3 +197,36 @@ export const xmlStringToTextsArray = async (xhtmlString: string) => {
 
   return array;
 };
+
+export const getMyBooks = async (books: Book[], dirSpecifier: string) => {
+  const booksMetadataDir = documentDirectory + dirSpecifier + "/";
+  const booksList = await readDirectoryAsync(booksMetadataDir);
+  const fileNameSet = new Set();
+  for (const book of booksList) {
+    const bookUri = booksMetadataDir + book;
+    const text = await readAsStringAsync(bookUri);
+    const data = JSON.parse(text);
+    fileNameSet.add(data.bookData.fileName);
+  }
+  let myBooks = [];
+  for (const book of books) {
+    if (fileNameSet.has(book.fileName)) {
+      myBooks.push(book);
+    }
+  }
+  return myBooks;
+};
+
+// export const getCurrentLocation = debounce(async (currentLocation: any) => {
+// console.log(sta);
+// Continue from here
+// const response = await fetch(`${url}/update-cart`, {
+//   method: "POST",
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+//   body: JSON.stringify(data),
+// });
+// const resData = await response.json();
+// return resData;
+// }, 5000);

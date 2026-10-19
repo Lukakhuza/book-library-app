@@ -1,30 +1,36 @@
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Navigation } from "./navigation/Navigation";
+import Navigation from "./navigation/Navigation";
 import BookContextProvider from "./store/BookContext";
-import ChapterContextProvider from "./store/ChapterContext";
 import LibraryContextProvider from "./store/LibraryContext";
 import MyBooksContextProvider from "./store/MyBooksContext";
 import ReaderContextProvider from "./store/ReaderContext";
 import { ReaderProvider } from "@epubjs-react-native/core";
 import { ThemeProvider } from "./store/ThemeContext";
+import AuthContextProvider from "./store/AuthContext";
+import UserDataContextProvider from "./store/UserDataContext";
+import { PaperProvider, Provider } from "react-native-paper";
 
 export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <LibraryContextProvider>
-          <MyBooksContextProvider>
-            <BookContextProvider>
-              <ChapterContextProvider>
-                <ReaderContextProvider>
-                  <ReaderProvider>
-                    <Navigation />
-                  </ReaderProvider>
-                </ReaderContextProvider>
-              </ChapterContextProvider>
-            </BookContextProvider>
-          </MyBooksContextProvider>
-        </LibraryContextProvider>
+        <AuthContextProvider>
+          <UserDataContextProvider>
+            <LibraryContextProvider>
+              <MyBooksContextProvider>
+                <BookContextProvider>
+                  <ReaderContextProvider>
+                    <ReaderProvider>
+                      <PaperProvider>
+                        <Navigation />
+                      </PaperProvider>
+                    </ReaderProvider>
+                  </ReaderContextProvider>
+                </BookContextProvider>
+              </MyBooksContextProvider>
+            </LibraryContextProvider>
+          </UserDataContextProvider>
+        </AuthContextProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
