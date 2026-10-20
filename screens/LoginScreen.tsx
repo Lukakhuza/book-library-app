@@ -45,8 +45,9 @@ const LoginScreen = () => {
   const onSubmit = async (values: LoginForm) => {
     try {
       setShowPassword(false);
-      const { token } = await loginUser(values);
+      const { token, refreshToken } = await loginUser(values);
       await signIn(token);
+      console.log("RefreshToken: ", refreshToken);
     } catch (error) {
       resetField("password");
       Alert.alert(`Error: ${error.name}`, error.message);
